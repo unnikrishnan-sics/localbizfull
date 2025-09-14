@@ -87,8 +87,22 @@ const sendNotificationToBusiness = async (email, subject, message) => {
     }
 };
 
+const getAllCommunities = async (req, res) => {
+    try {
+        const communities = await Organiser.find({}, '_id organizationName organizationType');
+        res.status(200).json({
+            message: "Communities fetched successfully",
+            data: communities
+        });
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     viewBusinessRequests,
     approveRejectBusiness,
-    sendNotificationToBusiness // Exporting for potential direct use or testing
+    sendNotificationToBusiness,
+    getAllCommunities // Export the new function
 };

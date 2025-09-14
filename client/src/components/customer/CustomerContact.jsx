@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Container, Stack, Typography, Avatar, Modal, Fade, Backdrop , TextField , Card } from '@mui/material';
+import { Box, Button, Container, Stack, Typography, Avatar, Modal, Fade, Backdrop, TextField, Card } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import PhoneIcon from '@mui/icons-material/Phone';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
@@ -9,7 +9,6 @@ import Footer from '../Footer/Footer';
 import CustomerNavbar from '../Navbar/CustomerNavbar';
 import contactbg from "../../assets/contactbg.png";
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { toast } from 'react-toastify';
 import arrow from "../../assets/arrow.png";
@@ -17,6 +16,7 @@ import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
+import axiosInstance from '../../api/axiosInstance';
 import { baseUrl } from '../../baseUrl';
 
 const CustomerContact = () => {
@@ -91,12 +91,8 @@ const CustomerContact = () => {
     const fetchUser = async () => {
         const token = localStorage.getItem('token');
         const decoded = jwtDecode(token);
-        const customer = await axios.get(`${baseUrl}customer/getcustomer/${decoded.id}`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
-        const customerDatas = localStorage.setItem("customerDetails",
+        const customer = await axiosInstance.get(`/customer/getcustomer/${decoded.id}`);
+        localStorage.setItem("customerDetails",
             JSON.stringify(customer.data.customer));
         setCustomer(customer.data.customer);
     };
@@ -162,7 +158,7 @@ const CustomerContact = () => {
         let isValid = true;
         let errorMessage = {};
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        
+
         if (!data.name.trim()) {
             errorMessage.name = "Name should not be empty";
             isValid = false;
@@ -170,7 +166,7 @@ const CustomerContact = () => {
             errorMessage.name = "Name should be 3 to 20 char length";
             isValid = false;
         }
-        
+
         if (!data.email.trim()) {
             errorMessage.email = "Email should not be empty";
             isValid = false;
@@ -186,7 +182,7 @@ const CustomerContact = () => {
             errorMessage.address = "Address should not be empty";
             isValid = false;
         }
-        
+
         if (!data.phone) {
             errorMessage.phone = "Phone should not be empty";
             isValid = false;
@@ -213,13 +209,8 @@ const CustomerContact = () => {
         formData.append('phone', data.phone);
         formData.append('profilePic', data.profilePic);
 
-        const token = localStorage.getItem("token");
         try {
-            const updated = await axios.post(`${baseUrl}customer/editcustomer/${customer._id}`, formData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const updated = await axiosInstance.post(`/customer/editcustomer/${customer._id}`, formData);
 
             if (updated.data.message === "Customer updated successfully.") {
                 toast.success("Profile updated successfully.");
@@ -234,13 +225,13 @@ const CustomerContact = () => {
     };
 
     // Text field style
-    const textFieldStyle = { 
-        height: "65px", 
-        width: "360px", 
-        display: "flex", 
-        flexDirection: "column", 
-        justifyContent: "start", 
-        position: "relative" 
+    const textFieldStyle = {
+        height: "65px",
+        width: "360px",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "start",
+        position: "relative"
     };
 
     useEffect(() => {
@@ -254,26 +245,26 @@ const CustomerContact = () => {
     return (
         <>
             <CustomerNavbar customerdetails={customer} onAvatarClick={onAvatarClick} contactbg={contactbg} />
-            
+
             {/* Profile Card */}
             {showProfileCard && (
                 <ClickAwayListener onClickAway={() => setShowProfileCard(false)}>
                     <Box sx={{ position: 'absolute', top: "80px", right: '60px', zIndex: 5, width: "375px" }}>
                         <Card sx={{ Width: "375px", height: "490px", position: "relative", zIndex: -2 }}>
-                            <Avatar 
-                                sx={{ 
-                                    height: "146px", 
-                                    width: "146px", 
-                                    position: "absolute", 
-                                    top: "50px", 
-                                    left: "100px", 
-                                    zIndex: 2 
+                            <Avatar
+                                sx={{
+                                    height: "146px",
+                                    width: "146px",
+                                    position: "absolute",
+                                    top: "50px",
+                                    left: "100px",
+                                    zIndex: 2
                                 }}
-                                src={`${baseUrl}uploads/${customer?.profilePic?.filename}`} 
+                                src={`${baseUrl}uploads/${customer?.profilePic?.filename}`}
                                 alt={customer?.name}
                             />
                             <Box sx={{ height: '132px', background: '#9B70D3', width: "100%", position: "relative" }}>
-                                <Box component="img" src={arrow} sx={{ position: "absolute", top: '25px', left: "25px" }} />
+                                {/* <Box component="img" src={arrow} sx={{ position: "absolute", top: '25px', left: "25px" }} /> */}
                             </Box>
                             <Box display={"flex"} flexDirection={"column"} alignItems={"center"} p={2} sx={{ gap: "15px", mt: "90px" }}>
                                 <Typography variant='h5' color='secondary' sx={{ fontSize: "24px", fontWeight: "400" }}>
@@ -289,18 +280,18 @@ const CustomerContact = () => {
                                     <LocationOnOutlinedIcon />{customer.address}
                                 </Typography>
                                 <Box display={"flex"} gap={3} alignItems={"center"}>
-                                    <Button 
-                                        variant='contained' 
-                                        color='secondary' 
-                                        sx={{ borderRadius: "15px", marginTop: "20px", mb: "20px", height: "40px", width: '100px', padding: '10px 35px' }} 
+                                    <Button
+                                        variant='contained'
+                                        color='secondary'
+                                        sx={{ borderRadius: "15px", marginTop: "20px", mb: "20px", height: "40px", width: '100px', padding: '10px 35px' }}
                                         onClick={handleEditOpen}
                                     >
                                         Edit
                                     </Button>
-                                    <Button 
-                                        variant='contained' 
-                                        color='secondary' 
-                                        sx={{ borderRadius: "15px", marginTop: "20px", mb: "20px", height: "40px", width: '100px', padding: '10px 35px' }} 
+                                    <Button
+                                        variant='contained'
+                                        color='secondary'
+                                        sx={{ borderRadius: "15px", marginTop: "20px", mb: "20px", height: "40px", width: '100px', padding: '10px 35px' }}
                                         onClick={handleOpen}
                                     >
                                         Logout
@@ -311,7 +302,7 @@ const CustomerContact = () => {
                     </Box>
                 </ClickAwayListener>
             )}
-            
+
             {/* Top Section with Background Image */}
             <Box
                 sx={{
@@ -340,7 +331,7 @@ const CustomerContact = () => {
             <Container maxWidth="false">
                 <Box display="flex" justifyContent="center" alignItems="center">
                     <Stack direction="row" justifyContent="center" alignItems="center" spacing={2} sx={{ height: "528px", width: "70%", gap: "100px" }}>
-                        
+
                         {/* Form */}
                         <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" sx={{ gap: "15px", border: "1px solid #CCCCCC", borderRadius: "15px", padding: "20px" }}>
                             <Typography variant='h3' color='primary' sx={{ fontSize: "24px", fontWeight: "500" }}>Get in Touch</Typography>
@@ -474,7 +465,7 @@ const CustomerContact = () => {
                                     <Stack direction="row" sx={{ display: "flex", gap: "15px" }}>
                                         <div style={textFieldStyle}>
                                             <label>Name</label>
-                                            <input 
+                                            <input
                                                 style={{ height: "40px", borderRadius: "8px", border: " 1px solid #CCCCCC", padding: '8px' }}
                                                 onChange={handleDataChange}
                                                 name='name'
@@ -485,7 +476,7 @@ const CustomerContact = () => {
                                         </div>
                                         <div style={textFieldStyle}>
                                             <label>Address</label>
-                                            <input 
+                                            <input
                                                 style={{ height: "40px", borderRadius: "8px", border: " 1px solid #CCCCCC", padding: '8px' }}
                                                 onChange={handleDataChange}
                                                 name='address'
@@ -497,7 +488,7 @@ const CustomerContact = () => {
                                     <Stack direction={'row'} sx={{ display: "flex", gap: "15px" }}>
                                         <div style={textFieldStyle}>
                                             <label>Email</label>
-                                            <input 
+                                            <input
                                                 style={{ height: "40px", borderRadius: "8px", border: " 1px solid #CCCCCC", padding: '8px' }}
                                                 onChange={handleDataChange}
                                                 name='email'
@@ -507,7 +498,7 @@ const CustomerContact = () => {
                                         </div>
                                         <div style={textFieldStyle}>
                                             <label>Phone Number</label>
-                                            <input 
+                                            <input
                                                 style={{ height: "40px", borderRadius: "8px", border: " 1px solid #CCCCCC", padding: '8px' }}
                                                 onChange={handleDataChange}
                                                 name='phone'
@@ -519,9 +510,9 @@ const CustomerContact = () => {
                                     </Stack>
                                 </Box>
                                 <Box display={'flex'} alignItems={'center'} justifyContent={'center'} flexDirection={'column'} sx={{ width: '253px', height: "93px", gap: '10px' }}>
-                                    <Button 
-                                        variant='contained' 
-                                        color='secondary' 
+                                    <Button
+                                        variant='contained'
+                                        color='secondary'
                                         sx={{ borderRadius: "25px", marginTop: "20px", height: "40px", width: '200px', padding: '10px 35px' }}
                                         onClick={handleSubmit}
                                     >

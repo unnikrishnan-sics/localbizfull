@@ -107,37 +107,16 @@ const bussinessForgotPassword = async (req, res) => {
         const bussiness = await bussinessModel.findOne({ email });
 
         if (!bussiness) {
-            return res.status(404).json({ message: "No bussiness found with this email." });
+            return res.status(404).json({ 
+                success: false,
+                message: "No business found with this email." 
+            });
         }
 
-        // Generate reset token
-        const resetToken = crypto.randomBytes(32).toString("hex");
-        bussiness.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
-        bussiness.resetPasswordExpires = Date.now() + 3600000; // 1 hour
-
-        await bussiness.save();
-
-        // Create reset URL
-        const resetURL = `${req.protocol}://${req.get("host")}/bussiness/resetpassword/${resetToken}`;
-
-        const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to: \n\n ${resetURL} \n\n with your new password. If you did not request this, please ignore this email and your password will remain unchanged.`;
-
-        try {
-            await sendEmail({
-                email: bussiness.email,
-                subject: "Password Reset Token",
-                message,
-            });
-
-            res.status(200).json({
-                message: "Token sent to email!",
-            });
-        } catch (error) {
-            bussiness.resetPasswordToken = undefined;
-            bussiness.resetPasswordExpires = undefined;
-            await bussiness.save();
-            return res.status(500).json({ message: "Error sending email. Please try again later." });
-        }
+        res.status(200).json({ 
+            success: true,
+            message: "Email verified. You can reset your password now." 
+        });
 
     } catch (error) {
         console.log(error.message);
@@ -147,30 +126,25 @@ const bussinessForgotPassword = async (req, res) => {
 
 const bussinessResetPassword = async (req, res) => {
     try {
-        const resetPasswordToken = crypto.createHash("sha256").update(req.params.email).digest("hex"); // req.params.email is actually the token here
-        const bussiness = await bussinessModel.findOne({
-            resetPasswordToken,
-            resetPasswordExpires: { $gt: Date.now() },
-        });
+        const { email, password } = req.body;
+        const bussiness = await bussinessModel.findOne({ email });
 
         if (!bussiness) {
-            return res.status(400).json({ message: "Password reset token is invalid or has expired." });
-        }
-
-        const { password, confirmpassword } = req.body;
-
-        if (password !== confirmpassword) {
-            return res.status(400).json({ message: "Passwords do not match." });
+            return res.status(404).json({ 
+                success: false,
+                message: "No business found with this email." 
+            });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
         bussiness.password = hashedPassword;
         bussiness.confirmpassword = hashedPassword;
-        bussiness.resetPasswordToken = undefined;
-        bussiness.resetPasswordExpires = undefined;
 
         await bussiness.save();
-        res.status(200).json({ message: "Password reset successfully." });
+        res.status(200).json({ 
+            success: true,
+            message: "Password reset successfully." 
+        });
 
     } catch (error) {
         console.log(error.message);

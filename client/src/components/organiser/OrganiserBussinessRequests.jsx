@@ -13,44 +13,7 @@ import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import { toast } from 'react-toastify';
 export default function OrganizerBussinessRequest() {
-  // Sample data for requests
-  const requests = [
-    {
-      id: 1,
-      name: "John Jerin",
-      business: "Homemade Pottery",
-      category: "Art",
-      icon: "refresh",
-    },
-    {
-      id: 2,
-      name: "Johny Deep",
-      business: "Homemade Sweets",
-      category: "Chef",
-      icon: "message",
-    },
-    {
-      id: 3,
-      name: "John Jerin",
-      business: "Homemade Pottery",
-      category: "Art",
-      icon: "refresh",
-    },
-    {
-      id: 4,
-      name: "Johny Deep",
-      business: "Homemade Sweets",
-      category: "Chef",
-      icon: "message",
-    },
-    {
-      id: 5,
-      name: "John Jerin",
-      business: "Homemade Pottery",
-      category: "Art",
-      icon: "refresh",
-    },
-  ];
+  const [requests, setRequests] = useState([]);
 
   const [organiser, setOrganiser] = useState({});
   const navigate = useNavigate();
@@ -63,14 +26,38 @@ export default function OrganizerBussinessRequest() {
         Authorization: `Bearer ${token}`,
       },
     });
-    const organiserdetails = localStorage.setItem("organiserDetails",
+    localStorage.setItem("organiserDetails",
       JSON.stringify(organiser.data.organisation));
     setOrganiser(organiser.data.organisation);
   }
 
   useEffect(() => {
     fetchUser();
+    fetchRequests();
   }, []);
+
+  const fetchRequests = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/organiser/login');
+      return;
+    }
+    try {
+      const response = await axios.get(`${baseUrl}api/community/requests`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setRequests(response.data.data); // Assuming the API returns an array of requests under 'data'
+    } catch (error) {
+      console.error("Error fetching business requests:", error);
+      toast.error("Error fetching business requests.");
+      if (error.response && error.response.status === 401) {
+        localStorage.removeItem('token');
+        navigate('/organiser/login');
+      }
+    }
+  };
 
   // Logout functionality
   const [open, setOpen] = React.useState(false);
@@ -105,7 +92,7 @@ export default function OrganizerBussinessRequest() {
       profilePic: null,
     });
     setImagePreview(organiser?.profilePic?.filename
-      ? `http://localhost:3000/uploads/${organiser?.profilePic?.filename}`
+      ? `http://localhost:4056/uploads/${organiser?.profilePic?.filename}`
       : null);
     setEditOpen(true);
   }
@@ -208,11 +195,34 @@ export default function OrganizerBussinessRequest() {
   const [showProfileCard, setShowProfileCard] = useState(false);
   const onAvatarClick = () => setShowProfileCard(prev => !prev);
 
-  useEffect(() => {
-    if (localStorage.getItem("token") == null) {
-      navigate("/");
+  const handleApproveReject = async (businessId, status) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/organiser/login');
+      return;
     }
-  }, []);
+    try {
+      // Assuming organiser._id is the communityId
+      const response = await axios.post(`${baseUrl}api/community/requests/${organiser._id}/approve`, {
+        businessId: businessId,
+        status: status,
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.data.message) {
+        toast.success(response.data.message);
+        fetchRequests(); // Refresh the list
+      } else {
+        toast.error("Failed to update request status.");
+      }
+    } catch (error) {
+      console.error("Error updating request status:", error);
+      toast.error(error.response?.data?.message || "Error updating request status.");
+    }
+  };
 
   // Styles
   const styleLogout = {
@@ -240,33 +250,33 @@ export default function OrganizerBussinessRequest() {
     p: 4,
   };
 
-  const textFieldStyle = { 
-    height: "65px", 
-    width: "360px", 
-    display: "flex", 
-    flexDirection: "column", 
-    justifyContent: "start", 
-    position: "relative" 
+  const textFieldStyle = {
+    height: "65px",
+    width: "360px",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "start",
+    position: "relative"
   };
 
   return (
     <>
       <OrganiserNavbar organiserdetails={organiser} onAvatarClick={onAvatarClick} />
-      
+
       {showProfileCard && (
         <ClickAwayListener onClickAway={() => setShowProfileCard(false)}>
           <Box sx={{ position: 'absolute', top: "80px", right: '60px', zIndex: 5, width: "375px" }}>
             <Card sx={{ Width: "375px", height: "490px", position: "relative", zIndex: -2 }}>
-              <Avatar 
-                sx={{ 
-                  height: "146px", 
-                  width: "146px", 
-                  position: "absolute", 
-                  top: "50px", 
-                  left: "100px", 
-                  zIndex: 2 
-                }} 
-                src={`http://localhost:3000/uploads/${organiser?.profilePic?.filename}`} 
+              <Avatar
+                sx={{
+                  height: "146px",
+                  width: "146px",
+                  position: "absolute",
+                  top: "50px",
+                  left: "100px",
+                  zIndex: 2
+                }}
+                src={`http://localhost:4056/uploads/${organiser?.profilePic?.filename}`}
                 alt={organiser?.name}
               />
               <Box sx={{ height: '132px', background: '#9B70D3', width: "100%", position: "relative" }}></Box>
@@ -282,18 +292,18 @@ export default function OrganizerBussinessRequest() {
                   <LocationOnOutlinedIcon />{organiser.address}
                 </Typography>
                 <Box display={"flex"} gap={3} alignItems={"center"}>
-                  <Button 
-                    variant='contained' 
-                    color='secondary' 
-                    sx={{ borderRadius: "15px", marginTop: "20px", mb: "20px", height: "40px", width: '100px', padding: '10px 35px' }} 
+                  <Button
+                    variant='contained'
+                    color='secondary'
+                    sx={{ borderRadius: "15px", marginTop: "20px", mb: "20px", height: "40px", width: '100px', padding: '10px 35px' }}
                     onClick={handleEditOpen}
                   >
                     Edit
                   </Button>
-                  <Button 
-                    variant='contained' 
-                    color='secondary' 
-                    sx={{ borderRadius: "15px", marginTop: "20px", mb: "20px", height: "40px", width: '100px', padding: '10px 35px' }} 
+                  <Button
+                    variant='contained'
+                    color='secondary'
+                    sx={{ borderRadius: "15px", marginTop: "20px", mb: "20px", height: "40px", width: '100px', padding: '10px 35px' }}
                     onClick={handleOpen}
                   >
                     Logout
@@ -365,70 +375,74 @@ export default function OrganizerBussinessRequest() {
 
           {/* Requests List */}
           <div>
-            {requests.map((request) => (
-              <div
-                key={request.id}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "15px 0",
-                  borderBottom: "1px solid #f0f0f0",
-                }}
-              >
-                {/* Profile Image */}
-                <div style={{ marginRight: "15px" }}>
-                  <img
-                    src={`/images/business-owner-${request.name === "John Jerin" ? "1" : "2"}.png`}
-                    alt={request.name}
-                    style={{
-                      width: "60px",
-                      height: "60px",
-                      borderRadius: "4px",
-                      objectFit: "cover",
-                    }}
-                  />
+            {requests.length > 0 ? (
+              requests.map((request) => (
+                <div
+                  key={request._id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "15px 0",
+                    borderBottom: "1px solid #f0f0f0",
+                  }}
+                >
+                  {/* Profile Image (if available) */}
+                  <div style={{ marginRight: "15px" }}>
+                    <img
+                      src={request.profilePic ? `${baseUrl}uploads/${request.profilePic.filename}` : '/images/default-business.png'} // Placeholder image
+                      alt={request.name}
+                      style={{
+                        width: "60px",
+                        height: "60px",
+                        borderRadius: "4px",
+                        objectFit: "cover",
+                      }}
+                    />
+                  </div>
+
+                  {/* Business Info */}
+                  <div style={{ flex: 1 }}>
+                    <h3 style={{ margin: "0 0 5px 0", fontSize: "16px", fontWeight: "bold" }}>{request.name}</h3>
+                    <p style={{ margin: "0 0 3px 0", fontSize: "14px" }}>{request.bussinessName || "N/A"}</p>
+                    <p style={{ margin: "0", fontSize: "12px", color: "#666" }}>{request.bussinessCategory || "N/A"}</p>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <button
+                      style={{
+                        backgroundColor: "#22c55e",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "20px",
+                        padding: "6px 16px",
+                        fontSize: "14px",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => handleApproveReject(request._id, "approved")}
+                    >
+                      Accept
+                    </button>
+                    <button
+                      style={{
+                        backgroundColor: "#ef4444",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "20px",
+                        padding: "6px 16px",
+                        fontSize: "14px",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => handleApproveReject(request._id, "rejected")}
+                    >
+                      Reject
+                    </button>
+                  </div>
                 </div>
-
-                {/* Business Info */}
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ margin: "0 0 5px 0", fontSize: "16px", fontWeight: "bold" }}>{request.name}</h3>
-                  <p style={{ margin: "0 0 3px 0", fontSize: "14px" }}>{request.business}</p>
-                  <p style={{ margin: "0", fontSize: "12px", color: "#666" }}>{request.category}</p>
-                </div>
-
-
-
-                {/* Action Buttons */}
-                <div style={{ display: "flex", gap: "10px" }}>
-                  <button
-                    style={{
-                      backgroundColor: "#22c55e",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "20px",
-                      padding: "6px 16px",
-                      fontSize: "14px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Accept
-                  </button>
-                  <button
-                    style={{
-                      backgroundColor: "#ef4444",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "20px",
-                      padding: "6px 16px",
-                      fontSize: "14px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Reject
-                  </button>
-                </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <Typography variant="body1" sx={{ textAlign: 'center', py: 3 }}>No pending business requests.</Typography>
+            )}
           </div>
         </div>
       </div>

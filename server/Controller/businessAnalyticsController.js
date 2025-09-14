@@ -5,7 +5,7 @@ const Organiser = require("../Models/organiserModel");
 
 const getBusinessAnalytics = async (req, res) => {
     try {
-        const businessId = req.user.id; // Extract businessId from authenticated user's token
+        const businessId = req.params; // Extract businessId from authenticated user's token
 
         if (!businessId) {
             // This case should ideally not be hit if protectedRoute is working correctly

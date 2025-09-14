@@ -9,58 +9,28 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
+import Tooltip from '@mui/material/Tooltip'; // Not used in final code, but often helpful
 import MenuItem from '@mui/material/MenuItem';
-import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 import Logo from "../../assets/localBizlogo.png";
 import { Link, useLocation } from "react-router-dom";
-import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
-import SmsOutlinedIcon from '@mui/icons-material/SmsOutlined';
-import { InputAdornment, TextField } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'; 
 
 const pages = [
-        { label: 'Home', path: '/organiser/home' },
-
-    { label: 'Requests', path: '/organiser/RequestPage' },
-    { 
-        label: 'Activities', 
-        path: '#',
+    { label: 'Home', path: '/organiser/home' },
+    {
+        label: 'Activities',
+        path: '#', 
         subItems: [
-            { 
-                label: 'Events', 
-                path: '#',
-                subItems: [
-                    { label: 'Add Event', path: '/organiser/addevents' },
-                    { label: 'View Events', path: '/organiser/Viewevents' }
-                ]
-            },
-            { 
-                label: 'Trainings', 
-                path: '#',
-                subItems: [
-                    { label: 'Add Training', path: '/organiser/AddTrainning' },
-                    { label: 'View Trainings', path: '/organiser/ViewTrainning' }
-                ]
-            },
-            { 
-                label: 'Workshops', 
-                path: '#',
-                subItems: [
-                    { label: 'Add Workshop', path: '/organiser/AddWorkShop' },
-                    { label: 'View Workshops', path: '/organiser/ViewWorkShop' }
-                ]
-            }
+            { label: 'Add Activities', path: '/organiser/addevents' },
+            { label: 'View Activities', path: '/organiser/Viewevents' },
+            { label: 'Joined Members', path: '/organiser/joined-members' } 
         ]
     },
-    // { label: 'Updates', path: '#' }
 ];
 
-const OrganiserNavbar = ({organiserdetails={}, onAvatarClick}) => {
+const OrganiserNavbar = ({ organiserdetails = {}, onAvatarClick }) => {
     const [anchorElNav, setAnchorElNav] = useState(null);
-    const [anchorElUser, setAnchorElUser] = useState(null);
     const [activitiesAnchorEl, setActivitiesAnchorEl] = useState(null);
     const [subMenuAnchorEl, setSubMenuAnchorEl] = useState(null);
     const [currentSubMenu, setCurrentSubMenu] = useState(null);
@@ -68,17 +38,9 @@ const OrganiserNavbar = ({organiserdetails={}, onAvatarClick}) => {
     const handleOpenNavMenu = (event) => {
         setAnchorElNav(event.currentTarget);
     };
-    
-    const handleOpenUserMenu = (event) => {
-        setAnchorElUser(event.currentTarget);
-    };
 
     const handleCloseNavMenu = () => {
         setAnchorElNav(null);
-    };
-
-    const handleCloseUserMenu = () => {
-        setAnchorElUser(null);
     };
 
     const handleActivitiesClick = (event) => {
@@ -87,6 +49,7 @@ const OrganiserNavbar = ({organiserdetails={}, onAvatarClick}) => {
 
     const handleActivitiesClose = () => {
         setActivitiesAnchorEl(null);
+        handleCloseNavMenu();
     };
 
     const handleSubMenuOpen = (event, subMenu) => {
@@ -103,9 +66,9 @@ const OrganiserNavbar = ({organiserdetails={}, onAvatarClick}) => {
     const renderMenuItem = (item) => {
         if (item.subItems) {
             return (
-                <MenuItem 
+                <MenuItem
                     key={item.label}
-                    onClick={item.label === 'Activities' ? handleActivitiesClick : (e) => handleSubMenuOpen(e, item)}
+                    onClick={handleActivitiesClick} 
                     sx={{
                         display: 'flex',
                         justifyContent: 'space-between',
@@ -119,19 +82,19 @@ const OrganiserNavbar = ({organiserdetails={}, onAvatarClick}) => {
                     <Typography color='primary' sx={{ color: '#1967D2' }}>
                         {item.label}
                     </Typography>
-                    {item.label === 'Activities' ? 
-                        <KeyboardArrowDownIcon fontSize="small" /> : 
-                        <KeyboardArrowRightIcon fontSize="small" />
-                    }
+                    <KeyboardArrowRightIcon fontSize="small" /> 
                 </MenuItem>
             );
         } else {
             return (
-                <MenuItem 
+                <MenuItem
                     key={item.label}
                     component={Link}
                     to={item.path}
-                    onClick={handleCloseNavMenu}
+                    onClick={() => {
+                        handleCloseNavMenu();
+                        handleActivitiesClose(); 
+                    }}
                 >
                     <Typography color='primary' sx={{ color: '#1967D2' }}>
                         {item.label}
@@ -143,21 +106,21 @@ const OrganiserNavbar = ({organiserdetails={}, onAvatarClick}) => {
 
     const renderDesktopMenu = (item) => {
         if (item.subItems) {
+            // This path is for "Activities" in the desktop menu
             return (
                 <Box key={item.label} sx={{ display: 'flex', alignItems: 'center' }}>
                     <Button
-                        onClick={item.label === 'Activities' ? handleActivitiesClick : null}
-                        onMouseEnter={item.label !== 'Activities' ? (e) => handleSubMenuOpen(e, item) : null}
+                        onClick={handleActivitiesClick} // Open the Activities dropdown
                         sx={{
                             my: 0,
                             fontSize: "14px",
                             fontWeight: "500",
                             color: '#1967D2',
                             textTransform: "inherit",
-                            backgroundColor: item.label === 'Activities' ? 'rgba(25, 103, 210, 0.08)' : 'transparent',
+                            backgroundColor: activitiesAnchorEl ? 'rgba(25, 103, 210, 0.08)' : 'transparent', // Highlight if dropdown is open
                             '&:hover': {
-                                backgroundColor: item.label === 'Activities' ? 'rgba(25, 103, 210, 0.08)' : 'transparent',
-                                color: item.label === 'Activities' ? '#1967D2' : '#6F32BF'
+                                backgroundColor: 'rgba(25, 103, 210, 0.08)',
+                                color: '#1967D2'
                             }
                         }}
                     >
@@ -167,13 +130,14 @@ const OrganiserNavbar = ({organiserdetails={}, onAvatarClick}) => {
                 </Box>
             );
         } else {
+            // This path is for "Home" in the desktop menu
             return (
                 <Box key={item.label} sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Link 
+                    <Link
                         style={{ textDecoration: "none" }}
                         to={item.path}
                     >
-                        <Typography 
+                        <Typography
                             sx={{
                                 my: 0,
                                 fontSize: "14px",
@@ -192,6 +156,7 @@ const OrganiserNavbar = ({organiserdetails={}, onAvatarClick}) => {
             );
         }
     };
+console.log(organiserdetails);
 
     return (
         <>
@@ -206,14 +171,14 @@ const OrganiserNavbar = ({organiserdetails={}, onAvatarClick}) => {
                         }}
                     >
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Link to="/customer/home">
+                            <Link to="/organiser/home"> {/* Changed to organiser home link */}
                                 <Box component="img" src={Logo} alt='logo'
                                     sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }}>
                                 </Box>
                             </Link>
                         </Box>
 
-                        <Box sx={{ flexGrow: 1 }}> 
+                        {/* <Box sx={{ flexGrow: 1 }}>
                             <TextField
                                 variant="outlined"
                                 placeholder="Search..."
@@ -227,7 +192,7 @@ const OrganiserNavbar = ({organiserdetails={}, onAvatarClick}) => {
                                     ),
                                 }}
                             />
-                        </Box>
+                        </Box> */}
 
                         <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
                             <IconButton
@@ -259,35 +224,35 @@ const OrganiserNavbar = ({organiserdetails={}, onAvatarClick}) => {
                                 {pages.map((page) => renderMenuItem(page))}
                             </Menu>
                         </Box>
-                        
-                        <Link to='/customer/home'>
+
+                        <Link to='/organiser/home'> 
                             <Box component="img" src={Logo} sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} ></Box>
                         </Link>
-                        
-                        <Box sx={{ 
-                            flexGrow: 1, 
-                            display: { xs: 'none', md: 'flex' }, 
-                            justifyContent: 'center', 
+
+                        <Box sx={{
+                            flexGrow: 1,
+                            display: { xs: 'none', md: 'flex' },
+                            justifyContent: 'center',
                             alignItems: 'center',
                             gap: "40px"
                         }}>
                             {pages.map((page) => renderDesktopMenu(page))}
                         </Box>
 
-                        <Box sx={{ 
-                            display: "flex", 
-                            alignItems: "center", 
+                        <Box sx={{
+                            display: "flex",
+                            alignItems: "center",
                             gap: "30px",
                             flexShrink: 0
                         }}>
-                            <SmsOutlinedIcon color='primary' sx={{ height: '24px' }} />
-                            <NotificationsOutlinedIcon color='primary' sx={{ height: '24px' }} />
-                            
+                            {/* <SmsOutlinedIcon color='primary' sx={{ height: '24px' }} />
+                            <NotificationsOutlinedIcon color='primary' sx={{ height: '24px' }} /> */}
+
                             <Box display={"flex"} alignItems={"center"} sx={{ gap: "10px" }}>
                                 <Typography color='secondary'>Hi, {organiserdetails?.name} </Typography>
-                            
+
                                 {organiserdetails?.profilePic?.filename ? (
-                                    <Avatar onClick={onAvatarClick} src={`http://localhost:3000/uploads/${organiserdetails?.profilePic?.filename}`} alt={organiserdetails?.name} />
+                                    <Avatar onClick={onAvatarClick} src={`http://localhost:4056/uploads/${organiserdetails?.profilePic?.filename}`} alt={organiserdetails?.name} />
                                 ) : (
                                     <Avatar onClick={onAvatarClick} >{organiserdetails?.name?.charAt(0)}</Avatar>
                                 )}
@@ -297,7 +262,7 @@ const OrganiserNavbar = ({organiserdetails={}, onAvatarClick}) => {
                 </Container>
             </AppBar>
 
-            {/* Activities Dropdown Menu */}
+            {/* Activities Dropdown Menu (for desktop and potentially mobile) */}
             <Menu
                 anchorEl={activitiesAnchorEl}
                 open={Boolean(activitiesAnchorEl)}
@@ -312,16 +277,13 @@ const OrganiserNavbar = ({organiserdetails={}, onAvatarClick}) => {
                 }}
                 sx={{ mt: 1 }}
             >
+                {/* Now, these subItems are directly the links you want */}
                 {pages.find(page => page.label === 'Activities')?.subItems?.map((item) => (
-                    <MenuItem 
+                    <MenuItem
                         key={item.label}
-                        onClick={(e) => {
-                            if (item.subItems) {
-                                handleSubMenuOpen(e, item);
-                            } else {
-                                handleActivitiesClose();
-                            }
-                        }}
+                        component={Link} // Make them direct links
+                        to={item.path}
+                        onClick={handleActivitiesClose} // Close activities menu on click
                         sx={{
                             display: 'flex',
                             justifyContent: 'space-between',
@@ -332,12 +294,14 @@ const OrganiserNavbar = ({organiserdetails={}, onAvatarClick}) => {
                         <Typography color='primary' sx={{ color: '#1967D2' }}>
                             {item.label}
                         </Typography>
-                        {item.subItems && <KeyboardArrowRightIcon fontSize="small" />}
+                        {/* No more KeyboardArrowRightIcon here as there are no further sub-levels */}
                     </MenuItem>
                 ))}
             </Menu>
 
-            {/* Sub-menu for Activities items */}
+            {/* Sub-menu for Activities items (This menu will now effectively be unused/not rendered
+                because the pages structure is flattened. You can remove it if you wish,
+                but keeping it won't cause harm if currentSubMenu is never set to an item with subItems) */}
             <Menu
                 anchorEl={subMenuAnchorEl}
                 open={Boolean(subMenuAnchorEl)}
@@ -352,14 +316,16 @@ const OrganiserNavbar = ({organiserdetails={}, onAvatarClick}) => {
                 }}
                 sx={{ mt: -1, ml: 0.5 }}
             >
+                {/* This will now always be empty because currentSubMenu.subItems won't exist */}
                 {currentSubMenu?.subItems?.map((item) => (
-                    <MenuItem 
+                    <MenuItem
                         key={item.label}
                         component={Link}
                         to={item.path}
                         onClick={() => {
                             handleSubMenuClose();
                             handleActivitiesClose();
+                            handleCloseNavMenu(); // Also close mobile nav if open
                         }}
                     >
                         <Typography color='primary' sx={{ color: '#1967D2' }}>

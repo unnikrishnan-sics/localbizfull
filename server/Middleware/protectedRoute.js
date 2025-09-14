@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const protectedRoute = (req, res, next) => {
     try {
         const bearerToken = req.headers["authorization"];
+        console.log(bearerToken);
         const token=bearerToken.split(" ")[1];
         console.log(token);
 

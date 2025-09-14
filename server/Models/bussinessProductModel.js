@@ -12,10 +12,6 @@ const bussinessProductSchema=mongoose.Schema({
         type:Number,
         required:true
     },
-    adds:{
-        type:String,
-        required:true
-    },
     price:{
         type:Number,
         required:true
@@ -40,6 +36,10 @@ const bussinessProductSchema=mongoose.Schema({
         type:Object,
         required:true
     },
+    ads: [{  // New field for ads images
+        type: Object,
+        required: true
+    }],
     bussinessId:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"bussiness",

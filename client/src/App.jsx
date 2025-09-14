@@ -1,4 +1,4 @@
-import { useState } from 'react'
+
 import './App.css';
 import { Route, Routes } from 'react-router-dom';
 import CustomerRegistration from "./components/customer/CustomerRegistration"
@@ -24,35 +24,21 @@ import About from './components/landing/About';
 import CustomerHome from './components/customer/CustomerHome';
 import BussinessHome from './components/bussiness/BussinessHome';
 import OrganiserHome from './components/organiser/OrganiserHome';
-import CustomerProductView from './components/customer/CustomerProductView';
-import BussinessAddProduct from './components/bussiness/BussinessAddProduct';
-import BussinessEditProducts from './components/bussiness/BussinessEditProducts';
 import CustomerProfile from './components/customer/CustomerProfile';
-import AdminRequests from './components/admin/AdminRequests';
-import AdminComplaints from './components/admin/AdminComplaints';
-import AdminViewUsers from './components/admin/AdminViewUsers';
-import AdminViewBusinessOwners from './components/admin/AdminViewBussinessOwners';
-import AdminViewOrganizations from './components/admin/AdminViewOrganizations';
-import MsgComplaint from './components/customer/MsgComplaint';
-import CustomerComplaints from './components/customer/CustometComplaints';
 import CustomerAboutUs from './components/customer/CustomerAboutUs';
 import CustomerContact from './components/customer/CustomerContact';
-import BusinessViewProduct from './components/bussiness/BusinessViewProduct';
-import OrganizerBussinessRequest from './components/organiser/OrganiserBussinessRequests';
 import OrganiserAboutUs from './components/organiser/OrganiserAboutUs';
 import OrganiserContact from './components/organiser/OrganiserContact';
-import CustomerBusinessView from './components/customer/CustomerBussinessView';
-import OrganiserAddEvents from './components/organiser/OrganiserAddEvents';
 
 
 function App() {
   const theme = createTheme({
     palette: {
       primary: {
-        main: '#333333', // Set #333333 as the primary color
+        main: '#333333', 
       },
       secondary: {
-        main: '#6F32BF', // Optional: customize secondary color
+        main: '#6F32BF',
       },
     },
   });
@@ -73,50 +59,36 @@ function App() {
           {/* admin */}
           <Route path='/admin/login' element={<AdminLogin />} />
           <Route path='/admin/dashboard' element={<AdminDashboard />} />
-          <Route path='/admin/requests' element={<AdminRequests />} />
-          <Route path='/admin/complaints' element={<AdminComplaints />} />
-          <Route path='/admin/viewusers' element={<AdminViewUsers />} />
-          <Route path='/admin/bussinessowners' element={<AdminViewBusinessOwners />} />
-          <Route path='/admin/organizations' element={<AdminViewOrganizations />} />
-          
+
 
           {/* customers */}
           <Route path='/customer/registration' element={<CustomerRegistration />} />
           <Route path='/customer/login' element={<CustomerLogin />} />
           <Route path='/customer/forgotpassword' element={<CustomerForgotPassword />} />
-          <Route path='/customer/resetpassword/:email' element={<CustomerResetPassword />} />
+          <Route path='/customer/resetpassword' element={<CustomerResetPassword />} />
           <Route path='/customer/home' element={<CustomerHome />} />
-          <Route path='/customer/viewproduct' element={<CustomerProductView />} />
           <Route path='/customer/profile' element={<CustomerProfile />} />
-          <Route path='/customer/msg/compaint' element={<MsgComplaint />} />
-          <Route path='/customer/Viewcompaints' element={<CustomerComplaints />} />
           <Route path='/customer/AboutUs' element={<CustomerAboutUs />} />
           <Route path='/customer/Contact' element={<CustomerContact />} />
-          <Route path='/customer/bussinessview/:id' element={<CustomerBusinessView/>}/>
-
 
 
           {/* bussiness */}
           <Route path='/bussiness/registration' element={<BussinessRegister />} />
           <Route path='/bussiness/login' element={<BussinessLogin />} />
           <Route path='/bussiness/forgotpassword' element={<BussinessForgotPassword />} />
-          <Route path='/bussiness/resetpassword/:email' element={<BussinessResetPassword />} />
+          <Route path='/bussiness/resetpassword' element={<BussinessResetPassword />} />
           <Route path='/bussiness/home' element={<BussinessHome />} />
-          <Route path='/bussiness/addproduct' element={<BussinessAddProduct />} />
-          <Route path='/bussiness/editproduct/:id' element={<BussinessEditProducts />} />
-          <Route path='/bussiness/ViewProduct/:id' element={<BusinessViewProduct />} />
+
 
           {/* organiser */}
           <Route path='/organiser/registration' element={<OrganiserRegister />} />
           <Route path='/organiser/login' element={<OrganiserLogin />} />
           <Route path='/organiser/forgotpassword' element={<OrganiserForgotPassword />} />
-          <Route path='/organiser/resetpassword/:email' element={<OrganiserResetPassword />} />
+          <Route path='/organiser/resetpassword' element={<OrganiserResetPassword />} />
           <Route path='/organiser/home' element={<OrganiserHome />} />
-          <Route path='/organiser/bussinessrequest' element={<OrganizerBussinessRequest/>}/>
           <Route path='/organiser/AboutUs' element={<OrganiserAboutUs />} />
           <Route path='/organiser/Contact' element={<OrganiserContact />} />
-          <Route path='/organiser/addevents' element={<OrganiserAddEvents />} />
-          
+
 
         </Routes>
       </ThemeProvider>

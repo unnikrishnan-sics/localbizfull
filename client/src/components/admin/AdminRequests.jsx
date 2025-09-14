@@ -11,7 +11,8 @@ import { useNavigate } from 'react-router-dom';
 import AdminSidebar from './AdminSideBar';
 import { toast } from 'react-toastify';
 import Footer from '../Footer/Footer';
-import axios from 'axios';
+import axiosInstance from '../../api/axiosInstance';
+import { baseUrl } from '../../baseUrl';
 
 const style = {
     position: 'absolute',
@@ -25,17 +26,9 @@ const style = {
     p: 4,
 };
 
-const dummyRequests = [
-    { id: 1, name: "Sarah Johnson", organization: "Johnson & Co.", profileImage: "https://randomuser.me/api/portraits/women/44.jpg", status: "pending" },
-    { id: 2, name: "Michael Chen", organization: "Community Builders", profileImage: "https://randomuser.me/api/portraits/men/32.jpg", status: "pending" },
-    { id: 3, name: "Emma Rodriguez", organization: "Local Entrepreneurs", profileImage: "https://randomuser.me/api/portraits/women/68.jpg", status: "pending" },
-    { id: 4, name: "David Wilson", organization: "Urban Developers", profileImage: "https://randomuser.me/api/portraits/men/75.jpg", status: "pending" },
-    { id: 5, name: "Lisa Wong", organization: "Tech Innovators", profileImage: "https://randomuser.me/api/portraits/women/65.jpg", status: "pending" }
-];
-
 const AdminRequests = () => {
     const [open, setOpen] = React.useState(false);
-    const [requests, setRequests] = useState([]);
+    const [requests, setRequests] = useState({ businesses: [], organisations: [] });
     const [loading, setLoading] = useState(true);
 
     const navigate = useNavigate();
@@ -48,44 +41,58 @@ const AdminRequests = () => {
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
+    const fetchRequests = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            navigate('/admin/login');
+            return;
+        }
+        try {
+            const response = await axiosInstance.get('/api/admin/requests');
+            if (response.data && response.data.data) {
+                setRequests(response.data.data);
+            } else {
+                setRequests({ businesses: [], organisations: [] });
+            }
+        } catch (error) {
+            console.error("Error fetching admin requests:", error);
+            toast.error("Error fetching admin requests.");
+            if (error.response && error.response.status === 401) {
+                localStorage.removeItem('token');
+                navigate('/admin/login');
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         if (localStorage.getItem("token") == null) {
             navigate("/admin/login");
         }
-
-        const fetchRequests = async () => {
-            try {
-                const response = await axios.get('https://jsonplaceholder.typicode.com/users');
-                if (response.data && response.data.length > 0) {
-                    const formattedRequests = response.data.slice(0, 5).map((user, index) => ({
-                        id: user.id,
-                        name: user.name,
-                        organization: user.company ? user.company.name : `Organization ${index + 1}`,
-                        profileImage: `https://randomuser.me/api/portraits/${index % 2 === 0 ? 'men' : 'women'}/${index * 10 + 5}.jpg`,
-                        status: "pending"
-                    }));
-                    setRequests(formattedRequests);
-                } else {
-                    setRequests(dummyRequests);
-                }
-            } catch (error) {
-                console.error("Error fetching requests:", error);
-                setRequests(dummyRequests);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchRequests();
     }, [navigate]);
 
-    const handleRequestAction = (id, action) => {
-        setRequests(prevRequests => prevRequests.filter(request => request.id !== id));
-
-        if (action === 'approved') {
-            toast.success(`Request #${id} approved successfully`);
-        } else {
-            toast.error(`Request #${id} rejected`);
+    const handleRequestAction = async (id, type, status) => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            navigate('/admin/login');
+            return;
+        }
+        try {
+            const response = await axiosInstance.post(`/api/admin/requests/${id}/approve`, {
+                status: status === 'approved' ? true : false,
+                type: type,
+            });
+            if (response.data.message) {
+                toast.success(response.data.message);
+                fetchRequests(); // Refresh the list
+            } else {
+                toast.error("Failed to update request status.");
+            }
+        } catch (error) {
+            console.error("Error updating request status:", error);
+            toast.error(error.response?.data?.message || "Error updating request status.");
         }
     };
 
@@ -110,38 +117,133 @@ const AdminRequests = () => {
                             </Box>
                         ) : (
                             <Box sx={{ width: '100%', overflow: 'hidden', borderRadius: 2, boxShadow: 1 }}>
-                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                    <thead>
-                                        <tr style={{ backgroundColor: '#f5f5f5', borderBottom: '2px solid #9c27b0' }}>
-                                            <th style={{ padding: '12px 16px', textAlign: 'left', color: '#9c27b0', fontWeight: 600 }}>S No</th>
-                                            <th style={{ padding: '12px 16px', textAlign: 'left', color: '#9c27b0', fontWeight: 600 }}>Profile</th>
-                                            <th style={{ padding: '12px 16px', textAlign: 'left', color: '#9c27b0', fontWeight: 600 }}>Business Owner / Organization</th>
-                                            <th style={{ padding: '12px 16px', textAlign: 'left', color: '#9c27b0', fontWeight: 600 }}>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {requests.map((request, index) => (
-                                            <tr key={request.id} style={{ borderBottom: '1px solid #e0e0e0' }}>
-                                                <td style={{ padding: '12px 16px' }}>{index + 1}</td>
-                                                <td style={{ padding: '12px 16px' }}>
-                                                    <Box sx={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: '#e0e0e0', backgroundImage: `url(${request.profileImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
-                                                </td>
-                                                <td style={{ padding: '12px 16px' }}>
-                                                    <Typography>{request.name}</Typography>
-                                                    <Typography variant="body2" color="text.secondary">{request.organization}</Typography>
-                                                </td>
-                                                <td style={{ padding: '12px 16px' }}>
-                                                    <Button variant="outlined" color="success" sx={{ minWidth: 0, p: 1, mr: 1, borderRadius: "50%", borderWidth: 3 }} onClick={() => handleRequestAction(request.id, 'approved')}>
-                                                        <CheckCircleOutlinedIcon />
-                                                    </Button>
-                                                    <Button variant="outlined" color="error" sx={{ minWidth: 0, p: 1, borderRadius: "50%", borderWidth: 3 }} onClick={() => handleRequestAction(request.id, 'rejected')}>
-                                                        <CancelOutlinedIcon />
-                                                    </Button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                {requests.businesses.length > 0 && (
+                                    <Box sx={{ mb: 4 }}>
+                                        <Typography variant="h6" sx={{ p: 2, backgroundColor: '#f5f5f5', borderBottom: '2px solid #9c27b0' }}>
+                                            Business Requests
+                                        </Typography>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                            <thead>
+                                                <tr style={{ backgroundColor: '#f5f5f5' }}>
+                                                    <th style={{ padding: '12px 16px', textAlign: 'left', color: '#9c27b0', fontWeight: 600 }}>S No</th>
+                                                    <th style={{ padding: '12px 16px', textAlign: 'left', color: '#9c27b0', fontWeight: 600 }}>Profile</th>
+                                                    <th style={{ padding: '12px 16px', textAlign: 'left', color: '#9c27b0', fontWeight: 600 }}>Business Details</th>
+                                                    <th style={{ padding: '12px 16px', textAlign: 'left', color: '#9c27b0', fontWeight: 600 }}>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {requests.businesses.map((request, index) => (
+                                                    <tr key={request._id} style={{ borderBottom: '1px solid #e0e0e0' }}>
+                                                        <td style={{ padding: '12px 16px' }}>{index + 1}</td>
+                                                        <td style={{ padding: '12px 16px' }}>
+                                                            <Box sx={{ 
+                                                                width: 40, 
+                                                                height: 40, 
+                                                                borderRadius: '50%', 
+                                                                backgroundColor: '#e0e0e0', 
+                                                                backgroundImage: request.profilePic ? `url(${baseUrl}uploads/${request.profilePic})` : 'none',
+                                                                backgroundSize: 'cover', 
+                                                                backgroundPosition: 'center' 
+                                                            }} />
+                                                        </td>
+                                                        <td style={{ padding: '12px 16px' }}>
+                                                            <Typography><strong>Name:</strong> {request.name}</Typography>
+                                                            <Typography><strong>Business:</strong> {request.bussinessName}</Typography>
+                                                            <Typography><strong>Email:</strong> {request.email}</Typography>
+                                                            <Typography><strong>Phone:</strong> {request.phone}</Typography>
+                                                            <Typography><strong>Address:</strong> {request.address}</Typography>
+                                                        </td>
+                                                        <td style={{ padding: '12px 16px' }}>
+                                                            <Button 
+                                                                variant="outlined" 
+                                                                color="success" 
+                                                                sx={{ minWidth: 0, p: 1, mr: 1, borderRadius: "50%", borderWidth: 3 }} 
+                                                                onClick={() => handleRequestAction(request._id, 'bussiness', 'approved')}
+                                                            >
+                                                                <CheckCircleOutlinedIcon />
+                                                            </Button>
+                                                            <Button 
+                                                                variant="outlined" 
+                                                                color="error" 
+                                                                sx={{ minWidth: 0, p: 1, borderRadius: "50%", borderWidth: 3 }} 
+                                                                onClick={() => handleRequestAction(request._id, 'bussiness', 'rejected')}
+                                                            >
+                                                                <CancelOutlinedIcon />
+                                                            </Button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </Box>
+                                )}
+
+                                {requests.organisations.length > 0 && (
+                                    <Box sx={{ mb: 4 }}>
+                                        <Typography variant="h6" sx={{ p: 2, backgroundColor: '#f5f5f5', borderBottom: '2px solid #9c27b0' }}>
+                                            Organization Requests
+                                        </Typography>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                            <thead>
+                                                <tr style={{ backgroundColor: '#f5f5f5' }}>
+                                                    <th style={{ padding: '12px 16px', textAlign: 'left', color: '#9c27b0', fontWeight: 600 }}>S No</th>
+                                                    <th style={{ padding: '12px 16px', textAlign: 'left', color: '#9c27b0', fontWeight: 600 }}>Profile</th>
+                                                    <th style={{ padding: '12px 16px', textAlign: 'left', color: '#9c27b0', fontWeight: 600 }}>Organization Details</th>
+                                                    <th style={{ padding: '12px 16px', textAlign: 'left', color: '#9c27b0', fontWeight: 600 }}>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {requests.organisations.map((request, index) => (
+                                                    <tr key={request._id} style={{ borderBottom: '1px solid #e0e0e0' }}>
+                                                        <td style={{ padding: '12px 16px' }}>{index + 1}</td>
+                                                        <td style={{ padding: '12px 16px' }}>
+                                                            <Box sx={{ 
+                                                                width: 40, 
+                                                                height: 40, 
+                                                                borderRadius: '50%', 
+                                                                backgroundColor: '#e0e0e0', 
+                                                                backgroundImage: request.profilePic ? `url(${baseUrl}uploads/${request.profilePic})` : 'none',
+                                                                backgroundSize: 'cover', 
+                                                                backgroundPosition: 'center' 
+                                                            }} />
+                                                        </td>
+                                                        <td style={{ padding: '12px 16px' }}>
+                                                            <Typography><strong>Name:</strong> {request.name}</Typography>
+                                                            <Typography><strong>Organization:</strong> {request.organizationName}</Typography>
+                                                            <Typography><strong>Email:</strong> {request.email}</Typography>
+                                                            <Typography><strong>Phone:</strong> {request.phone}</Typography>
+                                                            <Typography><strong>Address:</strong> {request.address}</Typography>
+                                                        </td>
+                                                        <td style={{ padding: '12px 16px' }}>
+                                                            <Button 
+                                                                variant="outlined" 
+                                                                color="success" 
+                                                                sx={{ minWidth: 0, p: 1, mr: 1, borderRadius: "50%", borderWidth: 3 }} 
+                                                                onClick={() => handleRequestAction(request._id, 'organisation', 'approved')}
+                                                            >
+                                                                <CheckCircleOutlinedIcon />
+                                                            </Button>
+                                                            <Button 
+                                                                variant="outlined" 
+                                                                color="error" 
+                                                                sx={{ minWidth: 0, p: 1, borderRadius: "50%", borderWidth: 3 }} 
+                                                                onClick={() => handleRequestAction(request._id, 'organisation', 'rejected')}
+                                                            >
+                                                                <CancelOutlinedIcon />
+                                                            </Button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </Box>
+                                )}
+
+                                {requests.businesses.length === 0 && requests.organisations.length === 0 && (
+                                    <Box sx={{ p: 4, textAlign: 'center' }}>
+                                        <Typography>No pending requests.</Typography>
+                                    </Box>
+                                )}
                             </Box>
                         )}
                     </Grid>

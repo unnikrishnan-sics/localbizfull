@@ -17,8 +17,6 @@ import {
   TextField,
   Toolbar,
   Typography,
-  alpha,
-  styled,
   Modal,
   Fade,
   Backdrop
@@ -34,22 +32,22 @@ import {
   LocalPhoneOutlined as LocalPhoneOutlinedIcon,
   LocationOnOutlined as LocationOnOutlinedIcon
 } from "@mui/icons-material";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import BussinessNavbar from "../Navbar/BussinessNavbar";
 import Footer from "../Footer/Footer";
 import { jwtDecode } from 'jwt-decode';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+import axiosInstance from '../../api/axiosInstance';
 import { baseUrl } from '../../baseUrl';
 import { ClickAwayListener } from '@mui/material';
 import arrow from "../../assets/arrow.png";
 
 export default function BusinessContactMsg() {
-  const [bussinessdetails, setBussinessdetails] = useState(
-    JSON.parse(localStorage.getItem("bussinessDetails")) || {}
-  );
-  const token = localStorage.getItem("token");
   const navigate = useNavigate();
+  const { id } = useParams(); // Get the ID of the other party (customer/organization) from the URL
+  const [message, setMessage] = useState('');
+  const [chatHistory, setChatHistory] = useState([]);
+  const [receiverType, setReceiverType] = useState(''); // To store the type of the receiver (customer or organisation)
 
   // Logout modal state
   const [open, setOpen] = React.useState(false);
@@ -71,13 +69,13 @@ export default function BusinessContactMsg() {
   const [error, setError] = useState({});
   const [imagePreview, setImagePreview] = useState(null);
 
-  const textFieldStyle = { 
-    height: "65px", 
-    width: "360px", 
-    display: "flex", 
-    flexDirection: "column", 
-    justifyContent: "start", 
-    position: "relative" 
+  const textFieldStyle = {
+    height: "65px",
+    width: "360px",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "start",
+    position: "relative"
   };
 
   const styleLogout = {
@@ -107,7 +105,14 @@ export default function BusinessContactMsg() {
 
   useEffect(() => {
     fetchUser();
-  }, []);
+    if (id) {
+      // Assuming 'id' is the receiver's ID, we need to determine their type.
+      // This might require an additional API call or a way to pass the type.
+      // For now, I'll assume it's a customer. If it's an organization, this logic needs adjustment.
+      setReceiverType('customer'); // Defaulting to customer for now
+      fetchChatHistory();
+    }
+  }, [id, navigate]); // Added navigate to dependency array
 
   const fetchUser = async () => {
     try {
@@ -116,24 +121,59 @@ export default function BusinessContactMsg() {
         navigate('/bussiness/login');
         return;
       }
-      
+
       const decoded = jwtDecode(token);
-      const response = await axios.get(`${baseUrl}bussiness/getbussiness/${decoded.id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      
+      const response = await axiosInstance.get(`/bussiness/getbussiness/${decoded.id}`);
+
       if (response.data && response.data.bussiness) {
         localStorage.setItem("bussinessDetails", JSON.stringify(response.data.bussiness));
         setBussiness(response.data.bussiness);
-        setBussinessdetails(response.data.bussiness);
       }
     } catch (error) {
       console.error("Error fetching business details:", error);
       toast.error("Error fetching business details");
     }
   }
+
+  const fetchChatHistory = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/bussiness/login');
+        return;
+      }
+      const response = await axiosInstance.get(`/api/chats/${id}`); // 'id' here is the receiver's ID
+      setChatHistory(response.data.data); // Assuming response.data.data contains the chat history array
+    } catch (error) {
+      console.error("Error fetching chat history:", error);
+      toast.error("Failed to fetch chat history.");
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!message.trim()) {
+      toast.warn("Message cannot be empty.");
+      return;
+    }
+    try {
+      const token = localStorage.getItem('token');
+      const decoded = jwtDecode(token);
+      const senderId = decoded.id; // The ID of the logged-in business
+
+      await axiosInstance.post('/api/chats', {
+        sender: senderId,
+        receiver: id, // The ID of the other party from the URL
+        onModel: receiverType, // Assuming the receiver type is 'customer' or 'organisation'
+        content: message
+      });
+      toast.success("Message sent successfully!");
+      setMessage('');
+      fetchChatHistory(); // Refresh chat history after sending
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast.error("Failed to send message.");
+    }
+  };
 
   const handleLogOut = () => {
     localStorage.removeItem('token');
@@ -168,7 +208,7 @@ export default function BusinessContactMsg() {
     let isValid = true;
     let errorMessage = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
+
     if (!data.name.trim()) {
       errorMessage.name = "Name should not be empty"
       isValid = false;
@@ -177,7 +217,7 @@ export default function BusinessContactMsg() {
       errorMessage.name = "Name should be 3 to 20 char length"
       isValid = false;
     }
-    
+
     if (!data.email.trim()) {
       errorMessage.email = "Email should not be empty";
       isValid = false;
@@ -195,7 +235,7 @@ export default function BusinessContactMsg() {
       errorMessage.address = "Address should not be empty"
       isValid = false;
     }
-    
+
     if (!data.phone) {
       errorMessage.phone = "Phone should not be empty"
       isValid = false;
@@ -224,14 +264,9 @@ export default function BusinessContactMsg() {
       formData.append('profilePic', data.profilePic);
     }
 
-    const token = localStorage.getItem("token");
     try {
-      const updated = await axios.post(`${baseUrl}bussiness/editBussiness/${bussiness._id}`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      
+      const updated = await axiosInstance.post(`/bussiness/editBussiness/${bussiness._id}`, formData);
+
       if (updated.data && updated.data.message === "bussiness updated successfully.") {
         toast.success("Business updated successfully.")
         setEditOpen(false);
@@ -266,36 +301,36 @@ export default function BusinessContactMsg() {
 
   return (
     <div>
-      <BussinessNavbar 
-        bussinessdetails={bussiness} 
-        onAvatarClick={onAvatarClick} 
+      <BussinessNavbar
+        bussinessdetails={bussiness}
+        onAvatarClick={onAvatarClick}
       />
 
       {showProfileCard && (
         <ClickAwayListener onClickAway={() => setShowProfileCard(false)}>
           <Box sx={{ position: 'absolute', top: "80px", right: '60px', zIndex: 5, width: "375px" }}>
             <Card sx={{ Width: "375px", height: "490px", position: "relative", zIndex: -2 }}>
-              <Avatar sx={{ 
-                height: "146px", 
-                width: "146px", 
-                position: "absolute", 
-                top: "50px", 
-                left: "100px", 
-                zIndex: 2 
+              <Avatar sx={{
+                height: "146px",
+                width: "146px",
+                position: "absolute",
+                top: "50px",
+                left: "100px",
+                zIndex: 2
               }}
-                src={bussiness?.profilePic ? `${baseUrl}uploads/${bussiness?.profilePic}` : ""} 
+                src={bussiness?.profilePic?.filename ? `${baseUrl}uploads/${bussiness?.profilePic?.filename}` : ""}
                 alt={bussiness?.name || "Business"}
               />
-              <Box sx={{ 
-                height: '132px', 
-                background: '#9B70D3', 
-                width: "100%", 
-                position: "relative" 
+              <Box sx={{
+                height: '132px',
+                background: '#9B70D3',
+                width: "100%",
+                position: "relative"
               }}>
-                <Box component="img" src={arrow} sx={{ 
-                  position: "absolute", 
-                  top: '25px', 
-                  left: "25px" 
+                <Box component="img" src={arrow} sx={{
+                  position: "absolute",
+                  top: '25px',
+                  left: "25px"
                 }} />
               </Box>
               <Box display={"flex"} flexDirection={"column"} alignItems={"center"} p={2} sx={{ gap: "15px", mt: "90px" }}>
@@ -312,32 +347,32 @@ export default function BusinessContactMsg() {
                   <LocationOnOutlinedIcon />{bussiness.address || "No address"}
                 </Typography>
                 <Box display={"flex"} gap={3} alignItems={"center"}>
-                  <Button 
-                    variant='contained' 
-                    color='secondary' 
-                    sx={{ 
-                      borderRadius: "15px", 
-                      marginTop: "20px", 
-                      mb: "20px", 
-                      height: "40px", 
-                      width: '100px', 
-                      padding: '10px 35px' 
-                    }} 
+                  <Button
+                    variant='contained'
+                    color='secondary'
+                    sx={{
+                      borderRadius: "15px",
+                      marginTop: "20px",
+                      mb: "20px",
+                      height: "40px",
+                      width: '100px',
+                      padding: '10px 35px'
+                    }}
                     onClick={handleEditOpen}
                   >
                     Edit
                   </Button>
-                  <Button 
-                    variant='contained' 
-                    color='secondary' 
-                    sx={{ 
-                      borderRadius: "15px", 
-                      marginTop: "20px", 
-                      mb: "20px", 
-                      height: "40px", 
-                      width: '100px', 
-                      padding: '10px 35px' 
-                    }} 
+                  <Button
+                    variant='contained'
+                    color='secondary'
+                    sx={{
+                      borderRadius: "15px",
+                      marginTop: "20px",
+                      mb: "20px",
+                      height: "40px",
+                      width: '100px',
+                      padding: '10px 35px'
+                    }}
                     onClick={handleOpen}
                   >
                     Logout
@@ -355,21 +390,21 @@ export default function BusinessContactMsg() {
           <Grid container spacing={4}>
             {/* Complaints Section - Left Side */}
             <Grid item xs={12} md={6}>
-              <Card elevation={0} sx={{ 
-                height: "100%", 
+              <Card elevation={0} sx={{
+                height: "100%",
                 border: "1px solid #e0e0e0",
                 borderRadius: "12px",
                 boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.05)",
-                width:"400px"
+                width: "400px"
               }}>
-                <CardHeader 
-                  title="Complaints" 
-                  titleTypographyProps={{ 
-                    variant: "h6", 
+                <CardHeader
+                  title="Complaints"
+                  titleTypographyProps={{
+                    variant: "h6",
                     fontWeight: "medium",
                     color: "primary.main"
-                  }} 
-                  sx={{ 
+                  }}
+                  sx={{
                     borderBottom: "1px solid #f0f0f0",
                     bgcolor: "#fafafa"
                   }}
@@ -385,8 +420,8 @@ export default function BusinessContactMsg() {
                       fullWidth
                       variant="outlined"
                       placeholder="Describe your complaint in detail..."
-                      sx={{ 
-                        "& .MuiOutlinedInput-root": { 
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
                           borderRadius: 2,
                           "& fieldset": {
                             borderColor: "#e0e0e0",
@@ -423,7 +458,7 @@ export default function BusinessContactMsg() {
                         sx={{
                           color: "#9c27b0",
                           borderColor: "#9c27b0",
-                          "&:hover": { 
+                          "&:hover": {
                             borderColor: "#7b1fa2",
                             bgcolor: "rgba(156, 39, 176, 0.04)"
                           },
@@ -442,55 +477,27 @@ export default function BusinessContactMsg() {
 
             {/* Chats Section - Right Side */}
             <Grid item xs={12} md={6}>
-              <Card elevation={0} sx={{ 
+              <Card elevation={0} sx={{
                 height: "100%",
                 border: "1px solid #e0e0e0",
                 borderRadius: "12px",
                 boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.05)",
-                width:"600px",
-                marginLeft:"100px"
+                width: "600px",
+                marginLeft: "100px"
               }}>
-                <CardHeader 
-                  title="Chats" 
-                  titleTypographyProps={{ 
-                    variant: "h6", 
+                <CardHeader
+                  title="Chats"
+                  titleTypographyProps={{
+                    variant: "h6",
                     fontWeight: "medium",
                     color: "primary.main"
                   }}
-                  sx={{ 
+                  sx={{
                     borderBottom: "1px solid #f0f0f0",
                     bgcolor: "#fafafa"
                   }}
                 />
                 <CardContent sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                  {/* Chat Message Preview */}
-                  <Box sx={{ 
-                    display: "flex", 
-                    alignItems: "flex-start", 
-                    gap: 1.5,
-                    p: 2,
-                    bgcolor: "#f9f5ff",
-                    borderRadius: "8px",
-                    border: "1px solid #f0ebfa"
-                  }}>
-                    <Avatar sx={{ 
-                      width: 40, 
-                      height: 40, 
-                      bgcolor: "#9c27b0" 
-                    }}>A</Avatar>
-                    <Box>
-                      <Typography variant="body2" sx={{ fontWeight: "medium", color: "#9c27b0" }}>
-                        Ashika A S
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        "Sure, I'll send it over shortly"
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
-                        10:30 AM
-                      </Typography>
-                    </Box>
-                  </Box>
-
                   {/* Chat Area */}
                   <Paper
                     variant="outlined"
@@ -506,38 +513,34 @@ export default function BusinessContactMsg() {
                       overflowY: "auto"
                     }}
                   >
-                    {/* Sample incoming message */}
-                    <Box sx={{ 
-                      alignSelf: "flex-start",
-                      maxWidth: "70%",
-                      bgcolor: "#f5f5f5",
-                      p: 1.5,
-                      borderRadius: "8px 8px 8px 0",
-                    }}>
-                      <Typography variant="body2">Hello, how can I help you today?</Typography>
-                      <Typography variant="caption" color="text.secondary" sx={{ display: "block", textAlign: "right" }}>
-                        10:28 AM
+                    {chatHistory.length === 0 ? (
+                      <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', mt: 5 }}>
+                        No messages yet. Start a conversation!
                       </Typography>
-                    </Box>
-                    
-                    {/* Sample outgoing message */}
-                    <Box sx={{ 
-                      alignSelf: "flex-end",
-                      maxWidth: "70%",
-                      bgcolor: "#9c27b0",
-                      p: 1.5,
-                      borderRadius: "8px 8px 0 8px",
-                      color: "white"
-                    }}>
-                      <Typography variant="body2">I have an issue with my recent order</Typography>
-                      <Typography variant="caption" sx={{ 
-                        display: "block", 
-                        textAlign: "right",
-                        color: "rgba(255, 255, 255, 0.7)"
-                      }}>
-                        10:29 AM
-                      </Typography>
-                    </Box>
+                    ) : (
+                      chatHistory.map((msg, index) => (
+                        <Box
+                          key={index}
+                          sx={{
+                            alignSelf: msg.sender === bussiness._id ? "flex-end" : "flex-start",
+                            maxWidth: "70%",
+                            bgcolor: msg.sender === bussiness._id ? "#9c27b0" : "#f5f5f5",
+                            p: 1.5,
+                            borderRadius: msg.sender === bussiness._id ? "8px 8px 0 8px" : "8px 8px 8px 0",
+                            color: msg.sender === bussiness._id ? "white" : "text.primary"
+                          }}
+                        >
+                          <Typography variant="body2">{msg.content}</Typography>
+                          <Typography variant="caption" sx={{
+                            display: "block",
+                            textAlign: "right",
+                            color: msg.sender === bussiness._id ? "rgba(255, 255, 255, 0.7)" : "text.secondary"
+                          }}>
+                            {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </Typography>
+                        </Box>
+                      ))
+                    )}
                   </Paper>
 
                   {/* Message Input */}
@@ -547,8 +550,15 @@ export default function BusinessContactMsg() {
                       placeholder="Type your message here..."
                       variant="outlined"
                       size="small"
-                      sx={{ 
-                        "& .MuiOutlinedInput-root": { 
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          handleSendMessage();
+                        }
+                      }}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
                           borderRadius: "8px",
                           "& fieldset": {
                             borderColor: "#e0e0e0",
@@ -563,6 +573,7 @@ export default function BusinessContactMsg() {
                       }}
                     />
                     <IconButton
+                      onClick={handleSendMessage}
                       sx={{
                         bgcolor: "#9c27b0",
                         color: "white",
@@ -581,7 +592,7 @@ export default function BusinessContactMsg() {
           </Grid>
         </Container>
       </Box>
-      <Footer/>
+      <Footer />
 
       {/* Logout modal */}
       <Modal
@@ -698,15 +709,15 @@ export default function BusinessContactMsg() {
                   </Stack>
                 </Box>
                 <Box display={'flex'} alignItems={'center'} justifyContent={'center'} flexDirection={'column'} sx={{ width: '253px', height: "93px", gap: '10px' }}>
-                  <Button 
-                    variant='contained' 
-                    color='secondary' 
-                    sx={{ 
-                      borderRadius: "25px", 
-                      marginTop: "20px", 
-                      height: "40px", 
-                      width: '200px', 
-                      padding: '10px 35px' 
+                  <Button
+                    variant='contained'
+                    color='secondary'
+                    sx={{
+                      borderRadius: "25px",
+                      marginTop: "20px",
+                      height: "40px",
+                      width: '200px',
+                      padding: '10px 35px'
                     }}
                     onClick={handleSubmit}
                   >

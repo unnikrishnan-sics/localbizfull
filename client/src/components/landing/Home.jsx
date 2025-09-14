@@ -1,6 +1,7 @@
-import React from 'react'
-import Navbar from '../Navbar/Navbar'
-import { Box, Button, Typography } from '@mui/material';
+import React, { useState } from 'react'; // Import useState
+import Navbar from '../Navbar/Navbar';
+// Import necessary MUI components for the chat window
+import { Box, Button, Typography, Fab, Slide, IconButton } from '@mui/material'; // Added Fab, Slide, IconButton
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 import { Link } from 'react-router-dom';
 import homemain from "../../assets/homemain.png";
@@ -16,11 +17,27 @@ import man1 from "../../assets/image 93.png";
 import dot from "../../assets/Group 9.png";
 import Footer from '../Footer/Footer';
 
+// Import Icons for Chat Button and Close Button
+import ChatIcon from '@mui/icons-material/Chat';
+import CloseIcon from '@mui/icons-material/Close';
+
+// Import the ChatBot component
+import ChatBot from '../ChatBot/ChatBot'; // Adjust the path if necessary
+
 const Home = () => {
     const homebg = {
         background: 'white',
         zIndex: -5
     };
+
+    // Add state to control chat window visibility
+    const [showChatBot, setShowChatBot] = useState(false);
+
+    // Function to toggle chat window visibility
+    const handleToggleChatBot = () => {
+        setShowChatBot(!showChatBot);
+    };
+
 
     return (
         <>
@@ -40,12 +57,13 @@ const Home = () => {
                         >
                             Register</Button>
                     </Link>
+                    <Link to={"/about"}>
                     <Button variant="contained"
 
                         endIcon={<ArrowRightAltIcon />}
                         sx={{ borderRadius: "15px", backgroundColor: "transparent", color: "#6F32BF" }}
                     >
-                        Learn more</Button>
+                        Learn more</Button></Link>
                 </Box>
                 <Box component="img" src={homemain} sx={{ height: 'auto', width: "auto", marginTop: "40px" }}></Box>
 
@@ -155,6 +173,74 @@ const Home = () => {
 
             </Box>
             <Footer/>
+
+            {/* Chat Bot Window (Fixed Position and Sliding) */}
+            <Slide direction="up" in={showChatBot} mountOnEnter unmountOnExit>
+                <Box
+                    sx={{
+                        position: 'fixed',
+                        bottom: 90, // Position above the chat button
+                        right: 24,  // Align with the chat button
+                        width: { xs: '90%', sm: 380 }, // Responsive width (e.g., 90% on small screens, 380px on larger)
+                        height: '75vh', // Set a height
+                        maxHeight: 600, // Max height to prevent it from getting too tall
+                        zIndex: 1100, // Ensure it's above most other content (higher than the button's z-index)
+                        backgroundColor: 'background.paper', // White background
+                        borderRadius: 3, // Rounded corners
+                        boxShadow: 6, // Add shadow
+                        display: 'flex',
+                        flexDirection: 'column', // Use flex column for header + chat content
+                    }}
+                >
+                    {/* Chat Window Header */}
+                    <Box sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        p: 2,
+                        borderBottom: '1px solid',
+                        borderColor: 'divider',
+                        bgcolor: '#6F32BF', // Using the secondary color from this page's theme
+                        color: 'white',
+                        borderTopLeftRadius: 10, // Match parent border radius
+                        borderTopRightRadius: 10,
+                        textAlign: "center"
+                    }}>
+                        <Typography variant="h6" sx={{ flexGrow: 1, textAlign: 'center', ml: 4 }}>LOCAL BIZ CHAT BOT</Typography> {/* Added ml:4 to center text better next to icon */}
+                        <IconButton
+                            aria-label="close chat"
+                            onClick={() => setShowChatBot(false)} // Close the window
+                            sx={{ color: 'white' }} // White color for the close icon
+                        >
+                            <CloseIcon />
+                        </IconButton>
+                    </Box>
+
+                    {/* Chat Bot Content Area */}
+                    <Box sx={{ flexGrow: 1, overflow: 'hidden' }}> {/* Allow ChatBot to fill space and handle its own scrolling */}
+                        <ChatBot /> {/* Render your ChatBot component here */}
+                    </Box>
+                </Box>
+            </Slide>
+
+             {/* Floating Chat Button - Moved below the sliding window for correct zIndex */}
+            <Fab
+                aria-label="chat"
+                sx={{
+                    position: 'fixed',
+                    bottom: 24,
+                    right: 24,
+                    zIndex: 1000, // Ensure z-index is high enough, but lower than the window
+                    backgroundColor: '#6F32BF', // Using the secondary color from this page's theme
+                    color: 'white',
+                    '&:hover': {
+                         backgroundColor: '#5a28a5', // Darker shade on hover
+                    }
+                }}
+                onClick={handleToggleChatBot} // Use the toggle function
+            >
+                <ChatIcon />
+            </Fab>
         </>
     )
 }

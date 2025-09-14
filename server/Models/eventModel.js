@@ -22,6 +22,14 @@ const eventSchema = mongoose.Schema(
         },
         description: {
             type: String
+        },
+        name:{
+            type:String,
+            required:true
+        },
+        venue:{
+            type:String,
+            required:true
         }
     },
     { timeStamps: true }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -22,33 +22,32 @@ import SearchIcon from '@mui/icons-material/Search';
 const pages = [
     { label: 'Home', path: '/customer/home' },
     { label: 'About', path: '/customer/AboutUs' },
-    { label: 'Contact', path: '/customer/Contact' }
+    { label: 'Contact', path: '/customer/Contact' },
+    // { label: 'Businesses', path: '/customer/bussinessview' }
 ];
 
 const CustomerNavbar = ({ onAvatarClick }) => {
     const [anchorElNav, setAnchorElNav] = React.useState(null);
-    const [anchorElUser, setAnchorElUser] = React.useState(null);
-
     const handleOpenNavMenu = (event) => {
         setAnchorElNav(event.currentTarget);
-    };
-    const handleOpenUserMenu = (event) => {
-        setAnchorElUser(event.currentTarget);
     };
 
     const handleCloseNavMenu = () => {
         setAnchorElNav(null);
     };
 
-    const handleCloseUserMenu = () => {
-        setAnchorElUser(null);
-    };
-
     const location = useLocation();
 
-const customerdetails = JSON.parse(localStorage.getItem("customerDetails"));   
- console.log(customerdetails);
-    
+    let customerdetails = {};
+    try {
+        customerdetails = JSON.parse(localStorage.getItem("customerDetails") || "{}");
+    } catch (error) {
+        console.error("Error parsing customerDetails from localStorage:", error);
+        // Fallback to an empty object if parsing fails
+        customerdetails = {};
+    }
+    console.log(customerdetails);
+
     return (
         <>
             <AppBar position="static" sx={{ backgroundColor: 'transparent', boxShadow: "none" }}>
@@ -74,7 +73,7 @@ const customerdetails = JSON.parse(localStorage.getItem("customerDetails"));
 
                         </Box>
 
-                        <Box sx={{ ml: "100px" }}>
+                        {/* <Box sx={{ ml: "100px" }}>
                             <TextField
                                 variant="outlined"
                                 placeholder="Search..."
@@ -88,7 +87,7 @@ const customerdetails = JSON.parse(localStorage.getItem("customerDetails"));
                                     ),
                                 }}
                             />
-                        </Box>
+                        </Box> */}
 
                         <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
                             <IconButton
@@ -153,7 +152,7 @@ const customerdetails = JSON.parse(localStorage.getItem("customerDetails"));
                         </Box>
                         <Box display={"flex"} justifyContent={"space-around"} alignItems={"center"} sx={{ mr: "100px", flexGrow: 0, gap: "50px" }}>
                             <Link to='/customer/msg/compaint'>
-                            <SmsOutlinedIcon color='primary' sx={{ height: '24px' }} />
+                                <SmsOutlinedIcon color='primary' sx={{ height: '24px' }} />
 
                             </Link>
                             {/* <NotificationsOutlinedIcon color='primary' sx={{ height: '24px' }} /> */}

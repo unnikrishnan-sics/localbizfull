@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { 
+import {
   Box,
   Button,
   Container,
@@ -25,7 +25,6 @@ import {
 } from "@mui/material";
 import BussinessNavbar from "../Navbar/BussinessNavbar";
 import Footer from "../Footer/Footer";
-import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 import { useNavigate, Link } from "react-router-dom";
 import CloseIcon from '@mui/icons-material/Close';
@@ -41,8 +40,9 @@ export default function CommunityJoinForm() {
   const [formData, setFormData] = useState({
     businessName: "",
     businessCategory: "",
-    communityJoin: "",
+    communityJoin: "", // This will store the community _id
   });
+  const [communities, setCommunities] = useState([]); // New state for communities
 
   const [loading, setLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({
@@ -77,6 +77,22 @@ export default function CommunityJoinForm() {
         businessCategory: parsedDetails.bussinessCategory || ""
       }));
     }
+
+    const fetchCommunities = async () => {
+      try {
+        const response = await axios.get(`${baseUrl}api/communities`);
+        setCommunities(response.data.data); // Assuming response.data.data contains the array of communities
+      } catch (error) {
+        console.error('Error fetching communities:', error);
+        setSnackbar({
+          open: true,
+          message: error.response?.data?.message || error.message || 'Failed to fetch communities',
+          severity: 'error'
+        });
+      }
+    };
+
+    fetchCommunities();
   }, []);
 
   const handleSubmit = async (e) => {
@@ -89,15 +105,10 @@ export default function CommunityJoinForm() {
         throw new Error('No authentication token found');
       }
 
-      const response = await axios.post(
-        `${baseUrl}bussiness/community`, 
+      const _response = await axios.post(
+        `${baseUrl}api/business/join-community`,
         {
-          businessName: formData.businessName,
-          businessCategory: formData.businessCategory,
-          communityJoin: formData.communityJoin,
-          email: businessDetails?.email,
-          phone: businessDetails?.phone,
-          location: businessDetails?.location || businessDetails?.address
+          communityId: formData.communityJoin
         },
         {
           headers: {
@@ -268,7 +279,7 @@ export default function CommunityJoinForm() {
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       if (updated.data && updated.data.message === "bussiness updated successfully.") {
         toast.success("Business updated successfully.")
         setEditOpen(false);
@@ -298,7 +309,7 @@ export default function CommunityJoinForm() {
     });
 
     setImagePreview(businessDetails?.profilePic
-      ? `${baseUrl}uploads/${businessDetails?.profilePic}`
+      ? `${baseUrl}uploads/${businessDetails?.profilePic?.filename}`
       : null);
     setEditOpen(true);
   };
@@ -307,9 +318,9 @@ export default function CommunityJoinForm() {
 
   return (
     <div>
-      <BussinessNavbar 
-        bussinessdetails={businessDetails} 
-        onAvatarClick={onAvatarClick} 
+      <BussinessNavbar
+        bussinessdetails={businessDetails}
+        onAvatarClick={onAvatarClick}
       />
 
       {showProfileCard && (
@@ -317,10 +328,10 @@ export default function CommunityJoinForm() {
           <Box sx={{ position: 'absolute', top: "80px", right: '60px', zIndex: 5, width: "375px" }}>
             <Card sx={{ Width: "375px", height: "490px", position: "relative", zIndex: -2 }}>
               <Avatar sx={{ height: "146px", width: "146px", position: "absolute", top: "50px", left: "100px", zIndex: 2 }}
-                src={businessDetails?.profilePic ? `${baseUrl}uploads/${businessDetails?.profilePic}` : ""} 
+                src={businessDetails?.profilePic?.filename ? `${baseUrl}uploads/${businessDetails?.profilePic?.filename}` : ""}
                 alt={businessDetails?.name || "Business"}></Avatar>
               <Box sx={{ height: '132px', background: '#9B70D3', width: "100%", position: "relative" }}>
-                <Box component="img" src={arrow} sx={{ position: "absolute", top: '25px', left: "25px" }}></Box>
+                {/* <Box component="img" src={arrow} sx={{ position: "absolute", top: '25px', left: "25px" }}></Box> */}
               </Box>
               <Box display={"flex"} flexDirection={"column"} alignItems={"center"} p={2} sx={{ gap: "15px", mt: "90px" }}>
                 <Typography variant='h5' color='secondary' sx={{ fontSize: "24px", fontWeight: "400" }}>{businessDetails?.name || "Business"}</Typography>
@@ -337,8 +348,8 @@ export default function CommunityJoinForm() {
         </ClickAwayListener>
       )}
 
-      <Container 
-        maxWidth="sm" 
+      <Container
+        maxWidth="sm"
         sx={{
           minHeight: '100vh',
           display: 'flex',
@@ -347,20 +358,20 @@ export default function CommunityJoinForm() {
           py: 4
         }}
       >
-        <Paper 
-          elevation={3} 
-          sx={{ 
-            p: 4, 
+        <Paper
+          elevation={3}
+          sx={{
+            p: 4,
             borderRadius: 2,
             backgroundColor: 'background.paper'
           }}
         >
           {/* Header */}
           <Box sx={{ textAlign: 'center', mb: 4 }}>
-            <Typography 
-              variant="h4" 
-              component="h1" 
-              sx={{ 
+            <Typography
+              variant="h4"
+              component="h1"
+              sx={{
                 fontWeight: 300,
                 color: 'primary.main',
                 mb: 3
@@ -371,10 +382,10 @@ export default function CommunityJoinForm() {
 
             {/* Logo */}
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
-              <Avatar 
-                sx={{ 
-                  width: 80, 
-                  height: 80, 
+              <Avatar
+                sx={{
+                  width: 80,
+                  height: 80,
                   bgcolor: 'background.default',
                   border: '4px solid',
                   borderColor: 'divider',
@@ -435,10 +446,11 @@ export default function CommunityJoinForm() {
                 label="Community Join"
                 onChange={handleChange}
               >
-                <MenuItem value="tech">Tech Community</MenuItem>
-                <MenuItem value="business">Business Network</MenuItem>
-                <MenuItem value="creative">Creative Hub</MenuItem>
-                <MenuItem value="local">Local Community</MenuItem>
+                {communities.map((community) => (
+                  <MenuItem key={community._id} value={community._id}>
+                    {community.organizationName}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
 
@@ -447,8 +459,8 @@ export default function CommunityJoinForm() {
               fullWidth
               variant="contained"
               disabled={loading || !formData.communityJoin}
-              sx={{ 
-                mt: 3, 
+              sx={{
+                mt: 3,
                 mb: 2,
                 py: 1.5,
                 fontSize: '1rem'
@@ -459,7 +471,7 @@ export default function CommunityJoinForm() {
           </Box>
         </Paper>
       </Container>
-      <Footer/>
+      <Footer />
 
       {/* Snackbar for notifications */}
       <Snackbar
@@ -468,8 +480,8 @@ export default function CommunityJoinForm() {
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert 
-          onClose={handleCloseSnackbar} 
+        <Alert
+          onClose={handleCloseSnackbar}
           severity={snackbar.severity}
           sx={{ width: '100%' }}
         >
@@ -487,9 +499,9 @@ export default function CommunityJoinForm() {
           closeAfterTransition
           slots={{ backdrop: Backdrop }}
           slotProps={{
-              backdrop: {
-                  timeout: 500,
-              },
+            backdrop: {
+              timeout: 500,
+            },
           }}
         >
           <Fade in={open}>
@@ -521,9 +533,9 @@ export default function CommunityJoinForm() {
           closeAfterTransition
           slots={{ backdrop: Backdrop }}
           slotProps={{
-              backdrop: {
-                  timeout: 500,
-              },
+            backdrop: {
+              timeout: 500,
+            },
           }}
         >
           <Fade in={editOpen}>

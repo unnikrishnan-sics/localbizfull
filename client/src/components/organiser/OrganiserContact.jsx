@@ -273,7 +273,7 @@ const OrganiserContact = () => {
                                 alt={customer?.name}
                             />
                             <Box sx={{ height: '132px', background: '#9B70D3', width: "100%", position: "relative" }}>
-                                <Box component="img" src={arrow} sx={{ position: "absolute", top: '25px', left: "25px" }} />
+                                {/* <Box component="img" src={arrow} sx={{ position: "absolute", top: '25px', left: "25px" }} /> */}
                             </Box>
                             <Box display={"flex"} flexDirection={"column"} alignItems={"center"} p={2} sx={{ gap: "15px", mt: "90px" }}>
                                 <Typography variant='h5' color='secondary' sx={{ fontSize: "24px", fontWeight: "400" }}>

@@ -6,41 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import AdminSidebar from './AdminSideBar';
 import Footer from '../Footer/Footer';
-
-const dummyUsers = [
-  {
-    id: 1,
-    name: "Alice Johnson",
-    email: "alice.johnson@example.com",
-    phone: "+1 555-1234",
-    address: "123 Maple St, Springfield, IL",
-    profileImage: "https://randomuser.me/api/portraits/women/44.jpg"
-  },
-  {
-    id: 2,
-    name: "Bob Smith",
-    email: "bob.smith@example.com",
-    phone: "+1 555-5678",
-    address: "456 Oak Ave, Metropolis, NY",
-    profileImage: "https://randomuser.me/api/portraits/men/32.jpg"
-  },
-  {
-    id: 3,
-    name: "Catherine Lee",
-    email: "catherine.lee@example.com",
-    phone: "+1 555-8765",
-    address: "789 Pine Rd, Gotham, CA",
-    profileImage: "https://randomuser.me/api/portraits/women/68.jpg"
-  },
-  {
-    id: 4,
-    name: "Daniel Kim",
-    email: "daniel.kim@example.com",
-    phone: "+1 555-4321",
-    address: "321 Cedar Blvd, Star City, TX",
-    profileImage: "https://randomuser.me/api/portraits/men/75.jpg"
-  }
-];
+import axiosInstance from '../../api/axiosInstance'; // Import axiosInstance
 
 const style = {
   position: 'absolute',
@@ -69,8 +35,35 @@ const AdminViewUsers = () => {
   };
 
   useEffect(() => {
-    setUsers(dummyUsers);
-  }, []);
+    const fetchUsers = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          toast.error("Authentication token not found. Please log in.");
+          navigate('/admin/login');
+          return;
+        }
+
+        // API to fetch all customers is not explicitly provided in README.md.
+        // Assuming a hypothetical endpoint for demonstration.
+        // In a real application, this API would need to be implemented on the backend.
+        const response = await axiosInstance.get('/api/admin/customers', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setUsers(response.data.customers || []);
+        // toast.success(response.data.message || "Users fetched successfully.");
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        toast.error(error.response?.data?.message || "Failed to fetch users.");
+        setUsers([]); // Clear users on error
+      }
+    };
+
+    fetchUsers();
+  }, [navigate]);
 
   return (
     <>
@@ -102,18 +95,24 @@ const AdminViewUsers = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((user, index) => (
-                    <tr key={user.id} style={{ borderBottom: '1px solid #e0e0e0' }}>
-                      <td style={cellStyle}>{index + 1}</td>
-                      <td style={cellStyle}>
-                        <Box sx={{ width: 40, height: 40, borderRadius: '50%', backgroundImage: `url(${user.profileImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
-                      </td>
-                      <td style={cellStyle}>{user.name}</td>
-                      <td style={cellStyle}>{user.email}</td>
-                      <td style={cellStyle}>{user.phone}</td>
-                      <td style={cellStyle}>{user.address}</td>
+                  {users.length > 0 ? (
+                    users.map((user, index) => (
+                      <tr key={user._id} style={{ borderBottom: '1px solid #e0e0e0' }}>
+                        <td style={cellStyle}>{index + 1}</td>
+                        <td style={cellStyle}>
+                          <Box sx={{ width: 40, height: 40, borderRadius: '50%', backgroundImage: `url(${user.profilePic?.path || ''})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                        </td>
+                        <td style={cellStyle}>{user.name}</td>
+                        <td style={cellStyle}>{user.email}</td>
+                        <td style={cellStyle}>{user.phone}</td>
+                        <td style={cellStyle}>{user.address}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>No users found or API not available.</td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </Box>

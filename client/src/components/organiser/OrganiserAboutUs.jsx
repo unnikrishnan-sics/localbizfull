@@ -31,22 +31,35 @@ const OrganiserAboutUs = () => {
         p: 4,
     };
 
-    const [customer, setCustomer] = useState({});
-    const fetchUser = async () => {
+    const [organiser, setOrganiser] = useState({});
+    const fetchOrganiser = async () => {
         const token = localStorage.getItem('token');
+        if (!token) {
+            navigate("/organiser/login");
+            return;
+        }
         const decoded = jwtDecode(token);
-        const customer = await axios.get(`${baseUrl}customer/getcustomer/${decoded.id}`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
-        const customerDatas = localStorage.setItem("customerDetails",
-            JSON.stringify(customer.data.customer));
-        setCustomer(customer.data.customer);
+        try {
+            const response = await axios.get(`${baseUrl}organiser/getorganiser/${decoded.id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            localStorage.setItem("organiserDetails", JSON.stringify(response.data.organiser));
+            setOrganiser(response.data.organiser);
+        } catch (error) {
+            console.error("Failed to fetch organiser details:", error);
+            toast.error("Failed to fetch organiser details.");
+            if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('organiserDetails');
+                navigate('/organiser/login');
+            }
+        }
     }
 
     useEffect(() => {
-        fetchUser();
+        fetchOrganiser();
     }, []);
 
     const navigate = useNavigate();
@@ -56,9 +69,9 @@ const OrganiserAboutUs = () => {
 
     const handleLogOut = () => {
         localStorage.removeItem('token');
-        localStorage.removeItem('customerDetails');
-        navigate('/customer/login');
-        toast.success("you logged out");
+        localStorage.removeItem('organiserDetails');
+        navigate('/organiser/login');
+        toast.success("You logged out successfully.");
     }
 
     // for profile 
@@ -164,33 +177,37 @@ const OrganiserAboutUs = () => {
         formData.append('profilePic', data.profilePic);
 
         const token = localStorage.getItem("token");
-        const updated = await axios.post(`${baseUrl}customer/editcustomer/${customer._id}`, formData, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
+        try {
+            const updated = await axios.post(`${baseUrl}organiser/editorganiser/${organiser._id}`, formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
 
-        if (updated.data.message === "Customer updated successfully.") {
-            toast.success("Customer updated successfully.")
-            setEditOpen(false);
-            fetchUser();
-        }
-        else {
-            toast.error("Error in updating Customer profile")
+            if (updated.data.message === "Organiser updated successfully.") {
+                toast.success("Organiser updated successfully.");
+                setEditOpen(false);
+                fetchOrganiser();
+            } else {
+                toast.error("Error in updating Organiser profile.");
+            }
+        } catch (error) {
+            console.error("Error updating organiser profile:", error);
+            toast.error("Error in updating Organiser profile.");
         }
     }
 
     const [editOpen, setEditOpen] = React.useState(false);
     const handleEditOpen = () => {
         setData({
-            name: customer.name || "",
-            email: customer.email || "",
-            address: customer.address || "",
-            phone: customer.phone || "",
+            name: organiser.name || "",
+            email: organiser.email || "",
+            address: organiser.address || "",
+            phone: organiser.phone || "",
             profilePic: null,
         });
-        setImagePreview(customer?.profilePic?.filename
-            ? `http://localhost:4056/uploads/${customer?.profilePic?.filename}`
+        setImagePreview(organiser?.profilePic?.filename
+            ? `http://localhost:4056/uploads/${organiser?.profilePic?.filename}`
             : null);
         setEditOpen(true);
     }
@@ -202,7 +219,7 @@ const OrganiserAboutUs = () => {
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (!token) {
-            navigate("/customer/login");
+            navigate("/organiser/login");
             return;
         }
     }, []);
@@ -213,21 +230,21 @@ const OrganiserAboutUs = () => {
 
     return (
         <>
-            <OrganiserNavbar customerdetails={customer} onAvatarClick={onAvatarClick} aboutbg={aboutbg} />
+            <OrganiserNavbar organiserdetails={organiser} onAvatarClick={onAvatarClick} aboutbg={aboutbg} />
             {showProfileCard && (
                 <ClickAwayListener onClickAway={() => setShowProfileCard(false)}>
                     <Box sx={{ position: 'absolute', top: "80px", right: '60px', zIndex: 5, width: "375px" }}>
                         <Card sx={{ Width: "375px", height: "490px", position: "relative", zIndex: -2 }}>
                             <Avatar sx={{ height: "146px", width: "146px", position: "absolute", top: "50px", left: "100px", zIndex: 2 }}
-                                src={`http://localhost:4056/uploads/${customer?.profilePic?.filename}`} alt={customer?.name}></Avatar>
+                                src={`http://localhost:4056/uploads/${organiser?.profilePic?.filename}`} alt={organiser?.name}></Avatar>
                             <Box sx={{ height: '132px', background: '#9B70D3', width: "100%", position: "relative" }}>
-                                <Box component="img" src={arrow} sx={{ position: "absolute", top: '25px', left: "25px" }}></Box>
+                                {/* <Box component="img" src={arrow} sx={{ position: "absolute", top: '25px', left: "25px" }}></Box> */}
                             </Box>
                             <Box display={"flex"} flexDirection={"column"} alignItems={"center"} p={2} sx={{ gap: "15px", mt: "90px" }}>
-                                <Typography variant='h5' color='secondary' sx={{ fontSize: "24px", fontWeight: "400" }}>{customer.name}</Typography>
-                                <Typography display={"flex"} justifyContent={"center"} alignItems={"center"} variant='p' color='primary' sx={{ fontSize: "15px", fontWeight: "400", gap: "30px" }}><EmailOutlinedIcon />{customer.email}</Typography>
-                                <Typography display={"flex"} justifyContent={"center"} alignItems={"center"} variant='p' color='primary' sx={{ fontSize: "15px", fontWeight: "400", gap: "30px" }}><LocalPhoneOutlinedIcon />{customer.phone}</Typography>
-                                <Typography display={"flex"} justifyContent={"center"} alignItems={"center"} variant='p' color='primary' sx={{ fontSize: "15px", fontWeight: "400", gap: "30px" }}><LocationOnOutlinedIcon />{customer.address}</Typography>
+                                <Typography variant='h5' color='secondary' sx={{ fontSize: "24px", fontWeight: "400" }}>{organiser.name}</Typography>
+                                <Typography display={"flex"} justifyContent={"center"} alignItems={"center"} variant='p' color='primary' sx={{ fontSize: "15px", fontWeight: "400", gap: "30px" }}><EmailOutlinedIcon />{organiser.email}</Typography>
+                                <Typography display={"flex"} justifyContent={"center"} alignItems={"center"} variant='p' color='primary' sx={{ fontSize: "15px", fontWeight: "400", gap: "30px" }}><LocalPhoneOutlinedIcon />{organiser.phone}</Typography>
+                                <Typography display={"flex"} justifyContent={"center"} alignItems={"center"} variant='p' color='primary' sx={{ fontSize: "15px", fontWeight: "400", gap: "30px" }}><LocationOnOutlinedIcon />{organiser.address}</Typography>
                                 <Box display={"flex"} gap={3} alignItems={"center"}>
                                     <Button variant='contained' color='secondary' sx={{ borderRadius: "15px", marginTop: "20px", mb: "20px", height: "40px", width: '100px', padding: '10px 35px' }} onClick={handleEditOpen}>Edit</Button>
                                     <Button variant='contained' color='secondary' sx={{ borderRadius: "15px", marginTop: "20px", mb: "20px", height: "40px", width: '100px', padding: '10px 35px' }} onClick={handleOpen}>Logout</Button>
@@ -237,7 +254,7 @@ const OrganiserAboutUs = () => {
                     </Box>
                 </ClickAwayListener>
             )}
-            
+
             <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"} sx={{ height: "706px", background: "#F6F7F9", padding: "0px 100px" }}>
                 <Box display={"flex"} flexDirection={"column"} alignItems={"start"} justifyContent={"center"} sx={{ gap: '30px' }}>
                     <Typography variant='h5' color='parimary' sx={{ fontSize: '18px', fontWeight: "400" }}>About Us</Typography>
@@ -248,35 +265,35 @@ const OrganiserAboutUs = () => {
                     <Box component="img" src={aboutframe} sx={{ height: '486px', width: "auto" }}></Box>
                 </Box>
             </Box>
-            
+
             <Box display={"flex"} alignItems={"center"} justifyContent={"center"} gap={25}>
-                <Box display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"} sx={{ height: '292',width:"auto", border: "1px solid black", borderRadius: '20px', padding:"20px",margin:"80px"}}>
+                <Box display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"} sx={{ height: '292', width: "auto", border: "1px solid black", borderRadius: '20px', padding: "20px", margin: "80px" }}>
                     <Box component="img" src={mission} sx={{ height: '106px', width: "88px" }}></Box>
                     <Typography gutterBottom color='secondary' variant="h5" component="div">
                         Mission
                     </Typography>
-                    <Typography variant="p" color='primary' sx={{textAlign:'center'}}>
+                    <Typography variant="p" color='primary' sx={{ textAlign: 'center' }}>
                         To empower local businesses and consumers through a smart, <br /> user-friendly platform that fosters lasting local relationships.
                     </Typography>
                 </Box>
-                
-                <Box display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"} sx={{ height: '292',width:"auto", border: "1px solid black", borderRadius: '20px', padding:"20px",margin:"80px"}}>
+
+                <Box display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"} sx={{ height: '292', width: "auto", border: "1px solid black", borderRadius: '20px', padding: "20px", margin: "80px" }}>
                     <Box component="img" src={vission} sx={{ height: '106px', width: "88px" }}></Box>
                     <Typography gutterBottom color='secondary' variant="h5" component="div">
                         Vission
                     </Typography>
-                    <Typography variant="p" color='primary' sx={{textAlign:'center'}}>
-                    To become the go-to digital hub for local business discovery,  <br />driving community connection and sustainable economic growth <br />worldwide.
+                    <Typography variant="p" color='primary' sx={{ textAlign: 'center' }}>
+                        To become the go-to digital hub for local business discovery,  <br />driving community connection and sustainable economic growth <br />worldwide.
                     </Typography>
                 </Box>
             </Box>
-            
+
             {/* why us */}
-            <Box sx={{ width:'100%',mb:"100px"}} display={"flex"} justifyContent={"center"} alignItems={"center"}>
-                <Box sx={{ gap:"20px" }} display={"flex"} alignItems={"start"} flexDirection={"column"}>
-                    <Typography variant='h3' color='secondary' sx={{ fontSize: "32px", fontWeight: "600",marginTop:'20px' }}>Why Choose Skill Swap?</Typography>
-                    <Box display={"flex"} alignItems={"start"} flexDirection={"column"} sx={{marginLeft:'10px',gap:'25px'}}>
-                        <Box display={"flex"} alignItems={"start"} flexDirection={"column"} sx={{gap:'25px'}}>
+            <Box sx={{ width: '100%', mb: "100px" }} display={"flex"} justifyContent={"center"} alignItems={"center"}>
+                <Box sx={{ gap: "20px" }} display={"flex"} alignItems={"start"} flexDirection={"column"}>
+                    <Typography variant='h3' color='secondary' sx={{ fontSize: "32px", fontWeight: "600", marginTop: '20px' }}>Why Choose Skill Swap?</Typography>
+                    <Box display={"flex"} alignItems={"start"} flexDirection={"column"} sx={{ marginLeft: '10px', gap: '25px' }}>
+                        <Box display={"flex"} alignItems={"start"} flexDirection={"column"} sx={{ gap: '25px' }}>
                             <Typography variant='p' color='primary' sx={{ fontSize: "18px", fontWeight: "500" }}>1.All-in-One Platform – Discover, connect, and engage with local businesses—all from one easy-to-use interface.</Typography>
                             <Typography variant='p' color='primary' sx={{ fontSize: "18px", fontWeight: "500" }}>2.Boost Local Visibility – We help small businesses grow with powerful promotion tools and verified listings.</Typography>
                             <Typography variant='p' color='primary' sx={{ fontSize: "18px", fontWeight: "500" }}>3.Location-Based Discovery – Find what you need, when you need it, right in your neighborhood.</Typography>
@@ -286,7 +303,7 @@ const OrganiserAboutUs = () => {
                     </Box>
                 </Box>
             </Box>
-            
+
             <Footer />
 
             {/* logout modal */}

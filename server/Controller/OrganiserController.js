@@ -92,37 +92,16 @@ const organisationForgotPassword = async (req, res) => {
         const organisation = await organisationModel.findOne({ email });
 
         if (!organisation) {
-            return res.status(404).json({ message: "No organisation found with this email." });
+            return res.status(404).json({ 
+                success: false,
+                message: "No organization found with this email." 
+            });
         }
 
-        // Generate reset token
-        const resetToken = crypto.randomBytes(32).toString("hex");
-        organisation.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
-        organisation.resetPasswordExpires = Date.now() + 3600000; // 1 hour
-
-        await organisation.save();
-
-        // Create reset URL
-        const resetURL = `${req.protocol}://${req.get("host")}/organisation/resetpassword/${resetToken}`;
-
-        const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to: \n\n ${resetURL} \n\n with your new password. If you did not request this, please ignore this email and your password will remain unchanged.`;
-
-        try {
-            await sendEmail({
-                email: organisation.email,
-                subject: "Password Reset Token",
-                message,
-            });
-
-            res.status(200).json({
-                message: "Token sent to email!",
-            });
-        } catch (error) {
-            organisation.resetPasswordToken = undefined;
-            organisation.resetPasswordExpires = undefined;
-            await organisation.save();
-            return res.status(500).json({ message: "Error sending email. Please try again later." });
-        }
+        res.status(200).json({ 
+            success: true,
+            message: "Email verified. You can reset your password now." 
+        });
 
     } catch (error) {
         console.log(error.message);
@@ -132,30 +111,25 @@ const organisationForgotPassword = async (req, res) => {
 
 const organisationResetPassword = async (req, res) => {
     try {
-        const resetPasswordToken = crypto.createHash("sha256").update(req.params.email).digest("hex"); // req.params.email is actually the token here
-        const organisation = await organisationModel.findOne({
-            resetPasswordToken,
-            resetPasswordExpires: { $gt: Date.now() },
-        });
+        const { email, password } = req.body;
+        const organisation = await organisationModel.findOne({ email });
 
         if (!organisation) {
-            return res.status(400).json({ message: "Password reset token is invalid or has expired." });
-        }
-
-        const { password, confirmpassword } = req.body;
-
-        if (password !== confirmpassword) {
-            return res.status(400).json({ message: "Passwords do not match." });
+            return res.status(404).json({ 
+                success: false,
+                message: "No organization found with this email." 
+            });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
         organisation.password = hashedPassword;
         organisation.confirmpassword = hashedPassword;
-        organisation.resetPasswordToken = undefined;
-        organisation.resetPasswordExpires = undefined;
 
         await organisation.save();
-        res.status(200).json({ message: "Password reset successfully." });
+        res.status(200).json({ 
+            success: true,
+            message: "Password reset successfully." 
+        });
 
     } catch (error) {
         console.log(error.message);
@@ -202,5 +176,4 @@ const editOrganisationById = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
-
-module.exports={organisationRegister,uploadProfilePic,organisationLogin,organisationForgotPassword,organisationResetPassword,getOrganisationById,editOrganisationById};
+module.exports={organisationRegister,uploadProfilePic,organisationLogin,organisationForgotPassword,organisationResetPassword,getOrganisationById,editOrganisationById };

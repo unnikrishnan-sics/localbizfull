@@ -73,7 +73,31 @@ const updateReview = async (req, res) => {
     }
 };
 
+const getReviewsByBusinessId = async (req, res) => {
+    try {
+        const { businessId } = req.params;
+
+        const reviews = await Review.find({ business: businessId })
+            .populate('consumer', 'name profilePic') // Populate consumer details, only name and profilePic
+            .sort({ createdAt: -1 }); // Sort by newest first
+
+        if (!reviews || reviews.length === 0) {
+            return res.status(200).json({ message: "No reviews found for this business.", data: [] });
+        }
+
+        res.status(200).json({
+            message: "Reviews fetched successfully.",
+            data: reviews
+        });
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     createReview,
-    updateReview
+    updateReview,
+    getReviewsByBusinessId
 };

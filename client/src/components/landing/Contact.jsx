@@ -65,7 +65,7 @@ const Contact = () => {
     <Stack direction="row" justifyContent="center" alignItems="center" spacing={2} sx={{ height: "528px", width: "70%", gap: "100px" }}>
       
       {/* Form */}
-      <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" sx={{ gap: "15px", border: "1px solid #CCCCCC", borderRadius: "15px", padding: "20px" }}>
+      {/* <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" sx={{ gap: "15px", border: "1px solid #CCCCCC", borderRadius: "15px", padding: "20px" }}>
         <Typography variant='h3' color='primary' sx={{ fontSize: "24px", fontWeight: "500" }}>Get in Touch</Typography>
         <Box sx={{ height: "65px", width: "360px" }}>
           <label>Name</label>
@@ -82,7 +82,7 @@ const Contact = () => {
         <Button variant='contained' color='secondary' sx={{ borderRadius: "25px", marginTop: "20px", height: "40px", width: '150px', padding: '10px 35px' }}>
           Submit
         </Button>
-      </Box>
+      </Box> */}
 
       {/* Contact Info */}
       <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" sx={{ gap: "35px" }}>

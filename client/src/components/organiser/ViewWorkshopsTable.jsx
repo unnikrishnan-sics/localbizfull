@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -20,136 +20,165 @@ import { Link } from 'react-router-dom';
 const purpleColor = '#9B70D3';
 
 // Styled components for specific visual tweaks (reused from ViewTrainingsTable)
-const StyledTableHeadCell = styled(TableCell)(({ theme }) => ({
+const StyledTableHeadCell = styled(TableCell)(() => ({
   color: purpleColor, // Purple text for header
   fontWeight: 'normal', // Standard font weight for headers
   fontSize: '1rem', // Adjust font size if needed
   borderBottom: `2px solid ${purpleColor}`, // Purple bottom border for headers
-  paddingBottom: theme.spacing(1), // Add some padding below the border
+  paddingBottom: 8, // Add some padding below the border
 }));
 
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  // No specific background for alternating rows in the image, so keeping it simple
-  // '&:nth-of-type(odd)': {
-  //   backgroundColor: theme.palette.action.hover,
-  // },
-  // hide last border
+const StyledTableRow = styled(TableRow)(() => ({
   '&:last-child td, &:last-child th': {
     border: 0,
   },
 }));
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
+const StyledTableCell = styled(TableCell)(() => ({
   fontSize: '0.9rem', // Font size for body cells
-  padding: theme.spacing(1.5, 2), // Adjust padding for cell content
+  padding: '12px 16px', // Adjust padding for cell content
 }));
 
-const StyledEditButton = styled(Button)(({ theme }) => ({
+const StyledEditButton = styled(Button)(() => ({
   backgroundColor: purpleColor, // Purple background for the button
   color: 'white', // White text
   borderRadius: '8px', // Rounded corners for the button
   textTransform: 'none', // Prevent uppercase text
-  padding: theme.spacing(0.5, 2), // Adjust padding
+  padding: '4px 16px', // Adjust padding
   '&:hover': {
     backgroundColor: '#7b4fc2', // Darker purple on hover
   },
 }));
 
+import axiosInstance from '../../api/axiosInstance';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 function ViewWorkshopsTable() {
-  // Sample data (replace with actual data fetched from an API)
-  const workshops = [
-    {
-      id: 1,
-      organizerName: 'Creative Hands Community',
-      organizerEmail: 'creativehands@example.com',
-      phoneNumber: '+12 1234 1234 1234',
-    },
-    {
-      id: 2,
-      organizerName: 'Creative Hands Community',
-      organizerEmail: 'creativehands@example.com',
-      phoneNumber: '+12 1234 1234 1234',
-    },
-    {
-      id: 3,
-      organizerName: 'Creative Hands Community',
-      organizerEmail: 'creativehands@example.com',
-      phoneNumber: '+12 1234 1234 1234',
-    },
-    {
-      id: 4,
-      organizerName: 'Creative Hands Community',
-      organizerEmail: 'creativehands@example.com',
-      phoneNumber: '+12 1234 1234 1234',
-    },
-    // Add more workshop data as needed
-  ];
+  const [workshops, setWorkshops] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchWorkshops = async () => {
+      try {
+        const response = await axiosInstance.get('api/community/events');
+        // Check if response.data exists and has events array
+        const events = response?.data?.data || [];
+        console.log(events);
+        
+        const filteredWorkshops = events.filter(event => event.type === 'workshop');
+        setWorkshops(filteredWorkshops);
+      } catch (err) {
+        setError(err);
+        toast.error('Failed to fetch workshops.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWorkshops();
+  }, []);
 
   const handleEdit = (workshopId) => {
-    console.log(`Edit workshop with ID: ${workshopId}`);
-    // Implement your edit logic here, e.g., navigate to an edit page or open a modal
+    navigate(`/organiser/EditWorkShop/${workshopId}`);
   };
+
+  if (loading) {
+    return (
+      <div>
+        <OrganiserNavbar />
+        <Container component="main" maxWidth="lg" sx={{ pt: 8, pb: 4, textAlign: 'center' }}>
+          <Typography variant="h6" color="primary">Loading workshops...</Typography>
+        </Container>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div>
+        <OrganiserNavbar />
+        <Container component="main" maxWidth="lg" sx={{ pt: 8, pb: 4, textAlign: 'center' }}>
+          <Typography variant="h6" color="error">Error: {error.message}</Typography>
+        </Container>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div>
-        <OrganiserNavbar/>
-    <Container component="main" maxWidth="lg" sx={{ pt: 8, pb: 4 }}>
-      <Box sx={{ textAlign: 'center', marginBottom: 6 }}>
-        <Typography
-          variant="h4"
-          component="h1"
-          sx={{
-            color: purpleColor, // Purple color for the title
-            fontWeight: 'normal', // Thin font weight
-            fontSize: '2.5rem', // Larger font size for the heading
-          }}
-        >
-          View Workshops {/* Changed title */}
-        </Typography>
-      </Box>
+      <OrganiserNavbar />
+      <Container component="main" maxWidth="lg" sx={{ pt: 8, pb: 4 }}>
+        <Box sx={{ textAlign: 'center', marginBottom: 6 }}>
+          <Typography
+            variant="h4"
+            component="h1"
+            sx={{
+              color: purpleColor,
+              fontWeight: 'normal',
+              fontSize: '2.5rem',
+            }}
+          >
+            View Workshops
+          </Typography>
+        </Box>
 
-      <TableContainer component={Paper} elevation={0} sx={{
-        borderRadius: '16px', // Rounded corners for the whole table container
-        border: '1px solid #e0e0e0', // Subtle border around the table
-        overflowX: 'auto', // Allow horizontal scrolling for smaller screens
-      }}>
-        <Table sx={{ minWidth: 650 }} aria-label="workshops table">
-          <TableHead>
-            <TableRow>
-              <StyledTableHeadCell>S NO</StyledTableHeadCell>
-              <StyledTableHeadCell>Organizer Name</StyledTableHeadCell>
-              <StyledTableHeadCell>Organizer Email</StyledTableHeadCell>
-              <StyledTableHeadCell>Phone Number</StyledTableHeadCell>
-              <StyledTableHeadCell align="center">Action</StyledTableHeadCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {workshops.map((workshop) => (
-              <StyledTableRow key={workshop.id}>
-                <StyledTableCell component="th" scope="row">
-                  {workshop.id}.
-                </StyledTableCell>
-                <StyledTableCell>{workshop.organizerName}</StyledTableCell>
-                <StyledTableCell>{workshop.organizerEmail}</StyledTableCell>
-                <StyledTableCell>{workshop.phoneNumber}</StyledTableCell>
-                <StyledTableCell align="center">
-                  <Link to="/organiser/EditWorkShop">
-                   <StyledEditButton
-                    variant="contained"
-                    onClick={() => handleEdit(workshop.id)}
-                  >
-                    Edit
-                  </StyledEditButton>
-                  </Link>
-                 
-                </StyledTableCell>
-              </StyledTableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Container>
-<Footer/>
+        <TableContainer component={Paper} elevation={0} sx={{
+          borderRadius: '16px',
+          border: '1px solid #e0e0e0',
+          overflowX: 'auto',
+        }}>
+          <Table sx={{ minWidth: 650 }} aria-label="workshops table">
+            <TableHead>
+              <TableRow>
+                <StyledTableHeadCell>S NO</StyledTableHeadCell>
+                <StyledTableHeadCell>Workshop Type</StyledTableHeadCell>
+                <StyledTableHeadCell>Organizer</StyledTableHeadCell>
+                <StyledTableHeadCell>Description</StyledTableHeadCell>
+                <StyledTableHeadCell>Date</StyledTableHeadCell>
+                <StyledTableHeadCell align="center">Action</StyledTableHeadCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {workshops.length > 0 ? (
+                workshops.map((workshop, index) => (
+                  <StyledTableRow key={workshop._id || index}>
+                    <StyledTableCell component="th" scope="row">
+                      {index + 1}.
+                    </StyledTableCell>
+                    <StyledTableCell>{workshop.type || 'N/A'}</StyledTableCell>
+                    <StyledTableCell>{workshop.organizer || 'N/A'}</StyledTableCell>
+                    <StyledTableCell>{workshop.description || 'N/A'}</StyledTableCell>
+                    <StyledTableCell>
+                      {workshop.date ? new Date(workshop.date).toLocaleDateString() : 'N/A'}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      <StyledEditButton
+                        variant="contained"
+                        onClick={() => handleEdit(workshop._id)}
+                      >
+                        Edit
+                      </StyledEditButton>
+                    </StyledTableCell>
+                  </StyledTableRow>
+                ))
+              ) : (
+                <StyledTableRow>
+                  <StyledTableCell colSpan={6} align="center">
+                    No workshops found
+                  </StyledTableCell>
+                </StyledTableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Container>
+      <Footer />
     </div>
   );
 }

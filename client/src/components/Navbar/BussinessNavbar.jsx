@@ -8,14 +8,15 @@ import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
-import Tooltip from '@mui/material/Tooltip';
+// import Tooltip from '@mui/material/Tooltip'; // Removed as not used
 import MenuItem from '@mui/material/MenuItem';
 import Logo from "../../assets/localBizlogo.png";
 import { Link, useLocation } from "react-router-dom";
-import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
-import SmsOutlinedIcon from '@mui/icons-material/SmsOutlined';
+// import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined'; // Removed as not used
+// import SmsOutlinedIcon from '@mui/icons-material/SmsOutlined'; // Removed as not used
 import { InputAdornment, TextField } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import { baseUrl } from '../../baseUrl';
 
 const pages = [
     { label: 'Home', path: '/bussiness/home' },
@@ -25,17 +26,21 @@ const pages = [
         submenu: [
             { label: 'Events', path: '/bussiness/ViewEvents' },
             { label: 'Trainings', path: '/bussiness/ViewTrainning' },
-            { label: 'Workshops', path: '/bussiness/ViewWorkShops' }
+            { label: 'WorkShops', path: '/bussiness/ViewWorkShops' },
         ]
     },
     { label: 'Community', path: '/bussiness/Community' }
 ];
 
+// Removed bussinessData prop - now relies solely on localStorage
 const BussinessNavbar = ({ onAvatarClick, searchTerm, onSearchChange }) => {
-    const bussinessdetails = JSON.parse(localStorage.getItem("bussinessDetails"));
+
+    // Retrieve business details directly from localStorage
+    const currentBussinessDetails = JSON.parse(localStorage.getItem("bussinessDetails"));
+    // console.log("sjgakgk", currentBussinessDetails); // Removed or commented out debug log
 
     const [anchorElNav, setAnchorElNav] = useState(null);
-    const [anchorElUser, setAnchorElUser] = useState(null);
+    const [anchorElUser, setAnchorElUser] = useState(null); // Declared but not used in this code
     const [activitiesAnchorEl, setActivitiesAnchorEl] = useState(null);
     const [mobileActivitiesAnchorEl, setMobileActivitiesAnchorEl] = useState(null);
 
@@ -43,7 +48,7 @@ const BussinessNavbar = ({ onAvatarClick, searchTerm, onSearchChange }) => {
         setAnchorElNav(event.currentTarget);
     };
 
-    const handleOpenUserMenu = (event) => {
+    const handleOpenUserMenu = (event) => { // Declared but not used
         setAnchorElUser(event.currentTarget);
     };
 
@@ -51,7 +56,7 @@ const BussinessNavbar = ({ onAvatarClick, searchTerm, onSearchChange }) => {
         setAnchorElNav(null);
     };
 
-    const handleCloseUserMenu = () => {
+    const handleCloseUserMenu = () => { // Declared but not used
         setAnchorElUser(null);
     };
 
@@ -75,7 +80,7 @@ const BussinessNavbar = ({ onAvatarClick, searchTerm, onSearchChange }) => {
         setMobileActivitiesAnchorEl(null);
     };
 
-    const location = useLocation();
+    const location = useLocation(); // Not explicitly used
 
     return (
         <AppBar position="static" sx={{ backgroundColor: 'transparent', boxShadow: "none" }}>
@@ -87,16 +92,22 @@ const BussinessNavbar = ({ onAvatarClick, searchTerm, onSearchChange }) => {
                 }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Link to="/bussiness/home">
-                            <Box component="img" src={Logo} alt='logo' sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+                            <Box
+                                component="img"
+                                src={Logo}
+                                alt='logo'
+                                sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, height: '40px' }} // Added height for better logo display
+                            />
                         </Link>
                     </Box>
 
-                    <Box sx={{ ml: "100px" }}>
+                    {/* Search Field */}
+                    <Box sx={{ ml: { md: "100px", xs: "0" }, mr: { md: "0", xs: "auto" } }}>
                         <TextField
                             variant="outlined"
                             placeholder="Search products..."
                             size="small"
-                            sx={{ width: 300 }}
+                            sx={{ width: { xs: 200, md: 300 } }} // Responsive width
                             value={searchTerm}
                             onChange={onSearchChange}
                             InputProps={{
@@ -110,7 +121,7 @@ const BussinessNavbar = ({ onAvatarClick, searchTerm, onSearchChange }) => {
                     </Box>
 
                     {/* Mobile Menu */}
-                    <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+                    <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' }, justifyContent: 'flex-end' }}>
                         <IconButton
                             size="large"
                             aria-label="account of current user"
@@ -143,11 +154,13 @@ const BussinessNavbar = ({ onAvatarClick, searchTerm, onSearchChange }) => {
                                             anchorEl={mobileActivitiesAnchorEl}
                                             open={Boolean(mobileActivitiesAnchorEl)}
                                             onClose={handleMobileActivitiesClose}
+                                            anchorOrigin={{ vertical: 'top', horizontal: 'right' }} // Positioning for mobile submenu
+                                            transformOrigin={{ vertical: 'top', horizontal: 'left' }}
                                         >
                                             {page.submenu.map((subItem) => (
                                                 <MenuItem
                                                     key={subItem.label}
-                                                    onClick={handleMobileActivitiesClose}
+                                                    onClick={() => { handleMobileActivitiesClose(); handleCloseNavMenu(); }} // Close both menus on click
                                                     component={Link}
                                                     to={subItem.path}
                                                     sx={{ color: '#384371' }}
@@ -173,9 +186,12 @@ const BussinessNavbar = ({ onAvatarClick, searchTerm, onSearchChange }) => {
                         </Menu>
                     </Box>
 
-                    <Link to='/bussiness/home'>
-                        <Box component="img" src={Logo} sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
-                    </Link>
+                    {/* Logo for Mobile (center aligned) */}
+                    <Box sx={{ display: { xs: 'flex', md: 'none' }, position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
+                        <Link to='/bussiness/home'>
+                            <Box component="img" src={Logo} alt='logo' sx={{ height: '40px' }} />
+                        </Link>
+                    </Box>
 
                     {/* Desktop Menu */}
                     <Box sx={{ ml: "200px", flexGrow: 1, display: { xs: 'none', md: 'flex' }, justifyContent: 'center', gap: "40px" }}>
@@ -253,26 +269,32 @@ const BussinessNavbar = ({ onAvatarClick, searchTerm, onSearchChange }) => {
                     </Box>
 
                     {/* Right side icons and avatar */}
-                    <Box display="flex" justifyContent="space-around" alignItems="center" sx={{ mr: "100px", flexGrow: 0, gap: "50px" }}>
-                        <Link to="/bussiness/ContactMsg">
+                    <Box display="flex" justifyContent="space-around" alignItems="center" sx={{ mr: { md: "100px", xs: "0" }, flexGrow: 0, gap: { xs: "10px", md: "30px" } }}>
+                        {/* <Link to="/bussiness/ContactMsg">
                             <IconButton>
                                 <SmsOutlinedIcon color="primary" sx={{ height: '24px' }} />
                             </IconButton>
-                        </Link>
-                        <NotificationsOutlinedIcon color="primary" sx={{ height: '24px' }} />
+                        </Link> */}
+                        {/* <NotificationsOutlinedIcon color="primary" sx={{ height: '24px' }} /> */}
 
-                        <Box display="flex" justifyContent="center" alignItems="center" sx={{ gap: "30px" }}>
-                            <Typography color="secondary">Hi, {bussinessdetails?.name}</Typography>
+                        <Box display="flex" justifyContent="center" alignItems="center" sx={{ gap: { xs: "10px", md: "30px" } }}>
+                            {/* Display name from localStorage */}
+                            <Typography color="secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                                Hi, {currentBussinessDetails?.name || 'Guest'}
+                            </Typography>
 
-                            {bussinessdetails?.profilePic ? (
+                            {/* Display avatar from localStorage data */}
+                            {currentBussinessDetails?.profilePic?.filename || currentBussinessDetails?.profilePic ? ( // Check for both nested filename and direct filename
                                 <Avatar
                                     onClick={onAvatarClick}
-                                    src={`http://localhost:4056/uploads/${bussinessdetails?.profilePic}`}
-                                    alt={bussinessdetails?.name}
+                                    // Prioritize nested filename, fallback to direct filename if profilePic is just a string
+                                    src={`${baseUrl}uploads/${currentBussinessDetails?.profilePic?.filename || currentBussinessDetails?.profilePic}`}
+                                    alt={currentBussinessDetails?.name || 'User'}
+                                    sx={{ cursor: 'pointer' }}
                                 />
                             ) : (
-                                <Avatar onClick={onAvatarClick}>
-                                    {bussinessdetails?.name?.charAt(0)}
+                                <Avatar onClick={onAvatarClick} sx={{ cursor: 'pointer' }}>
+                                    {currentBussinessDetails?.name?.charAt(0) || 'U'}
                                 </Avatar>
                             )}
                         </Box>

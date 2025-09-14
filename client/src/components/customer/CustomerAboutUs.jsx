@@ -6,7 +6,6 @@ import vission from "../../assets/vission.png"
 import Footer from '../Footer/Footer';
 import CustomerNavbar from '../Navbar/CustomerNavbar';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import CloseIcon from '@mui/icons-material/Close';
 import Backdrop from '@mui/material/Backdrop';
@@ -17,6 +16,7 @@ import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import { baseUrl } from '../../baseUrl';
+import axiosInstance from '../../api/axiosInstance';
 
 const CustomerAboutUs = () => {
     const styleLogout = {
@@ -35,11 +35,7 @@ const CustomerAboutUs = () => {
     const fetchUser = async () => {
         const token = localStorage.getItem('token');
         const decoded = jwtDecode(token);
-        const customer = await axios.get(`${baseUrl}customer/getcustomer/${decoded.id}`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
+        const customer = await axiosInstance.get(`/customer/getcustomer/${decoded.id}`);
         const customerDatas = localStorage.setItem("customerDetails",
             JSON.stringify(customer.data.customer));
         setCustomer(customer.data.customer);
@@ -164,11 +160,7 @@ const CustomerAboutUs = () => {
         formData.append('profilePic', data.profilePic);
 
         const token = localStorage.getItem("token");
-        const updated = await axios.post(`${baseUrl}customer/editcustomer/${customer._id}`, formData, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
+        const updated = await axiosInstance.post(`/customer/editcustomer/${customer._id}`, formData);
 
         if (updated.data.message === "Customer updated successfully.") {
             toast.success("Customer updated successfully.")
@@ -190,7 +182,7 @@ const CustomerAboutUs = () => {
             profilePic: null,
         });
         setImagePreview(customer?.profilePic?.filename
-            ? `http://localhost:4056/uploads/${customer?.profilePic?.filename}`
+            ? `${baseUrl}uploads/${customer?.profilePic?.filename}`
             : null);
         setEditOpen(true);
     }
@@ -219,9 +211,9 @@ const CustomerAboutUs = () => {
                     <Box sx={{ position: 'absolute', top: "80px", right: '60px', zIndex: 5, width: "375px" }}>
                         <Card sx={{ Width: "375px", height: "490px", position: "relative", zIndex: -2 }}>
                             <Avatar sx={{ height: "146px", width: "146px", position: "absolute", top: "50px", left: "100px", zIndex: 2 }}
-                                src={`http://localhost:4056/uploads/${customer?.profilePic?.filename}`} alt={customer?.name}></Avatar>
+                                src={`${baseUrl}uploads/${customer?.profilePic?.filename}`} alt={customer?.name}></Avatar>
                             <Box sx={{ height: '132px', background: '#9B70D3', width: "100%", position: "relative" }}>
-                                <Box component="img" src={arrow} sx={{ position: "absolute", top: '25px', left: "25px" }}></Box>
+                                {/* <Box component="img" src={arrow} sx={{ position: "absolute", top: '25px', left: "25px" }}></Box> */}
                             </Box>
                             <Box display={"flex"} flexDirection={"column"} alignItems={"center"} p={2} sx={{ gap: "15px", mt: "90px" }}>
                                 <Typography variant='h5' color='secondary' sx={{ fontSize: "24px", fontWeight: "400" }}>{customer.name}</Typography>
@@ -237,7 +229,7 @@ const CustomerAboutUs = () => {
                     </Box>
                 </ClickAwayListener>
             )}
-            
+
             <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"} sx={{ height: "706px", background: "#F6F7F9", padding: "0px 100px" }}>
                 <Box display={"flex"} flexDirection={"column"} alignItems={"start"} justifyContent={"center"} sx={{ gap: '30px' }}>
                     <Typography variant='h5' color='parimary' sx={{ fontSize: '18px', fontWeight: "400" }}>About Us</Typography>
@@ -248,35 +240,35 @@ const CustomerAboutUs = () => {
                     <Box component="img" src={aboutframe} sx={{ height: '486px', width: "auto" }}></Box>
                 </Box>
             </Box>
-            
+
             <Box display={"flex"} alignItems={"center"} justifyContent={"center"} gap={25}>
-                <Box display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"} sx={{ height: '292',width:"auto", border: "1px solid black", borderRadius: '20px', padding:"20px",margin:"80px"}}>
+                <Box display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"} sx={{ height: '292', width: "auto", border: "1px solid black", borderRadius: '20px', padding: "20px", margin: "80px" }}>
                     <Box component="img" src={mission} sx={{ height: '106px', width: "88px" }}></Box>
                     <Typography gutterBottom color='secondary' variant="h5" component="div">
                         Mission
                     </Typography>
-                    <Typography variant="p" color='primary' sx={{textAlign:'center'}}>
+                    <Typography variant="p" color='primary' sx={{ textAlign: 'center' }}>
                         To empower local businesses and consumers through a smart, <br /> user-friendly platform that fosters lasting local relationships.
                     </Typography>
                 </Box>
-                
-                <Box display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"} sx={{ height: '292',width:"auto", border: "1px solid black", borderRadius: '20px', padding:"20px",margin:"80px"}}>
+
+                <Box display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"} sx={{ height: '292', width: "auto", border: "1px solid black", borderRadius: '20px', padding: "20px", margin: "80px" }}>
                     <Box component="img" src={vission} sx={{ height: '106px', width: "88px" }}></Box>
                     <Typography gutterBottom color='secondary' variant="h5" component="div">
                         Vission
                     </Typography>
-                    <Typography variant="p" color='primary' sx={{textAlign:'center'}}>
-                    To become the go-to digital hub for local business discovery,  <br />driving community connection and sustainable economic growth <br />worldwide.
+                    <Typography variant="p" color='primary' sx={{ textAlign: 'center' }}>
+                        To become the go-to digital hub for local business discovery,  <br />driving community connection and sustainable economic growth <br />worldwide.
                     </Typography>
                 </Box>
             </Box>
-            
+
             {/* why us */}
-            <Box sx={{ width:'100%',mb:"100px"}} display={"flex"} justifyContent={"center"} alignItems={"center"}>
-                <Box sx={{ gap:"20px" }} display={"flex"} alignItems={"start"} flexDirection={"column"}>
-                    <Typography variant='h3' color='secondary' sx={{ fontSize: "32px", fontWeight: "600",marginTop:'20px' }}>Why Choose Skill Swap?</Typography>
-                    <Box display={"flex"} alignItems={"start"} flexDirection={"column"} sx={{marginLeft:'10px',gap:'25px'}}>
-                        <Box display={"flex"} alignItems={"start"} flexDirection={"column"} sx={{gap:'25px'}}>
+            <Box sx={{ width: '100%', mb: "100px" }} display={"flex"} justifyContent={"center"} alignItems={"center"}>
+                <Box sx={{ gap: "20px" }} display={"flex"} alignItems={"start"} flexDirection={"column"}>
+                    <Typography variant='h3' color='secondary' sx={{ fontSize: "32px", fontWeight: "600", marginTop: '20px' }}>Why Choose Skill Swap?</Typography>
+                    <Box display={"flex"} alignItems={"start"} flexDirection={"column"} sx={{ marginLeft: '10px', gap: '25px' }}>
+                        <Box display={"flex"} alignItems={"start"} flexDirection={"column"} sx={{ gap: '25px' }}>
                             <Typography variant='p' color='primary' sx={{ fontSize: "18px", fontWeight: "500" }}>1.All-in-One Platform – Discover, connect, and engage with local businesses—all from one easy-to-use interface.</Typography>
                             <Typography variant='p' color='primary' sx={{ fontSize: "18px", fontWeight: "500" }}>2.Boost Local Visibility – We help small businesses grow with powerful promotion tools and verified listings.</Typography>
                             <Typography variant='p' color='primary' sx={{ fontSize: "18px", fontWeight: "500" }}>3.Location-Based Discovery – Find what you need, when you need it, right in your neighborhood.</Typography>
@@ -286,7 +278,7 @@ const CustomerAboutUs = () => {
                     </Box>
                 </Box>
             </Box>
-            
+
             <Footer />
 
             {/* logout modal */}

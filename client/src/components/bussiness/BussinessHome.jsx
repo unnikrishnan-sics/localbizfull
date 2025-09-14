@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { Box, Button, Fade, Grid, Modal, Typography, Container, Stack, Card, Avatar } from '@mui/material';
 import Footer from '../Footer/Footer';
 import BussinessNavbar from '../Navbar/BussinessNavbar';
@@ -7,35 +7,43 @@ import { Link, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import CloseIcon from '@mui/icons-material/Close';
 import Backdrop from '@mui/material/Backdrop';
-import axios from 'axios';
 import arrow from "../../assets/arrow.png";
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import { ClickAwayListener } from '@mui/material';
 import { baseUrl } from '../../baseUrl';
+import axiosInstance from '../../api/axiosInstance';
 
 const BussinessHome = () => {
-    const [bussinessdetails, setBussinessdetails] = useState(
+    const textFieldStyle = { height: "65px", width: "360px", display: "flex", flexDirection: "column", justifyContent: "start", position: "relative" };
+
+    // Use a single state for business details, initialized from localStorage
+    const [bussiness, setBussiness] = useState(
         JSON.parse(localStorage.getItem("bussinessDetails")) || {}
     );
-    const token = localStorage.getItem("token");
+    console.log(bussiness);
+    
     const [products, setProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const navigate = useNavigate();
+    const [analyticsData, setAnalyticsData] = useState(null);
+    const [totalProductsCount, setTotalProductsCount] = useState(0);
 
+    // Initial data fetching when component mounts
     useEffect(() => {
+        fetchUser(); // This will update the 'bussiness' state
         fetchProducts();
-        fetchUser();
+        fetchAnalytics();
     }, []);
 
+    // Effect to filter products based on search term
     useEffect(() => {
-        // Filter products based on search term whenever products or searchTerm changes
         if (searchTerm.trim() === "") {
             setFilteredProducts(products);
         } else {
-            const filtered = products.filter(product => 
+            const filtered = products.filter(product =>
                 product.productName.toLowerCase().includes(searchTerm.toLowerCase())
             );
             setFilteredProducts(filtered);
@@ -44,28 +52,40 @@ const BussinessHome = () => {
 
     const fetchProducts = async () => {
         try {
-            const response = await axios.get(`${baseUrl}bussiness/viewproduct`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                }
-            });
+            // Always read from localStorage for up-to-date business details here
+            const currentBussinessDetails = JSON.parse(localStorage.getItem("bussinessDetails"));
+            if (!currentBussinessDetails || !currentBussinessDetails._id) {
+                navigate('/bussiness/login');
+                return;
+            }
+
+            const response = await axiosInstance.get(`${baseUrl}bussiness/viewproduct`);
 
             if (response.data && response.data.data) {
                 const filteredProducts = response.data.data.filter(
-                    product => product && product.bussinessId === bussinessdetails._id
+                    product => product && product.bussinessId === currentBussinessDetails._id
                 );
                 setProducts(filteredProducts || []);
                 setFilteredProducts(filteredProducts || []);
+                setTotalProductsCount(filteredProducts.length);
             } else {
                 setProducts([]);
                 setFilteredProducts([]);
+                setTotalProductsCount(0);
             }
         } catch (error) {
             console.error("Error fetching products:", error);
-            toast.error("Error fetching products");
+            if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+                toast.error("Session expired. Please log in again.");
+                localStorage.removeItem("token");
+                localStorage.removeItem("bussinessDetails");
+                navigate('/bussiness/login');
+            } else {
+                toast.error("Error fetching products");
+            }
             setProducts([]);
             setFilteredProducts([]);
+            setTotalProductsCount(0);
         }
     };
 
@@ -81,7 +101,6 @@ const BussinessHome = () => {
         p: 4,
     };
 
-    const [bussiness, setBussiness] = useState({});
     const fetchUser = async () => {
         try {
             const token = localStorage.getItem('token');
@@ -89,24 +108,49 @@ const BussinessHome = () => {
                 navigate('/bussiness/login');
                 return;
             }
-            
+
             const decoded = jwtDecode(token);
-            const response = await axios.get(`${baseUrl}bussiness/getbussiness/${decoded.id}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            
+            const response = await axiosInstance.get(`${baseUrl}bussiness/getbussiness/${decoded.id}`);
+
             if (response.data && response.data.bussiness) {
+                // Update localStorage AND the 'bussiness' state
                 localStorage.setItem("bussinessDetails", JSON.stringify(response.data.bussiness));
                 setBussiness(response.data.bussiness);
-                setBussinessdetails(response.data.bussiness);
             }
         } catch (error) {
             console.error("Error fetching business details:", error);
-            toast.error("Error fetching business details");
+            if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+                toast.error("Session expired. Please log in again.");
+                localStorage.removeItem("token");
+                localStorage.removeItem("bussinessDetails");
+                navigate('/bussiness/login');
+            } else {
+                toast.error("Error fetching business details");
+            }
         }
     }
+
+    const fetchAnalytics = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                navigate('/bussiness/login');
+                return;
+            }
+            const currentBussinessDetails = JSON.parse(localStorage.getItem("bussinessDetails"));
+            if (!currentBussinessDetails || !currentBussinessDetails._id) {
+                return;
+            }
+            const response = await axiosInstance.get(`${baseUrl}api/business/analytics/${currentBussinessDetails._id}`);
+
+            if (response.data && response.data.data) {
+                setAnalyticsData(response.data.data);
+            }
+        } catch (error) {
+            console.error("Error fetching business analytics:", error);
+            // toast.error("Error fetching business analytics"); // Keep commented if you don't want to show toast for analytics
+        }
+    };
 
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
@@ -118,9 +162,6 @@ const BussinessHome = () => {
         navigate('/bussiness/login');
         toast.success("You have been logged out");
     }
-
-    // for profile 
-    const textFieldStyle = { height: "65px", width: "360px", display: "flex", flexDirection: "column", justifyContent: "start", position: "relative" };
 
     const styleEditBox = {
         position: 'absolute',
@@ -135,7 +176,7 @@ const BussinessHome = () => {
         p: 4,
     };
 
-    const [data, setData] = useState({
+    const [profileData, setProfileData] = useState({
         name: "",
         email: "",
         address: "",
@@ -143,113 +184,135 @@ const BussinessHome = () => {
         profilePic: null
     });
 
-    const [error, setError] = useState({})
-    const handleDataChange = (e) => {
-        setError((prevError) => ({
+    const [profileError, setProfileError] = useState({});
+    const [imagePreview, setImagePreview] = useState(null);
+
+    const handleProfileDataChange = (e) => {
+        setProfileError((prevError) => ({
             ...prevError,
             [e.target.name]: ""
         }));
         const { name, value } = e.target;
-        setData(prev => {
+        setProfileData(prev => {
             return { ...prev, [name]: value }
         })
     };
 
-    const [imagePreview, setImagePreview] = useState(null);
-
-    const handleFileUpload = (e) => {
+    const handleProfileFileUpload = (e) => {
+        setProfileError((prevError) => ({ ...prevError, profilePic: "" }));
         const file = e.target.files[0];
         if (file) {
-            setData(prev => {
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+            if (!allowedTypes.includes(file.type)) {
+                setProfileError((prevError) => ({ ...prevError, profilePic: "Only JPG, PNG, GIF files are allowed." }));
+                setImagePreview(null);
+                setProfileData(prev => ({ ...prev, profilePic: null }));
+                return;
+            }
+            const maxSize = 5 * 1024 * 1024; // 5 MB
+            if (file.size > maxSize) {
+                setProfileError((prevError) => ({ ...prevError, profilePic: "File size exceeds 5MB limit." }));
+                setImagePreview(null);
+                setProfileData(prev => ({ ...prev, profilePic: null }));
+                return;
+            }
+
+            setProfileData(prev => {
                 return { ...prev, profilePic: file }
             });
             const objectURL = URL.createObjectURL(file);
             setImagePreview(objectURL);
+        } else {
+            // If user cancels file selection, revert to current business profile picture
+            // Note: bussiness.profilePic holds the filename string, not an object here
+            setImagePreview(bussiness?.profilePic?.filename ? `${baseUrl}uploads/${bussiness.profilePic?.filename}` : null);
+            setProfileData(prev => ({ ...prev, profilePic: null }));
         }
     };
 
-    const validation = () => {
+    const profileValidation = () => {
         let isValid = true;
         let errorMessage = {};
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!data.name.trim()) {
-            errorMessage.name = "Name should not be empty"
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        const nameRegex = /^[a-zA-Z\s]+$/;
+
+        if (!profileData.name.trim()) {
+            errorMessage.name = "Name should not be empty";
             isValid = false;
-        }
-        else if (data.name.length < 3 || data.name.length > 20) {
-            errorMessage.name = "Name should be 3 to 20 char length"
+        } else if (profileData.name.length < 3 || profileData.name.length > 20) {
+            errorMessage.name = "Name should be 3 to 20 characters long";
             isValid = false;
-        }
-        if (!data.email.trim()) {
-            errorMessage.email = "Email should not be empty";
-            isValid = false;
-        }
-        else if (!emailRegex.test(data.email)) {
-            errorMessage.email = "Invalid email address";
+        } else if (!nameRegex.test(profileData.name)) {
+            errorMessage.name = "Name should only contain alphabets and spaces";
             isValid = false;
         }
 
-        if (data.address.length < 10) {
-            errorMessage.address = "Address should be 10 char length"
+        if (!profileData.email.trim()) {
+            errorMessage.email = "Email address should not be empty";
             isValid = false;
-        }
-        else if (!data.address.trim()) {
-            errorMessage.address = "Address should not be empty"
-            isValid = false;
-        }
-        if (!data.phone) {
-            errorMessage.phone = "Phone should not be empty"
-            isValid = false;
-        }
-        else if (!/^\d{10}$/.test(data.phone)) {
-            errorMessage.phone = "Phone should be exactly 10 digits and contain only numbers";
+        } else if (!emailRegex.test(profileData.email)) {
+            errorMessage.email = "Invalid email address format (e.g., example@domain.com)";
             isValid = false;
         }
 
-        setError(errorMessage);
+        if (!profileData.address.trim()) {
+            errorMessage.address = "Address should not be empty";
+            isValid = false;
+        } else if (profileData.address.length < 10) {
+            errorMessage.address = "Address should be at least 10 characters long";
+            isValid = false;
+        }
+
+        if (!profileData.phone) {
+            errorMessage.phone = "Phone number should not be empty";
+            isValid = false;
+        } else if (!/^\d{10}$/.test(profileData.phone)) {
+            errorMessage.phone = "Phone number must be exactly 10 digits and contain only numbers";
+            isValid = false;
+        }
+
+        setProfileError(errorMessage);
         return isValid;
     };
 
-    const handleSubmit = async (e) => {
-        const isValid = validation();
+    const handleProfileSubmit = async (e) => {
+        e.preventDefault();
+
+        const isValid = profileValidation();
         if (!isValid) {
+            toast.error("Please correct the errors in your profile details.");
             return;
         }
-        e.preventDefault();
+
         const formData = new FormData();
-        formData.append('name', data.name);
-        formData.append('email', data.email);
-        formData.append('address', data.address);
-        formData.append('phone', data.phone);
-        if (data.profilePic) {
-            formData.append('profilePic', data.profilePic);
+        formData.append('name', profileData.name);
+        formData.append('email', profileData.email);
+        formData.append('address', profileData.address);
+        formData.append('phone', profileData.phone);
+        if (profileData.profilePic) {
+            formData.append('profilePic', profileData.profilePic);
         }
 
-        const token = localStorage.getItem("token");
         try {
-            const updated = await axios.post(`${baseUrl}bussiness/editBussiness/${bussiness._id}`, formData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            
+            const updated = await axiosInstance.post(`${baseUrl}bussiness/editBussiness/${bussiness._id}`, formData);
+
             if (updated.data && updated.data.message === "bussiness updated successfully.") {
-                toast.success("Business updated successfully.")
+                toast.success("Business profile updated successfully!");
                 setEditOpen(false);
-                fetchUser();
+                fetchUser(); // Re-fetch user data to update the UI and localStorage
             }
             else {
-                toast.error("Error in updating Business profile")
+                toast.error("Error in updating Business profile");
             }
         } catch (error) {
             console.error("Error updating business:", error);
-            toast.error("Error updating business profile");
+            toast.error(error.response?.data?.message || "Error updating business profile");
         }
     }
 
     const [editOpen, setEditOpen] = React.useState(false);
     const handleEditOpen = () => {
-        setData({
+        setProfileData({
             name: bussiness.name || "",
             email: bussiness.email || "",
             address: bussiness.address || "",
@@ -257,9 +320,11 @@ const BussinessHome = () => {
             profilePic: null,
         });
 
+        // Use bussiness.profilePic directly here as it's the filename string
         setImagePreview(bussiness?.profilePic
-            ? `${baseUrl}uploads/${bussiness?.profilePic}`
+            ? `${baseUrl}uploads/${bussiness.profilePic}`
             : null);
+        setProfileError({});
         setEditOpen(true);
     }
 
@@ -268,23 +333,16 @@ const BussinessHome = () => {
     const [showProfileCard, setShowProfileCard] = useState(false);
     const onAvatarClick = () => setShowProfileCard(prev => !prev);
 
-    useEffect(() => {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            navigate("/bussiness/login");
-            return;
-        }
-    }, [navigate]);
-
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
     };
 
     return (
         <>
-            <BussinessNavbar 
-                bussinessdetails={bussiness} 
-                onAvatarClick={onAvatarClick} 
+            {/* Pass the 'bussiness' state to BussinessNavbar as 'bussinessData' */}
+            <BussinessNavbar
+                bussinessData={bussiness}
+                onAvatarClick={onAvatarClick}
                 searchTerm={searchTerm}
                 onSearchChange={handleSearchChange}
             />
@@ -293,11 +351,12 @@ const BussinessHome = () => {
                 <ClickAwayListener onClickAway={() => setShowProfileCard(false)}>
                     <Box sx={{ position: 'absolute', top: "80px", right: '60px', zIndex: 5, width: "375px" }}>
                         <Card sx={{ Width: "375px", height: "490px", position: "relative", zIndex: -2 }}>
+                            {/* Corrected src for the profile card Avatar */}
                             <Avatar sx={{ height: "146px", width: "146px", position: "absolute", top: "50px", left: "100px", zIndex: 2 }}
-                                src={bussiness?.profilePic ? `${baseUrl}uploads/${bussiness?.profilePic}` : ""} 
+                                src={bussiness?.profilePic?.filename ? `${baseUrl}uploads/${bussiness?.profilePic?.filename}` : "" || bussiness?.profilePic ? `${baseUrl}uploads/${bussiness?.profilePic.filename}` : ""}
                                 alt={bussiness?.name || "Business"}></Avatar>
                             <Box sx={{ height: '132px', background: '#9B70D3', width: "100%", position: "relative" }}>
-                                <Box component="img" src={arrow} sx={{ position: "absolute", top: '25px', left: "25px" }}></Box>
+                                {/* <Box component="img" src={arrow} sx={{ position: "absolute", top: '25px', left: "25px" }} alt="arrow icon"></Box> */}
                             </Box>
                             <Box display={"flex"} flexDirection={"column"} alignItems={"center"} p={2} sx={{ gap: "15px", mt: "90px" }}>
                                 <Typography variant='h5' color='secondary' sx={{ fontSize: "24px", fontWeight: "400" }}>{bussiness.name || "Business"}</Typography>
@@ -315,7 +374,7 @@ const BussinessHome = () => {
             )}
 
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '20px 75px' }}>
-                <Typography variant='p' sx={{ fontSize: "24px", fontWeight: "400", color: "black" }}>View Products</Typography>
+                <Typography variant='p' sx={{ fontSize: "24px", fontWeight: "400", color: "black" }}>Your Products</Typography>
                 <Link to='/bussiness/addproduct'>
                     <Button
                         variant="contained"
@@ -325,6 +384,26 @@ const BussinessHome = () => {
                         Add Product
                     </Button>
                 </Link>
+            </Box>
+
+            {/* Business Analytics Section with Total Products Card */}
+            <Box sx={{
+                border: "1px solid #e0e0e0",
+                borderRadius: "15px",
+                margin: "20px 75px",
+                padding: "20px",
+                mt: 4,
+                boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.05)"
+            }}>
+                <Typography variant='h5' sx={{ fontSize: "24px", fontWeight: "600", color: "black", mb: 2 }}>Business Analytics</Typography>
+                <Grid container spacing={3}>
+                    <Grid item xs={12} sm={6} md={4}>
+                        <Card sx={{ p: 3, bgcolor: '#e8f5e9', borderRadius: '10px', boxShadow: 'none' }}>
+                            <Typography variant='h6' sx={{ color: '#388e3c', fontWeight: 'bold' }}>Total Products</Typography>
+                            <Typography variant='h3' sx={{ color: '#388e3c', mt: 1 }}>{totalProductsCount}</Typography>
+                        </Card>
+                    </Grid>
+                </Grid>
             </Box>
 
             <Box sx={{
@@ -388,19 +467,17 @@ const BussinessHome = () => {
                                                 flexDirection: { xs: 'column', sm: 'row' }
                                             }}
                                         >
-                                            {item.photo && item.photo.filename && (
-                                                <Box
-                                                    component="img"
-                                                    src={`${baseUrl}uploads/${item.photo.filename}`}
-                                                    sx={{
-                                                        width: "100px",
-                                                        height: "100px",
-                                                        objectFit: 'cover',
-                                                        borderRadius: '8px'
-                                                    }}
-                                                    alt={item.productName || "Product"}
-                                                />
-                                            )}
+                                            <Box
+                                                component="img"
+                                                src={item.photo?.filename ? `${baseUrl}uploads/${item.photo.filename}` : "https://via.placeholder.com/100"}
+                                                sx={{
+                                                    width: "100px",
+                                                    height: "100px",
+                                                    objectFit: 'cover',
+                                                    borderRadius: '8px'
+                                                }}
+                                                alt={item.productName || "Product"}
+                                            />
                                             <Box
                                                 sx={{
                                                     display: 'flex',
@@ -431,7 +508,7 @@ const BussinessHome = () => {
                                                     <Typography variant='p' sx={{ fontSize: "16px", fontWeight: "500", color: "black" }}>Stock:</Typography>
                                                     <Typography variant='p' sx={{ fontSize: "16px", fontWeight: "400", color: "black" }}>{item.stockavailable || "0"}</Typography>
                                                 </Box>
-                                                <Box
+                                                {/* <Box
                                                     sx={{
                                                         display: 'flex',
                                                         justifyContent: 'space-between',
@@ -441,7 +518,7 @@ const BussinessHome = () => {
                                                 >
                                                     <Typography variant='p' sx={{ fontSize: "16px", fontWeight: "500", color: "black" }}>Special Offer:</Typography>
                                                     <Typography variant='p' sx={{ fontSize: "16px", fontWeight: "400", color: "black" }}>{item.specialOffer ? "Yes" : "No"}</Typography>
-                                                </Box>
+                                                </Box> */}
                                                 <Box
                                                     sx={{
                                                         display: 'flex',
@@ -538,7 +615,7 @@ const BussinessHome = () => {
                 </Modal>
             </div>
 
-            {/* edit modal */}
+            {/* edit modal (for profile) */}
             <div>
                 <Modal
                     aria-labelledby="transition-modal-title"
@@ -568,13 +645,14 @@ const BussinessHome = () => {
                                                 type="file"
                                                 id="profile-upload"
                                                 accept="image/*"
-                                                onChange={handleFileUpload}
+                                                onChange={handleProfileFileUpload}
                                                 style={{ display: "none" }}
                                             />
                                             <label htmlFor="profile-upload" style={{ cursor: "pointer", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "15px" }}>
-                                                <Box component="img" src={imagePreview ? imagePreview : null} alt='profilepic' sx={{ width: "150px", height: "150px", borderRadius: "50%" }}></Box>
+                                                <Box component="img" src={imagePreview || 'https://via.placeholder.com/150'} alt='profilepic' sx={{ width: "150px", height: "150px", borderRadius: "50%" }}></Box>
                                                 {imagePreview ? <Typography></Typography> : <Typography variant='p' color='primary' sx={{ fontSize: "12px", fontWeight: "500" }}>+ Add image</Typography>}
                                             </label>
+                                            {profileError.profilePic && <span style={{ color: 'red', fontSize: '12px' }}>{profileError.profilePic}</span>}
                                         </Stack>
                                     </Box>
                                     <Box sx={{ display: "flex", justifyContent: 'center', alignItems: "start", gap: "30px", height: "154px", flexDirection: "column", marginTop: '30px' }}>
@@ -582,48 +660,50 @@ const BussinessHome = () => {
                                             <div style={textFieldStyle}>
                                                 <label>Name</label>
                                                 <input style={{ height: "40px", borderRadius: "8px", border: " 1px solid #CCCCCC", padding: '8px' }}
-                                                    onChange={handleDataChange}
+                                                    onChange={handleProfileDataChange}
                                                     name='name'
-                                                    value={data.name}
+                                                    value={profileData.name}
                                                     type='text'
                                                 />
-                                                {error.name && <span style={{ color: 'red', fontSize: '12px' }}>{error.name}</span>}
+                                                {profileError.name && <span style={{ color: 'red', fontSize: '12px' }}>{profileError.name}</span>}
                                             </div>
                                             <div style={textFieldStyle}>
                                                 <label>Address</label>
                                                 <input style={{ height: "40px", borderRadius: "8px", border: " 1px solid #CCCCCC", padding: '8px' }}
-                                                    onChange={handleDataChange}
+                                                    onChange={handleProfileDataChange}
                                                     name='address'
-                                                    value={data.address}
+                                                    value={profileData.address}
                                                 />
-                                                {error.address && <span style={{ color: 'red', fontSize: '12px' }}>{error.address}</span>}
+                                                {profileError.address && <span style={{ color: 'red', fontSize: '12px' }}>{profileError.address}</span>}
                                             </div>
                                         </Stack>
                                         <Stack direction={'row'} sx={{ display: "flex", gap: "15px" }}>
                                             <div style={textFieldStyle}>
                                                 <label>Email</label>
                                                 <input style={{ height: "40px", borderRadius: "8px", border: " 1px solid #CCCCCC", padding: '8px' }}
-                                                    onChange={handleDataChange}
+                                                    onChange={handleProfileDataChange}
                                                     name='email'
-                                                    value={data.email}
+                                                    value={profileData.email}
+                                                    type='email'
                                                 />
-                                                {error.email && <span style={{ color: 'red', fontSize: '12px' }}>{error.email}</span>}
+                                                {profileError.email && <span style={{ color: 'red', fontSize: '12px' }}>{profileError.email}</span>}
                                             </div>
                                             <div style={textFieldStyle}>
                                                 <label>Phone Number</label>
                                                 <input style={{ height: "40px", borderRadius: "8px", border: " 1px solid #CCCCCC", padding: '8px' }}
-                                                    onChange={handleDataChange}
+                                                    onChange={handleProfileDataChange}
                                                     name='phone'
-                                                    value={data.phone}
+                                                    value={profileData.phone}
                                                     type='tel'
+                                                    pattern="[0-9]{10}"
                                                 />
-                                                {error.phone && <span style={{ color: 'red', fontSize: '12px' }}>{error.phone}</span>}
+                                                {profileError.phone && <span style={{ color: 'red', fontSize: '12px' }}>{profileError.phone}</span>}
                                             </div>
                                         </Stack>
                                     </Box>
                                     <Box display={'flex'} alignItems={'center'} justifyContent={'center'} flexDirection={'column'} sx={{ width: '253px', height: "93px", gap: '10px' }}>
                                         <Button variant='contained' color='secondary' sx={{ borderRadius: "25px", marginTop: "20px", height: "40px", width: '200px', padding: '10px 35px' }}
-                                            onClick={handleSubmit}
+                                            onClick={handleProfileSubmit}
                                         >Confirm</Button>
                                     </Box>
                                 </Box>

@@ -1,5 +1,4 @@
 import { Box, Button, Container, Grid, Typography, Modal, Fade, Backdrop } from '@mui/material';
-import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
 import CloseIcon from '@mui/icons-material/Close';
 import React, { useEffect, useState } from 'react';
@@ -7,36 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import AdminSidebar from './AdminSideBar';
 import Footer from '../Footer/Footer';
-
-const dummyCommunityOrgs = [
-  {
-    id: 1,
-    organizationName: "Neighborhood Helpers",
-    name: "Emma Rivera",
-    email: "emma@helpers.org",
-    phone: "+1 555-0101",
-    type: "Non-Profit",
-    profileImage: "https://randomuser.me/api/portraits/women/45.jpg"
-  },
-  {
-    id: 2,
-    organizationName: "Urban Connect",
-    name: "Liam Bennett",
-    email: "liam@urbanconnect.com",
-    phone: "+1 555-0202",
-    type: "Civic Group",
-    profileImage: "https://randomuser.me/api/portraits/men/34.jpg"
-  },
-  {
-    id: 3,
-    organizationName: "Green Hearts",
-    name: "Ava Scott",
-    email: "ava@greenhearts.org",
-    phone: "+1 555-0303",
-    type: "Environmental",
-    profileImage: "https://randomuser.me/api/portraits/women/66.jpg"
-  }
-];
+import axiosInstance from '../../api/axiosInstance'; // Import axiosInstance
 
 const style = {
   position: 'absolute',
@@ -50,18 +20,13 @@ const style = {
   p: 4,
 };
 
-const AdminViewBusinessOwners = () => {
-  const [orgs, setOrgs] = useState([]);
+const AdminViewBussinessOwners = () => {
+  const [businessOwners, setBusinessOwners] = useState([]);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    setOrgs(dummyCommunityOrgs);
-  }, []);
-
-  const handleRemoveOrg = (id) => {
-    setOrgs(prev => prev.filter(org => org.id !== id));
-  };
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   const handleLogOut = () => {
     localStorage.removeItem('token');
@@ -69,8 +34,33 @@ const AdminViewBusinessOwners = () => {
     toast.success("You logged out successfully");
   };
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  useEffect(() => {
+    const fetchBusinessOwners = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          toast.error("Authentication token not found. Please log in.");
+          navigate('/admin/login');
+          return;
+        }
+
+        const response = await axiosInstance.get('/api/admin/businessowners', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setBusinessOwners(response.data.businessOwners || []);
+        // toast.success(response.data.message || "Business owners fetched successfully.");
+      } catch (error) {
+        console.error("Error fetching business owners:", error);
+        toast.error(error.response?.data?.message || "Failed to fetch business owners.");
+        setBusinessOwners([]); // Clear business owners on error
+      }
+    };
+
+    fetchBusinessOwners();
+  }, [navigate]);
 
   return (
     <>
@@ -88,40 +78,40 @@ const AdminViewBusinessOwners = () => {
           </Grid>
 
           <Grid item sx={{ p: 3 }}>
-            <Typography variant="h4" sx={{ textAlign: 'center', fontWeight: 100, fontSize: '2rem', fontFamily: 'Roboto, sans-serif', mb: 4 }}>Community Organizations</Typography>
+            <Typography variant="h4" sx={{ textAlign: 'center', fontWeight: 100, fontSize: '2rem', fontFamily: 'Roboto, sans-serif', mb: 4 }}>Business Owners</Typography>
             <Box sx={{ width: '100%', overflow: 'hidden', borderRadius: 2, boxShadow: 1 }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ backgroundColor: '#f5f5f5', borderBottom: '2px solid #9c27b0' }}>
                     <th style={headerStyle}>S No</th>
-                    <th style={headerStyle}>Profile</th>
-                    <th style={headerStyle}>Organization Name</th>
+                    {/* <th style={headerStyle}>Profile</th> */}
+                    <th style={headerStyle}>Business Name</th>
                     <th style={headerStyle}>Full Name</th>
                     <th style={headerStyle}>Email</th>
                     <th style={headerStyle}>Phone Number</th>
-                    <th style={headerStyle}>Organization Type</th>
-                    <th style={headerStyle}>Action</th>
+                    <th style={headerStyle}>Business Category</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {orgs.map((org, index) => (
-                    <tr key={org.id} style={{ borderBottom: '1px solid #e0e0e0' }}>
-                      <td style={cellStyle}>{index + 1}</td>
-                      <td style={cellStyle}>
-                        <Box sx={{ width: 40, height: 40, borderRadius: '50%', backgroundImage: `url(${org.profileImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
-                      </td>
-                      <td style={cellStyle}>{org.organizationName}</td>
-                      <td style={cellStyle}>{org.name}</td>
-                      <td style={cellStyle}>{org.email}</td>
-                      <td style={cellStyle}>{org.phone}</td>
-                      <td style={cellStyle}>{org.type}</td>
-                      <td style={cellStyle}>
-                        <Button variant="outlined" color="error" sx={{ minWidth: 0, p: 1, borderRadius: "50%", borderWidth: 3 }} onClick={() => handleRemoveOrg(org.id)}>
-                          <CancelOutlinedIcon />
-                        </Button>
-                      </td>
+                  {businessOwners.length > 0 ? (
+                    businessOwners.map((businessOwner, index) => (
+                      <tr key={businessOwner._id} style={{ borderBottom: '1px solid #e0e0e0' }}>
+                        <td style={cellStyle}>{index + 1}</td>
+                        {/* <td style={cellStyle}>
+                          <Box sx={{ width: 40, height: 40, borderRadius: '50%', backgroundImage: `url(${businessOwner.profilePic?.path || ''})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                        </td> */}
+                        <td style={cellStyle}>{businessOwner.bussinessName}</td>
+                        <td style={cellStyle}>{businessOwner.name}</td>
+                        <td style={cellStyle}>{businessOwner.email}</td>
+                        <td style={cellStyle}>{businessOwner.phone}</td>
+                        <td style={cellStyle}>{businessOwner.bussinessCategory}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>No business owners found or API not available.</td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </Box>
@@ -174,4 +164,4 @@ const cellStyle = {
   padding: '12px 16px'
 };
 
-export default AdminViewBusinessOwners;
+export default AdminViewBussinessOwners;
