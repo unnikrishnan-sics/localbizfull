@@ -614,8 +614,7 @@ function EditTrainning() {
         </Fade>
       </Modal>
       
-      <Footer />
-    </div>
+<Footer userRole="organiser" />    </div>
   );
 }
 

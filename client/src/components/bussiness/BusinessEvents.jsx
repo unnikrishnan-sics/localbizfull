@@ -541,7 +541,7 @@ console.log("busienss"+ bussiness);
           )}
         </Box>
       </Container>
-      <Footer />
+            <Footer userRole="bussiness" />
 
       {/* logout modal */}
       <div>

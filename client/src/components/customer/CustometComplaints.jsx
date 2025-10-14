@@ -542,8 +542,7 @@ const CustomerComplaints = () => {
         </Fade>
       </Modal>
 
-      <Footer />
-    </Box>
+<Footer userRole="customer" />    </Box>
   );
 };
 

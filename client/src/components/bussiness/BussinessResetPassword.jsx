@@ -81,7 +81,7 @@ const BussinessResetPassword = () => {
                     </Stack>
                 </Box>
             </Container>
-            <Footer />
+            <Footer userRole="bussiness" />
         </>
     )
 }

@@ -81,8 +81,7 @@ const CustomerResetPassword = () => {
                     </Stack>
                 </Box>
             </Container>
-            <Footer />
-        </>
+<Footer userRole="customer" />        </>
     )
 }
 

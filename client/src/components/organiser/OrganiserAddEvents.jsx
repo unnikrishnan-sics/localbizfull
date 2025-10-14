@@ -669,8 +669,7 @@ function OrganiserAddEvents() {
           </Box>
         </Fade>
       </Modal>
-      <Footer />
-    </div>
+<Footer userRole="organiser" />    </div>
   );
 }
 

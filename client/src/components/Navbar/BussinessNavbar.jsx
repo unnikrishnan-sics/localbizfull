@@ -105,7 +105,7 @@ const BussinessNavbar = ({ onAvatarClick, searchTerm, onSearchChange }) => {
                     <Box sx={{ ml: { md: "100px", xs: "0" }, mr: { md: "0", xs: "auto" } }}>
                         <TextField
                             variant="outlined"
-                            placeholder="Search products..."
+                            placeholder="Search your products..."
                             size="small"
                             sx={{ width: { xs: 200, md: 300 } }} // Responsive width
                             value={searchTerm}

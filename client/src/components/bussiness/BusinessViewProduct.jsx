@@ -484,7 +484,7 @@ const BusinessViewProduct = () => {
                 </Card>
             </Container>
 
-            <Footer />
+            <Footer userRole="bussiness" />
 
             {/* Delete Confirmation Modal */}
             <Modal

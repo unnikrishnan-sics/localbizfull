@@ -304,8 +304,7 @@ const OrganiserAboutUs = () => {
                 </Box>
             </Box>
 
-            <Footer />
-
+<Footer userRole="organiser" />
             {/* logout modal */}
             <div>
                 <Modal

@@ -451,8 +451,7 @@ const OrganiserViewProductList = () => {
         )}
       </Box>
 
-      <Footer />
-
+<Footer userRole="organiser" />
       {/* Logout Modal */}
       <Modal
         aria-labelledby="transition-modal-title"

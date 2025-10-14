@@ -60,8 +60,7 @@ const OrganiserForgotPassword = () => {
                     </Stack>
                 </Box>
             </Container>
-            <Footer />
-        </>
+<Footer userRole="organiser" />        </>
     )
 }
 

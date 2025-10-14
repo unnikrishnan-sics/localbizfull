@@ -724,8 +724,7 @@ function EditEvents() {
         onUpdate={handleProfileUpdate}
       />
       
-      <Footer />
-    </div>
+<Footer userRole="organiser" />    </div>
   );
 }
 

@@ -501,7 +501,7 @@ export default function ViewTrainning() {
           )}
         </Box>
       </Container>
-      <Footer />
+            <Footer userRole="bussiness" />
 
       {/* logout modal */}
       <div>

@@ -441,7 +441,7 @@ const navigate=useNavigate();
                 {message.error && <p style={{ textAlign: "center", color: "red", fontSize: "32px", fontWeight: "600" }}>{message.error}</p>}
 
             </Container>
-            <Footer />
+            <Footer userRole="bussiness" />
     </>
   )
 }

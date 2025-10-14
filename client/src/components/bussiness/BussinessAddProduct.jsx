@@ -728,7 +728,7 @@ const BussinessAddProduct = () => {
                     </Box>
                 </Box>
             </Container>
-            <Footer />
+            <Footer userRole="bussiness" />
 
             {/* logout modal */}
             <div>

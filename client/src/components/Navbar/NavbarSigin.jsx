@@ -18,7 +18,7 @@ import {Link} from "react-router-dom";
 
 const pages = [
     { label: 'Home', path: '/' },
-    { label: 'About', path: '/aboutus' },
+    { label: 'About', path: '/about' },
     { label: 'Contact', path: '/contact' }
 ];
 

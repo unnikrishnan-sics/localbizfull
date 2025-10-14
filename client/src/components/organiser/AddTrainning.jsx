@@ -589,8 +589,7 @@ function AddTrainingsForm() {
         </Fade>
       </Modal>
       
-      <Footer />
-    </div>
+<Footer userRole="organiser" />    </div>
   );
 }
 

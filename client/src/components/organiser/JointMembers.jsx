@@ -14,7 +14,8 @@ import {
   Stack,
   CircularProgress,
   Button,Typography ,Container ,
-  ClickAwayListener
+  ClickAwayListener,
+  Card
 } from '@mui/material';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
@@ -159,7 +160,7 @@ function JointMembers() {
         try {
             const token = localStorage.getItem('token');
             if (!token) {
-                navigate('/organisation/login');
+                navigate('/local_biz/organiser/login');
                 return;
             }
 
@@ -392,8 +393,7 @@ function JointMembers() {
                 <div style={containerStyle}>
                     <div style={noDataStyle}>Loading...</div>
                 </div>
-                <Footer />
-            </div>
+<Footer userRole="organiser" />            </div>
         );
     }
 
@@ -404,8 +404,7 @@ function JointMembers() {
                 <div style={containerStyle}>
                     <div style={errorStyle}>Error: {error}</div>
                 </div>
-                <Footer />
-            </div>
+<Footer userRole="organiser" />            </div>
         );
     }
 
@@ -416,8 +415,7 @@ function JointMembers() {
                 <div style={containerStyle}>
                     <div style={noDataStyle}>No user ID found to filter events. Please log in.</div>
                 </div>
-                <Footer />
-            </div>
+<Footer userRole="organiser" />            </div>
         );
     }
 
@@ -487,10 +485,10 @@ function JointMembers() {
             )}
 
             <div style={containerStyle}>
-                <h1 style={headerStyle}>Joint Members & Business Details</h1>
+                <h1 style={headerStyle}>Joined Members & Business Details</h1>
 
                 {joinedEvents.length === 0 ? (
-                    <p style={noDataStyle}>No joint events found for your community.</p>
+                    <p style={noDataStyle}>No joined events found for your community.</p>
                 ) : (
                     <div style={tableContainerStyle}>
                         <table style={tableStyle}>
@@ -555,8 +553,7 @@ function JointMembers() {
                 )}
             </div>
 
-            <Footer />
-
+<Footer userRole="organiser" />
             {/* Logout Modal */}
             <Modal
                 aria-labelledby="transition-modal-title"

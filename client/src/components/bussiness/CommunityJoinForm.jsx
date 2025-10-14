@@ -471,7 +471,7 @@ export default function CommunityJoinForm() {
           </Box>
         </Paper>
       </Container>
-      <Footer />
+            <Footer userRole="bussiness" />
 
       {/* Snackbar for notifications */}
       <Snackbar

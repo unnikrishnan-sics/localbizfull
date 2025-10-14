@@ -451,8 +451,7 @@ const CustomerBusinessProductList = () => {
                 )}
             </Box>
 
-            <Footer />
-
+<Footer userRole="customer" />
             {/* Logout Modal - Consistent with CustomerHome */}
             <Modal
                 aria-labelledby="transition-modal-title"

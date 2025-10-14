@@ -572,7 +572,6 @@ export default function OrganizerBussinessRequest() {
         </Fade>
       </Modal>
 
-      <Footer />
-    </>
+<Footer userRole="organiser" />    </>
   );
 }

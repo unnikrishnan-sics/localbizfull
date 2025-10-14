@@ -60,8 +60,7 @@ const CustomerForgotPassword = () => {
                     </Stack>
                 </Box>
             </Container>
-            <Footer />
-        </>
+<Footer userRole="customer" />        </>
     )
 }
 

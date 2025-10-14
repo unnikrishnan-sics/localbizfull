@@ -590,8 +590,7 @@ function AddWorkshopsForm() {
         </Fade>
       </Modal>
       
-      <Footer />
-    </div>
+<Footer userRole="organiser" />    </div>
   );
 }
 

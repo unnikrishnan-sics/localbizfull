@@ -18,12 +18,9 @@ import axiosInstance from '../../api/axiosInstance';
 const BussinessHome = () => {
     const textFieldStyle = { height: "65px", width: "360px", display: "flex", flexDirection: "column", justifyContent: "start", position: "relative" };
 
-    // Use a single state for business details, initialized from localStorage
     const [bussiness, setBussiness] = useState(
         JSON.parse(localStorage.getItem("bussinessDetails")) || {}
     );
-    console.log(bussiness);
-    
     const [products, setProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
@@ -31,14 +28,12 @@ const BussinessHome = () => {
     const [analyticsData, setAnalyticsData] = useState(null);
     const [totalProductsCount, setTotalProductsCount] = useState(0);
 
-    // Initial data fetching when component mounts
     useEffect(() => {
-        fetchUser(); // This will update the 'bussiness' state
+        fetchUser();
         fetchProducts();
         fetchAnalytics();
     }, []);
 
-    // Effect to filter products based on search term
     useEffect(() => {
         if (searchTerm.trim() === "") {
             setFilteredProducts(products);
@@ -52,7 +47,6 @@ const BussinessHome = () => {
 
     const fetchProducts = async () => {
         try {
-            // Always read from localStorage for up-to-date business details here
             const currentBussinessDetails = JSON.parse(localStorage.getItem("bussinessDetails"));
             if (!currentBussinessDetails || !currentBussinessDetails._id) {
                 navigate('/bussiness/login');
@@ -113,7 +107,6 @@ const BussinessHome = () => {
             const response = await axiosInstance.get(`${baseUrl}bussiness/getbussiness/${decoded.id}`);
 
             if (response.data && response.data.bussiness) {
-                // Update localStorage AND the 'bussiness' state
                 localStorage.setItem("bussinessDetails", JSON.stringify(response.data.bussiness));
                 setBussiness(response.data.bussiness);
             }
@@ -148,7 +141,6 @@ const BussinessHome = () => {
             }
         } catch (error) {
             console.error("Error fetching business analytics:", error);
-            // toast.error("Error fetching business analytics"); // Keep commented if you don't want to show toast for analytics
         }
     };
 
@@ -223,9 +215,7 @@ const BussinessHome = () => {
             const objectURL = URL.createObjectURL(file);
             setImagePreview(objectURL);
         } else {
-            // If user cancels file selection, revert to current business profile picture
-            // Note: bussiness.profilePic holds the filename string, not an object here
-            setImagePreview(bussiness?.profilePic?.filename ? `${baseUrl}uploads/${bussiness.profilePic?.filename}` : null);
+            setImagePreview(bussiness?.profilePic?.filename ? `${baseUrl}uploads/${bussiness.profilePic.filename}` : null);
             setProfileData(prev => ({ ...prev, profilePic: null }));
         }
     };
@@ -299,7 +289,7 @@ const BussinessHome = () => {
             if (updated.data && updated.data.message === "bussiness updated successfully.") {
                 toast.success("Business profile updated successfully!");
                 setEditOpen(false);
-                fetchUser(); // Re-fetch user data to update the UI and localStorage
+                fetchUser();
             }
             else {
                 toast.error("Error in updating Business profile");
@@ -320,9 +310,9 @@ const BussinessHome = () => {
             profilePic: null,
         });
 
-        // Use bussiness.profilePic directly here as it's the filename string
-        setImagePreview(bussiness?.profilePic
-            ? `${baseUrl}uploads/${bussiness.profilePic}`
+        // Corrected to consistently look for the 'filename' property
+        setImagePreview(bussiness?.profilePic?.filename
+            ? `${baseUrl}uploads/${bussiness.profilePic.filename}`
             : null);
         setProfileError({});
         setEditOpen(true);
@@ -339,7 +329,6 @@ const BussinessHome = () => {
 
     return (
         <>
-            {/* Pass the 'bussiness' state to BussinessNavbar as 'bussinessData' */}
             <BussinessNavbar
                 bussinessData={bussiness}
                 onAvatarClick={onAvatarClick}
@@ -351,12 +340,12 @@ const BussinessHome = () => {
                 <ClickAwayListener onClickAway={() => setShowProfileCard(false)}>
                     <Box sx={{ position: 'absolute', top: "80px", right: '60px', zIndex: 5, width: "375px" }}>
                         <Card sx={{ Width: "375px", height: "490px", position: "relative", zIndex: -2 }}>
-                            {/* Corrected src for the profile card Avatar */}
+                            {/* Corrected and simplified src for the profile card Avatar */}
                             <Avatar sx={{ height: "146px", width: "146px", position: "absolute", top: "50px", left: "100px", zIndex: 2 }}
-                                src={bussiness?.profilePic?.filename ? `${baseUrl}uploads/${bussiness?.profilePic?.filename}` : "" || bussiness?.profilePic ? `${baseUrl}uploads/${bussiness?.profilePic.filename}` : ""}
-                                alt={bussiness?.name || "Business"}></Avatar>
+                                src={bussiness?.profilePic?.filename ? `${baseUrl}uploads/${bussiness.profilePic.filename}` : ""}
+                                alt={bussiness?.name || "Business"}
+                            />
                             <Box sx={{ height: '132px', background: '#9B70D3', width: "100%", position: "relative" }}>
-                                {/* <Box component="img" src={arrow} sx={{ position: "absolute", top: '25px', left: "25px" }} alt="arrow icon"></Box> */}
                             </Box>
                             <Box display={"flex"} flexDirection={"column"} alignItems={"center"} p={2} sx={{ gap: "15px", mt: "90px" }}>
                                 <Typography variant='h5' color='secondary' sx={{ fontSize: "24px", fontWeight: "400" }}>{bussiness.name || "Business"}</Typography>
@@ -373,6 +362,8 @@ const BussinessHome = () => {
                 </ClickAwayListener>
             )}
 
+            {/* Other JSX for analytics, product list, modals, etc. remains the same */}
+            {/* ... Rest of your component ... */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '20px 75px' }}>
                 <Typography variant='p' sx={{ fontSize: "24px", fontWeight: "400", color: "black" }}>Your Products</Typography>
                 <Link to='/bussiness/addproduct'>
@@ -386,7 +377,6 @@ const BussinessHome = () => {
                 </Link>
             </Box>
 
-            {/* Business Analytics Section with Total Products Card */}
             <Box sx={{
                 border: "1px solid #e0e0e0",
                 borderRadius: "15px",
@@ -508,17 +498,7 @@ const BussinessHome = () => {
                                                     <Typography variant='p' sx={{ fontSize: "16px", fontWeight: "500", color: "black" }}>Stock:</Typography>
                                                     <Typography variant='p' sx={{ fontSize: "16px", fontWeight: "400", color: "black" }}>{item.stockavailable || "0"}</Typography>
                                                 </Box>
-                                                {/* <Box
-                                                    sx={{
-                                                        display: 'flex',
-                                                        justifyContent: 'space-between',
-                                                        alignItems: 'center',
-                                                        width: '100%'
-                                                    }}
-                                                >
-                                                    <Typography variant='p' sx={{ fontSize: "16px", fontWeight: "500", color: "black" }}>Special Offer:</Typography>
-                                                    <Typography variant='p' sx={{ fontSize: "16px", fontWeight: "400", color: "black" }}>{item.specialOffer ? "Yes" : "No"}</Typography>
-                                                </Box> */}
+                                                
                                                 <Box
                                                     sx={{
                                                         display: 'flex',
@@ -579,7 +559,7 @@ const BussinessHome = () => {
                     </Grid>
                 )}
             </Box>
-            <Footer />
+            <Footer userRole="bussiness" />
 
             {/* logout modal */}
             <div>

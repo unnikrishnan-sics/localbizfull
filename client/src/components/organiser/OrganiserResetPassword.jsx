@@ -81,8 +81,7 @@ const OrganiserResetPassword = () => {
                     </Stack>
                 </Box>
             </Container>
-            <Footer />
-        </>
+<Footer userRole="organiser" />        </>
     )
 }
 

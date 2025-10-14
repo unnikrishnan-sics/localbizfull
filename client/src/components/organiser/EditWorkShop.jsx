@@ -209,8 +209,7 @@ function EditWorkShop() {
           </Box>
         </StyledPaper>
       </Container>
-      <Footer />
-    </div>
+<Footer userRole="organiser" />    </div>
   );
 }
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import NavbarSigin from '../Navbar/NavbarSigin';
-import { Box, Button, Container, Typography, Fade, Slide } from '@mui/material';
+import { Box, Button, Container, Typography } from '@mui/material'; // Removed Fade, Slide
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import Footer from '../Footer/Footer';
@@ -8,12 +8,11 @@ import axios from "axios";
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { baseUrl } from '../../baseUrl';
-import { motion } from 'framer-motion';
 import styled from '@emotion/styled';
 import BusinessIcon from '@mui/icons-material/Business';
 import CorporateFareIcon from '@mui/icons-material/CorporateFare';
 
-// Styled components with corporate theme
+// Styled components with corporate theme (No changes here)
 const AuthContainer = styled(Container)({
   minHeight: 'calc(100vh - 128px)',
   display: 'flex',
@@ -149,104 +148,92 @@ const BusinessLogin = () => {
     <>
       <NavbarSigin siginupStyle={{ background: "white", boxShadow: "none" }} />
       
-      <Fade in={true} timeout={500}>
-        <AuthContainer>
-          <Slide in={true} direction="up" timeout={300}>
-            <AuthCard>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <AuthHeader>
-                  <CorporateFareIcon />
-                  <Typography variant="h5" component="h1" sx={{ 
-                    fontWeight: '600',
-                    color: '#1e293b',
-                    mb: 1
-                  }}>
-                    Business Portal
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: '#64748b' }}>
-                    Access your business account dashboard
-                  </Typography>
-                </AuthHeader>
-                
-                <form onSubmit={handleLogin}>
-                  <InputWrapper>
-                    <AuthLabel>Business Email</AuthLabel>
-                    <AuthInput
-                      onChange={handleInputChange}
-                      name="email"
-                      value={data.email}
-                      type="email"
-                      placeholder="your@business.com"
-                      required
-                    />
-                  </InputWrapper>
-                  
-                  <InputWrapper>
-                    <AuthLabel>Password</AuthLabel>
-                    <AuthInput
-                      onChange={handleInputChange}
-                      name="password"
-                      value={data.password}
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
-                      required
-                    />
-                    <PasswordToggle onClick={togglePasswordVisibility}>
-                      {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                    </PasswordToggle>
-                  </InputWrapper>
-                  
-                  <Box sx={{ textAlign: 'right', mb: 3 }}>
-                    <Link to="/bussiness/forgotpassword" style={{ 
-                      textDecoration: 'none',
-                      color: '#2563eb',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      '&:hover': {
-                        textDecoration: 'underline'
-                      }
-                    }}>
-                      Forgot password?
-                    </Link>
-                  </Box>
-                  
-                  <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
-                    <AuthButton
-                      fullWidth
-                      variant="contained"
-                      type="submit"
-                      disabled={isLoading}
-                      startIcon={<BusinessIcon />}
-                    >
-                      {isLoading ? 'Accessing Dashboard...' : 'Login to Dashboard'}
-                    </AuthButton>
-                  </motion.div>
-                </form>
-                
-                <Typography align="center" sx={{ mt: 3, color: '#64748b', fontSize: '14px' }}>
-                  Don't have a business account?{' '}
-                  <Link to="/bussiness/registration" style={{ 
-                    color: '#2563eb',
-                    fontWeight: '500',
-                    textDecoration: 'none',
-                    '&:hover': {
-                      textDecoration: 'underline'
-                    }
-                  }}>
-                    Register your business
-                  </Link>
-                </Typography>
-              </motion.div>
-            </AuthCard>
-          </Slide>
-        </AuthContainer>
-      </Fade>
+      <AuthContainer>
+        <AuthCard>
+          <AuthHeader>
+            <CorporateFareIcon />
+            <Typography variant="h5" component="h1" sx={{ 
+              fontWeight: '600',
+              color: '#1e293b',
+              mb: 1
+            }}>
+              Business Portal
+            </Typography>
+            <Typography variant="body2" sx={{ color: '#64748b' }}>
+              Access your business account dashboard
+            </Typography>
+          </AuthHeader>
+          
+          <form onSubmit={handleLogin}>
+            <InputWrapper>
+              <AuthLabel>Business Email</AuthLabel>
+              <AuthInput
+                onChange={handleInputChange}
+                name="email"
+                value={data.email}
+                type="email"
+                placeholder="your@business.com"
+                required
+              />
+            </InputWrapper>
+            
+            <InputWrapper>
+              <AuthLabel>Password</AuthLabel>
+              <AuthInput
+                onChange={handleInputChange}
+                name="password"
+                value={data.password}
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                required
+              />
+              <PasswordToggle onClick={togglePasswordVisibility}>
+                {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+              </PasswordToggle>
+            </InputWrapper>
+            
+            <Box sx={{ textAlign: 'right', mb: 3 }}>
+              <Link to="/bussiness/forgotpassword" style={{ 
+                textDecoration: 'none',
+                color: '#2563eb',
+                fontSize: '14px',
+                fontWeight: '500',
+                '&:hover': {
+                  textDecoration: 'underline'
+                }
+              }}>
+                Forgot password?
+              </Link>
+            </Box>
+            
+            <AuthButton
+              fullWidth
+              variant="contained"
+              type="submit"
+              disabled={isLoading}
+              startIcon={<BusinessIcon />}
+            >
+              {isLoading ? 'Accessing Dashboard...' : 'Login to Dashboard'}
+            </AuthButton>
+          </form>
+          
+          <Typography align="center" sx={{ mt: 3, color: '#64748b', fontSize: '14px' }}>
+            Don't have a business account?{' '}
+            <Link to="/bussiness/registration" style={{ 
+              color: '#2563eb',
+              fontWeight: '500',
+              textDecoration: 'none',
+              '&:hover': {
+                textDecoration: 'underline'
+              }
+            }}>
+              Register your business
+            </Link>
+          </Typography>
+        </AuthCard>
+      </AuthContainer>
       
-      <Footer />
+      <Footer userRole="bussiness" />
     </>
   );
 };

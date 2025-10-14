@@ -613,8 +613,7 @@ const CustomerProductView = () => {
                 )}
             </Container>
 
-            <Footer />
-
+<Footer userRole="customer" />
             {/* Logout Modal */}
             <Modal
               aria-labelledby="logout-modal-title"

@@ -511,7 +511,7 @@ export default function ViewWorkShop() {
           )}
         </Box>
       </Container>
-      <Footer />
+            <Footer userRole="bussiness" />
 
       {/* logout modal */}
       <div>

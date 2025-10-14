@@ -592,7 +592,7 @@ export default function BusinessContactMsg() {
           </Grid>
         </Container>
       </Box>
-      <Footer />
+            <Footer userRole="bussiness" />
 
       {/* Logout modal */}
       <Modal

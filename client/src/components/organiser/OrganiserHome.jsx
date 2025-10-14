@@ -815,8 +815,7 @@ const handleSubmit = async (e) => {
               </Box>
           </Fade>
       </Modal>
-      <Footer />
-    </div>
+<Footer userRole="organiser" />    </div>
   );
 }
 

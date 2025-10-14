@@ -683,8 +683,7 @@ const CustomerBusinessView = () => {
                     </Box>
                 </Fade>
             </Modal>
-            <Footer />
-        </>
+<Footer userRole="customer" />        </>
     );
 };
 

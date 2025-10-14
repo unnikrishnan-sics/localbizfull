@@ -255,7 +255,7 @@ const CustomerAboutUs = () => {
                 <Box display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"} sx={{ height: '292', width: "auto", border: "1px solid black", borderRadius: '20px', padding: "20px", margin: "80px" }}>
                     <Box component="img" src={vission} sx={{ height: '106px', width: "88px" }}></Box>
                     <Typography gutterBottom color='secondary' variant="h5" component="div">
-                        Vission
+                        Vision
                     </Typography>
                     <Typography variant="p" color='primary' sx={{ textAlign: 'center' }}>
                         To become the go-to digital hub for local business discovery,  <br />driving community connection and sustainable economic growth <br />worldwide.
@@ -279,8 +279,7 @@ const CustomerAboutUs = () => {
                 </Box>
             </Box>
 
-            <Footer />
-
+<Footer userRole="customer" />
             {/* logout modal */}
             <div>
                 <Modal

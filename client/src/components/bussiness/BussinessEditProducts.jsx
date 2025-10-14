@@ -987,7 +987,7 @@ console.log(response);
                 </Box>
             </Container>
 
-            <Footer />
+            <Footer userRole="bussiness" />
 
             {/* Logout Modal */}
             <Modal

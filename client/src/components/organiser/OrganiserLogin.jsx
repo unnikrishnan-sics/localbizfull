@@ -280,8 +280,7 @@ const OrganiserLogin = () => {
         </AuthContainer>
       </Container>
       
-      <Footer />
-    </>
+<Footer userRole="organiser" />    </>
   );
 };
 

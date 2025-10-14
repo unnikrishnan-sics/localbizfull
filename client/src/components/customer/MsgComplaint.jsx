@@ -688,7 +688,6 @@ const response = await axios.post(`${baseUrl}customer/editcustomer/${customerDet
              {/* --- End of Edit Profile Modal --- */}
 
 
-            <Footer />
-        </div>
+<Footer userRole="customer" />        </div>
     );
 }

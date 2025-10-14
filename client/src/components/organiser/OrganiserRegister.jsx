@@ -358,7 +358,7 @@ const navigate=useNavigate();
                                     inputProps={{ 'aria-label': 'controlled' }}
                                 />
                                 <Typography sx={{ fontSize: "14px", fontWeight: "500" }}>
-                                    Aggred to <span style={{ color: "#6F32BF" }}>Terms and Conditions</span>
+                                    Agreed to <span style={{ color: "#6F32BF" }}>Terms and Conditions</span>
                                 </Typography>
                                 
                                
@@ -386,8 +386,7 @@ const navigate=useNavigate();
                 {message.error && <p style={{ textAlign: "center", color: "red", fontSize: "32px", fontWeight: "600" }}>{message.error}</p>} */}
 
             </Container>
-            <Footer />
-      
+<Footer userRole="organiser" />      
     </>
   )
 }

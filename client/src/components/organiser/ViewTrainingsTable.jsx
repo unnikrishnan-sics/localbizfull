@@ -91,8 +91,7 @@ function ViewTrainingsTable() {
         <Container component="main" maxWidth="lg" sx={{ pt: 8, pb: 4, textAlign: 'center' }}>
           <Typography variant="h6" color="primary">Loading trainings...</Typography>
         </Container>
-        <Footer />
-      </div>
+<Footer userRole="organiser" />      </div>
     );
   }
 
@@ -103,8 +102,7 @@ function ViewTrainingsTable() {
         <Container component="main" maxWidth="lg" sx={{ pt: 8, pb: 4, textAlign: 'center' }}>
           <Typography variant="h6" color="error">Error: {error.message}</Typography>
         </Container>
-        <Footer />
-      </div>
+<Footer userRole="organiser" />      </div>
     );
   }
 
@@ -174,8 +172,7 @@ function ViewTrainingsTable() {
           </Table>
         </TableContainer>
       </Container>
-      <Footer />
-    </div>
+<Footer userRole="organiser" />    </div>
   );
 }
 
