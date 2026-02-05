@@ -1,1 +1,1 @@
-export const secret_key='AIzaSyCq_XIv482AOjFWIVL0obkdO1BDT5S7Jt8'
+export const secret_key = import.meta.env.VITE_GEMINI_API_KEY;
