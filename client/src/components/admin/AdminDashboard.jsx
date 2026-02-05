@@ -1,4 +1,7 @@
-import { Box, Button, Container, Grid, Typography, Card, CardContent, Select, MenuItem } from '@mui/material';
+import {
+    Box, Button, Container, Grid, Typography, Card, CardContent, Select, MenuItem,
+    Stack, IconButton, alpha, Tooltip as MuiTooltip, CircularProgress
+} from '@mui/material';
 import Modal from '@mui/material/Modal';
 import Fade from '@mui/material/Fade';
 import Backdrop from '@mui/material/Backdrop';
@@ -9,46 +12,28 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import BusinessIcon from '@mui/icons-material/Business';
 import GroupsIcon from '@mui/icons-material/Groups';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-// import TrendingDownIcon from '@mui/icons-material/TrendingDown'; // Not used, can be removed if not needed elsewhere
+import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import { useNavigate } from 'react-router-dom';
 import AdminSidebar from './AdminSideBar';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area
+} from 'recharts';
 import { toast } from 'react-toastify';
 import Footer from '../Footer/Footer';
 import { baseUrl } from '../../baseUrl';
 import axios from 'axios';
-
-const style = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: 'background.paper',
-    borderRadius: "10px",
-    boxShadow: 24,
-    p: 4,
-};
+import { motion, AnimatePresence } from 'framer-motion';
 
 const AdminDashboard = () => {
-    const [open, setOpen] = React.useState(false);
+    const [open, setOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const navigate = useNavigate();
 
-    // Helper to get current month name
     const getMonthName = (date) => new Date(date).toLocaleString('en-US', { month: 'long' });
-
-    // Separate state variables for time ranges for each chart, initialized to current month
     const [eventTimeRange, setEventTimeRange] = useState(getMonthName(new Date()));
-    const [workshopTimeRange, setWorkshopTimeRange] = useState(getMonthName(new Date()));
-    const [trainingTimeRange, setTrainingTimeRange] = useState(getMonthName(new Date()));
-
     const [allFetchedEvents, setAllFetchedEvents] = useState([]);
-
-    // Separate state variables for processed chart data for each chart type
     const [eventsChartData, setEventsChartData] = useState([]);
-    const [workshopsChartData, setWorkshopsChartData] = useState([]);
-    const [trainingsChartData, setTrainingsChartData] = useState([]);
 
-    // New state variables for total counts
     const [totalUsers, setTotalUsers] = useState(0);
     const [totalBusinesses, setTotalBusinesses] = useState(0);
     const [totalOrganizers, setTotalOrganizers] = useState(0);
@@ -56,523 +41,268 @@ const AdminDashboard = () => {
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
-    const navigate = useNavigate();
     const handleLogOut = () => {
         localStorage.removeItem('token');
         navigate('/admin/login');
-        toast.success("You logged out successfully");
+        toast.success("Securely logged out");
     }
 
-    // Helper for token and navigation on authentication errors
     const handleAuthError = useCallback(() => {
         localStorage.removeItem('token');
         navigate('/admin/login');
-        toast.error("Session expired or unauthorized. Please log in again.");
+        toast.error("Session expired. Please log in again.");
     }, [navigate]);
 
-    // Function to fetch all events
-    const fetchEvents = useCallback(async () => {
+    const fetchData = useCallback(async () => {
         const token = localStorage.getItem('token');
-        if (!token) {
-            handleAuthError();
-            return;
-        }
+        if (!token) { handleAuthError(); return; }
+
+        setIsLoading(true);
         try {
-            const response = await axios.get(`${baseUrl}events`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            console.log("Fetched events:", response.data);
-            if (response.data && Array.isArray(response.data.data)) {
-                setAllFetchedEvents(response.data.data); // Store all events
-            } else {
-                console.warn("Unexpected data structure for events:", response.data);
-                setAllFetchedEvents([]);
-            }
+            const config = { headers: { Authorization: `Bearer ${token}` } };
+
+            const [eventsRes, usersRes, businessesRes, organizersRes] = await Promise.all([
+                axios.get(`${baseUrl}events`, config).catch(() => ({ data: { data: [] } })),
+                axios.get(`${baseUrl}api/admin/customers`, config).catch(() => ({ data: { customers: [] } })),
+                axios.get(`${baseUrl}api/admin/businessowners`, config).catch(() => ({ data: { businessOwners: [] } })),
+                axios.post(`${baseUrl}organisation/getAllOrgaiser`, {}, config).catch(() => ({ data: { data: [] } }))
+            ]);
+
+            setAllFetchedEvents(eventsRes.data?.data || []);
+            setTotalUsers(usersRes.data?.customers?.length || 0);
+            setTotalBusinesses(businessesRes.data?.businessOwners?.length || 0);
+            setTotalOrganizers(organizersRes.data?.data?.length || 0);
         } catch (error) {
-            console.error("Error fetching events:", error);
-            toast.error("Error fetching events.");
-            if (error.response && error.response.status === 401) {
-                handleAuthError();
-            }
+            console.error("Dashboard Fetch Error:", error);
+            toast.error("Systems update failed");
+        } finally {
+            setIsLoading(false);
         }
-    }, [baseUrl, handleAuthError]);
+    }, [handleAuthError]);
 
-    // New function to fetch total users (customers)
-    const fetchTotalUsers = useCallback(async () => {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            handleAuthError();
-            return;
-        }
-        try {
-            const response = await axios.get(`${baseUrl}api/admin/customers`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            console.log(response);
-
-            // Assuming response.data.customers is an array of customers
-            if (response.data.customers && Array.isArray(response.data?.customers)) {
-                setTotalUsers(response.data.customers.length);
-            } else {
-                console.warn("Unexpected data structure for customers:", response.data);
-                setTotalUsers(0);
-            }
-        } catch (error) {
-            console.error("Error fetching total users:", error);
-            toast.error("Error fetching user count.");
-            if (error.response && error.response.status === 401) {
-                handleAuthError();
-            }
-        }
-    }, [baseUrl, handleAuthError]);
-
-    // New function to fetch total business owners
-    const fetchTotalBusinesses = useCallback(async () => {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            handleAuthError();
-            return;
-        }
-        try {
-            const response = await axios.get(`${baseUrl}api/admin/businessowners`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            console.log(response);
-
-            // Assuming response.data.businessOwners is an array of business owners
-            if (response.data && Array.isArray(response.data.businessOwners)) {
-                setTotalBusinesses(response.data.businessOwners.length);
-            } else {
-                console.warn("Unexpected data structure for business owners:", response.data);
-                setTotalBusinesses(0);
-            }
-        } catch (error) {
-            console.error("Error fetching total businesses:", error);
-            toast.error("Error fetching business count.");
-            if (error.response && error.response.status === 401) {
-                handleAuthError();
-            }
-        }
-    }, [baseUrl, handleAuthError]);
-
-    // New function to fetch total organizers (using POST as per router definition)
-    const fetchTotalOrganizers = useCallback(async () => {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            handleAuthError();
-            return;
-        }
-        try {
-            // The router definition specified a POST request with an empty body
-            const response = await axios.post(`${baseUrl}organisation/getAllOrgaiser`, {}, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json', // Explicitly set content type for POST
-                },
-            });
-            // Assuming response.data.data is an array of organizers
-            if (response.data && Array.isArray(response.data.data)) {
-                setTotalOrganizers(response.data.data.length);
-            } else {
-                console.warn("Unexpected data structure for organizers:", response.data);
-                setTotalOrganizers(0);
-            }
-        } catch (error) {
-            console.error("Error fetching total organizers:", error);
-            toast.error("Error fetching organizer count.");
-            if (error.response && error.response.status === 401) {
-                handleAuthError();
-            }
-        }
-    }, [baseUrl, handleAuthError]);
-
-
-    // Function to process raw events into chart-ready data for a selected month
     const processEventsForCharts = useCallback((events, selectedMonth) => {
-        if (!events || events.length === 0) {
-            return { events: [], workshops: [], trainings: [] }; // Return empty data for all types
-        }
-
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         const monthIndex = monthNames.indexOf(selectedMonth);
-
-        if (monthIndex === -1) {
-            return { events: [], workshops: [], trainings: [] }; // Invalid month selected
-        }
-
-        // Assuming event dates are in the current year.
         const targetYear = new Date().getFullYear();
         const daysInMonth = new Date(targetYear, monthIndex + 1, 0).getDate();
 
-        // Initialize daily counts for the month
-        const dailyCounts = {
-            event: Array(daysInMonth).fill(0),
-            workshop: Array(daysInMonth).fill(0),
-            training: Array(daysInMonth).fill(0),
-        };
+        const counts = Array(daysInMonth).fill(0).map((_, i) => ({ name: `${i + 1}`, value: 0 }));
 
         events.forEach(event => {
-            const eventDate = new Date(event.date);
-            // Check if the event falls within the selected month and year
-            if (eventDate.getMonth() === monthIndex && eventDate.getFullYear() === targetYear) {
-                const dayOfMonth = eventDate.getDate(); // 1-based day
-                if (dailyCounts.hasOwnProperty(event.type)) { // Check if type is one we track
-                    dailyCounts[event.type][dayOfMonth - 1]++;
-                }
+            const d = new Date(event.date);
+            if (d.getMonth() === monthIndex && d.getFullYear() === targetYear) {
+                const day = d.getDate();
+                if (counts[day - 1]) counts[day - 1].value++;
             }
         });
-
-        // Format data for Recharts (name: "Day X", value: count)
-        const formattedData = {
-            events: dailyCounts.event.map((count, index) => ({ name: `Day ${index + 1}`, value: count })),
-            workshops: dailyCounts.workshop.map((count, index) => ({ name: `Day ${index + 1}`, value: count })),
-            trainings: dailyCounts.training.map((count, index) => ({ name: `Day ${index + 1}`, value: count })),
-        };
-
-        return formattedData;
+        return counts;
     }, []);
 
-    // useEffect to fetch general data on component mount
-    useEffect(() => {
-        if (localStorage.getItem("token") == null) {
-            navigate("/admin/login");
-            return; // Exit early if no token
-        }
-        fetchEvents();
-        fetchTotalUsers();
-        fetchTotalBusinesses();
-        fetchTotalOrganizers();
-    }, [navigate, fetchEvents, fetchTotalUsers, fetchTotalBusinesses, fetchTotalOrganizers]);
+    useEffect(() => { fetchData(); }, [fetchData]);
 
-    // useEffect to process events data for Events Chart when raw data or eventTimeRange changes
     useEffect(() => {
-        const processed = processEventsForCharts(allFetchedEvents, eventTimeRange);
-        setEventsChartData(processed.events);
+        setEventsChartData(processEventsForCharts(allFetchedEvents, eventTimeRange));
     }, [allFetchedEvents, eventTimeRange, processEventsForCharts]);
 
-    // useEffect to process events data for Workshops Chart when raw data or workshopTimeRange changes
-    useEffect(() => {
-        const processed = processEventsForCharts(allFetchedEvents, workshopTimeRange);
-        setWorkshopsChartData(processed.workshops);
-    }, [allFetchedEvents, workshopTimeRange, processEventsForCharts]);
+    const MetricCard = ({ title, value, icon, color, trend }) => (
+        <motion.div whileHover={{ y: -5 }}>
+            <Card sx={{
+                borderRadius: '24px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                color: 'white',
+                height: '100%',
+                position: 'relative',
+                overflow: 'hidden'
+            }}>
+                <Box sx={{
+                    position: 'absolute',
+                    top: -20, right: -20,
+                    width: 100, height: 100,
+                    borderRadius: '50%',
+                    background: color,
+                    opacity: 0.1,
+                    filter: 'blur(20px)'
+                }} />
 
-    // useEffect to process events data for Trainings Chart when raw data or trainingTimeRange changes
-    useEffect(() => {
-        const processed = processEventsForCharts(allFetchedEvents, trainingTimeRange);
-        setTrainingsChartData(processed.trainings);
-    }, [allFetchedEvents, trainingTimeRange, processEventsForCharts]);
+                <CardContent sx={{ p: 3 }}>
+                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                        <Box sx={{ p: 1.5, borderRadius: '16px', bgcolor: alpha(color, 0.1) }}>
+                            {React.cloneElement(icon, { sx: { fontSize: 28, color: color } })}
+                        </Box>
+                        {trend && (
+                            <Stack direction="row" spacing={0.5} alignItems="center" sx={{ color: '#00e676', bgcolor: 'rgba(0, 230, 118, 0.1)', px: 1, py: 0.5, borderRadius: '20px' }}>
+                                <TrendingUpIcon sx={{ fontSize: 16 }} />
+                                <Typography variant="caption" sx={{ fontWeight: 700 }}>{trend}%</Typography>
+                            </Stack>
+                        )}
+                    </Stack>
 
-    // Handlers for individual time range changes
-    const handleEventTimeRangeChange = (event) => {
-        setEventTimeRange(event.target.value);
-    };
-
-    const handleWorkshopTimeRangeChange = (event) => {
-        setWorkshopTimeRange(event.target.value);
-    };
-
-    const handleTrainingTimeRangeChange = (event) => {
-        setTrainingTimeRange(event.target.value);
-    };
+                    <Typography sx={{ mt: 3, opacity: 0.6, fontSize: '14px', fontWeight: 600, letterSpacing: '0.5px' }}>{title}</Typography>
+                    <Typography variant="h3" sx={{ fontWeight: 800, mt: 1 }}>{value}</Typography>
+                </CardContent>
+            </Card>
+        </motion.div>
+    );
 
     return (
-        <>
-            <Container
-                maxWidth="x-lg"
-                sx={{
-                    background: "#fffff",
-                    minHeight: '100vh',
-                    display: 'flex',
-                    flexDirection: 'row',
-                    p: 0
-                }}
-            >
-                <Grid item xs={6} md={2} sx={{ p: 0 }}>
-                    <AdminSidebar />
-                </Grid>
-                <Grid
-                    container
-                    spacing={2}
-                    sx={{
-                        flex: 1,
-                        width: "100%",
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 3,
-                        padding: "15px 0px 15px 15px",
-                        borderRadius: "8px",
-                        flexGrow: 1
-                    }}
-                >
-                    {/* Top Bar */}
-                    <Box sx={{ height: "70px", background: "white", borderRadius: "8px", width: "98%", px: 3 }} display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
-                        <Typography variant='h3' sx={{ fontSize: "24px", fontWeight: "500" }} color='primary'>Dashboard</Typography>
-                        <Button onClick={handleOpen} variant="text" color='primary' sx={{ borderRadius: "25px", height: "40px", width: '200px', padding: '10px 35px' }} startIcon={<LogoutIcon />}>logout</Button>
-                    </Box>
-                    <Grid container spacing={12} sx={{ mt: 2, marginLeft: "190px" }}>
-                        {/* Users Card */}
-                        <Grid item xs={12} md={4}>
-                            <Card sx={{
-                                borderRadius: '10px',
-                                boxShadow: 3,
-                                background: 'linear-gradient(135deg, #1976d2 0%, #2196f3 100%)',
-                                color: 'white'
-                            }}>
-                                <CardContent>
-                                    <Box display="flex" justifyContent="space-between" alignItems="center">
-                                        <Box display="flex" alignItems="center">
-                                            <PersonOutlineIcon sx={{
-                                                fontSize: 30,
-                                                mr: 1,
-                                                backgroundColor: 'rgba(255,255,255,0.2)',
-                                                borderRadius: '50%',
-                                                p: 1
-                                            }} />
-                                            <Typography variant="h6">Users</Typography>
-                                        </Box>
-                                        <Box display="flex" alignItems="center" color="white">
-                                            {/* Trending percentage kept static as per request */}
-                                            <TrendingUpIcon sx={{ mr: 0.5 }} />
-                                            <Typography variant="body2">12%</Typography>
-                                        </Box>
-                                    </Box>
-                                    <Typography variant="body2" sx={{ mt: 1, opacity: 0.8 }}>Total Users</Typography>
-                                    <Typography variant="h3" sx={{ mt: 1, fontWeight: 600 }}>{totalUsers}</Typography>
-                                </CardContent>
-                            </Card>
-                        </Grid>
+        <Box sx={{ minHeight: '100vh', bgcolor: '#0a0a1a', display: 'flex' }}>
+            <AdminSidebar />
 
-                        {/* Business Card */}
-                        <Grid item xs={12} md={4}>
-                            <Card sx={{
-                                borderRadius: '10px',
-                                boxShadow: 3,
-                                background: 'linear-gradient(135deg, #4caf50 0%, #8bc34a 100%)',
-                                color: 'white'
-                            }}>
-                                <CardContent>
-                                    <Box display="flex" justifyContent="space-between" alignItems="center">
-                                        <Box display="flex" alignItems="center">
-                                            <BusinessIcon sx={{
-                                                fontSize: 30,
-                                                mr: 1,
-                                                backgroundColor: 'rgba(255,255,255,0.2)',
-                                                borderRadius: '50%',
-                                                p: 1
-                                            }} />
-                                            <Typography variant="h6">Business</Typography>
-                                        </Box>
-                                        <Box display="flex" alignItems="center" color="white">
-                                            <TrendingUpIcon sx={{ mr: 0.5 }} />
-                                            <Typography variant="body2">8%</Typography>
-                                        </Box>
-                                    </Box>
-                                    <Typography variant="body2" sx={{ mt: 1, opacity: 0.8 }}>Total Business</Typography>
-                                    <Typography variant="h3" sx={{ mt: 1, fontWeight: 600 }}>{totalBusinesses}</Typography>
-                                </CardContent>
-                            </Card>
-                        </Grid>
+            <Box sx={{ flexGrow: 1, p: 4 }}>
+                <Container maxWidth="xl">
+                    {/* Top Header */}
+                    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 6 }}>
+                        <Box>
+                            <Typography variant="h4" sx={{ color: 'white', fontWeight: 900 }}>Command Center</Typography>
+                            <Typography sx={{ color: 'rgba(255,255,255,0.5)', mt: 0.5 }}>Real-time platform overview and controls</Typography>
+                        </Box>
+                        <Stack direction="row" spacing={2} alignItems="center">
+                            <IconButton sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.05)', p: 1.5 }}>
+                                <NotificationsNoneIcon />
+                            </IconButton>
+                            <Button
+                                onClick={handleOpen}
+                                variant="outlined"
+                                startIcon={<LogoutIcon />}
+                                sx={{
+                                    color: '#e94560',
+                                    borderColor: 'rgba(233, 69, 96, 0.3)',
+                                    borderRadius: '12px',
+                                    px: 3,
+                                    height: '48px',
+                                    textTransform: 'none',
+                                    fontWeight: 700,
+                                    '&:hover': { borderColor: '#e94560', bgcolor: 'rgba(233, 69, 96, 0.05)' }
+                                }}
+                            >
+                                Logout
+                            </Button>
+                        </Stack>
+                    </Stack>
 
-                        {/* Organizers Card */}
+                    {/* Performance Metrics */}
+                    <Grid container spacing={3} sx={{ mb: 6 }}>
                         <Grid item xs={12} md={4}>
-                            <Card sx={{
-                                borderRadius: '10px',
-                                boxShadow: 3,
-                                background: 'linear-gradient(135deg, #9c27b0 0%, #e91e63 100%)',
-                                color: 'white'
-                            }}>
-                                <CardContent>
-                                    <Box display="flex" justifyContent="space-between" alignItems="center">
-                                        <Box display="flex" alignItems="center">
-                                            <GroupsIcon sx={{
-                                                fontSize: 30,
-                                                mr: 1,
-                                                backgroundColor: 'rgba(255,255,255,0.2)',
-                                                borderRadius: '50%',
-                                                p: 1
-                                            }} />
-                                            <Typography variant="h6">Organizers</Typography>
-                                        </Box>
-                                        <Box display="flex" alignItems="center" color="white">
-                                            <TrendingUpIcon sx={{ mr: 0.5 }} />
-                                            <Typography variant="body2">15%</Typography>
-                                        </Box>
-                                    </Box>
-                                    <Typography variant="body2" sx={{ mt: 1, opacity: 0.8 }}>Total Organizers</Typography>
-                                    <Typography variant="h3" sx={{ mt: 1, fontWeight: 600 }}>{totalOrganizers}</Typography>
-                                </CardContent>
-                            </Card>
+                            <MetricCard title="System Users" value={totalUsers} icon={<PersonOutlineIcon />} color="#e94560" trend="12.5" />
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                            <MetricCard title="Registered Businesses" value={totalBusinesses} icon={<BusinessIcon />} color="#0f3460" trend="8.2" />
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                            <MetricCard title="Active Organizers" value={totalOrganizers} icon={<GroupsIcon />} color="#6f32bf" trend="15.0" />
                         </Grid>
                     </Grid>
 
-                    {/* Event Details Chart */}
-                    <Card sx={{ borderRadius: '10px', boxShadow: 3 }}>
-                        <CardContent>
-                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                                <Typography variant="h6">Events Details (Monthly Breakdown)</Typography>
-                                <Select
-                                    value={eventTimeRange} // Use eventTimeRange
-                                    onChange={handleEventTimeRangeChange} // Use dedicated handler
-                                    size="small"
-                                    sx={{
-                                        minWidth: 120,
-                                        '& .MuiSelect-select': {
-                                            color: 'primary.main'
-                                        }
-                                    }}
-                                >
-                                    {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map((month) => (
-                                        <MenuItem key={month} value={month}>{month}</MenuItem>
-                                    ))}
-                                </Select>
-                            </Box>
-                            <Box sx={{ height: 300 }}>
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <LineChart data={eventsChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                                        <XAxis
-                                            dataKey="name"
-                                            tick={{ fill: '#8884d8', fontSize: 12, fontWeight: 500 }}
-                                            axisLine={{ stroke: '#ccc' }}
-                                            tickLine={false}
-                                        />
-                                        <YAxis
-                                            domain={[0, 'auto']}
-                                            tickCount={6}
-                                            tickFormatter={(value) => `${value}`}
-                                            tick={{ fill: '#8884d8', fontSize: 12, fontWeight: 500 }}
-                                            axisLine={{ stroke: '#ccc' }}
-                                            tickLine={false}
-                                        />
-                                        <Tooltip
-                                            contentStyle={{
-                                                borderRadius: '10px',
-                                                backgroundColor: '#ffffff',
-                                                border: '1px solid #e0e0e0',
-                                                boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-                                            }}
-                                            formatter={(value) => [`${value}`, 'Events Count']}
-                                        />
-                                        <Line
-                                            type="monotone"
-                                            dataKey="value"
-                                            stroke="#1976d2"
-                                            strokeWidth={3}
-                                            dot={{ r: 4, stroke: '#1976d2', strokeWidth: 2, fill: '#fff' }}
-                                            activeDot={{ r: 6, stroke: '#1976d2', strokeWidth: 3, fill: '#fff' }}
-                                        />
-                                    </LineChart>
-                                </ResponsiveContainer>
-                            </Box>
-                        </CardContent>
-                    </Card>
+                    {/* Analytics Section */}
+                    <Grid container spacing={3}>
+                        <Grid item xs={12}>
+                            <Card sx={{
+                                borderRadius: '24px',
+                                background: 'rgba(255, 255, 255, 0.03)',
+                                border: '1px solid rgba(255, 255, 255, 0.05)',
+                                p: 4
+                            }}>
+                                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 4 }}>
+                                    <Box>
+                                        <Typography variant="h6" sx={{ color: 'white', fontWeight: 800 }}>Platform Activity</Typography>
+                                        <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px' }}>Monthly event creations and engagement tracking</Typography>
+                                    </Box>
+                                    <Select
+                                        value={eventTimeRange}
+                                        onChange={(e) => setEventTimeRange(e.target.value)}
+                                        size="small"
+                                        sx={{
+                                            color: 'white',
+                                            bgcolor: 'rgba(255,255,255,0.05)',
+                                            borderRadius: '12px',
+                                            border: 'none',
+                                            '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+                                            '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' }
+                                        }}
+                                    >
+                                        {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map(m => (
+                                            <MenuItem key={m} value={m}>{m}</MenuItem>
+                                        ))}
+                                    </Select>
+                                </Stack>
 
-                    {/* Workshop Details Chart */}
-                    <Card sx={{ borderRadius: '10px', boxShadow: 3 }}>
-                        <CardContent>
-                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                                <Typography variant="h6">Workshop Details (Monthly Breakdown)</Typography>
-                                <Select
-                                    value={workshopTimeRange} // Use workshopTimeRange
-                                    onChange={handleWorkshopTimeRangeChange} // Use dedicated handler
-                                    size="small"
-                                    sx={{ minWidth: 120, '& .MuiSelect-select': { color: 'primary.main' } }}
-                                >
-                                    {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map((month) => (
-                                        <MenuItem key={month} value={month}>{month}</MenuItem>
-                                    ))}
-                                </Select>
-                            </Box>
-                            <Box sx={{ height: 300 }}>
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <LineChart data={workshopsChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                                        <XAxis dataKey="name" tick={{ fill: '#8884d8', fontSize: 12, fontWeight: 500 }} axisLine={{ stroke: '#ccc' }} tickLine={false} />
-                                        <YAxis domain={[0, 'auto']} tickCount={6} tickFormatter={(value) => `${value}`} tick={{ fill: '#8884d8', fontSize: 12, fontWeight: 500 }} axisLine={{ stroke: '#ccc' }} tickLine={false} />
-                                        <Tooltip contentStyle={{ borderRadius: '10px', backgroundColor: '#ffffff', border: '1px solid #e0e0e0', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }} formatter={(value) => [`${value}`, 'Workshops Count']} />
-                                        <Line type="monotone" dataKey="value" stroke="#ffc658" strokeWidth={3} dot={{ r: 4, stroke: '#ffc658', strokeWidth: 2, fill: '#fff' }} activeDot={{ r: 6, stroke: '#ffc658', strokeWidth: 3, fill: '#fff' }} />
-                                    </LineChart>
-                                </ResponsiveContainer>
-                            </Box>
-                        </CardContent>
-                    </Card>
+                                <Box sx={{ height: 400, width: '100%', mt: 2 }}>
+                                    <ResponsiveContainer>
+                                        <AreaChart data={eventsChartData}>
+                                            <defs>
+                                                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#e94560" stopOpacity={0.3} />
+                                                    <stop offset="95%" stopColor="#e94560" stopOpacity={0} />
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                                            <XAxis
+                                                dataKey="name"
+                                                axisLine={false}
+                                                tickLine={false}
+                                                tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 12 }}
+                                                dy={15}
+                                            />
+                                            <YAxis
+                                                axisLine={false}
+                                                tickLine={false}
+                                                tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 12 }}
+                                                dx={-10}
+                                            />
+                                            <Tooltip
+                                                contentStyle={{
+                                                    background: '#1a1a2e',
+                                                    border: '1px solid rgba(255,255,255,0.1)',
+                                                    borderRadius: '12px',
+                                                    boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+                                                }}
+                                                itemStyle={{ color: '#e94560' }}
+                                            />
+                                            <Area
+                                                type="monotone"
+                                                dataKey="value"
+                                                stroke="#e94560"
+                                                strokeWidth={3}
+                                                fillOpacity={1}
+                                                fill="url(#colorValue)"
+                                            />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                </Box>
+                            </Card>
+                        </Grid>
+                    </Grid>
+                </Container>
+            </Box>
 
-                    {/* Training Details Chart */}
-                    <Card sx={{ borderRadius: '10px', boxShadow: 3 }}>
-                        <CardContent>
-                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                                <Typography variant="h6">Training Details (Monthly Breakdown)</Typography>
-                                <Select
-                                    value={trainingTimeRange} // Use trainingTimeRange
-                                    onChange={handleTrainingTimeRangeChange} // Use dedicated handler
-                                    size="small"
-                                    sx={{ minWidth: 120, '& .MuiSelect-select': { color: 'primary.main' } }}
-                                >
-                                    {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map((month) => (
-                                        <MenuItem key={month} value={month}>{month}</MenuItem>
-                                    ))}
-                                </Select>
-                            </Box>
-                            <Box sx={{ height: 300 }}>
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <LineChart data={trainingsChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                                        <XAxis dataKey="name" tick={{ fill: '#8884d8', fontSize: 12, fontWeight: 500 }} axisLine={{ stroke: '#ccc' }} tickLine={false} />
-                                        <YAxis domain={[0, 'auto']} tickCount={6} tickFormatter={(value) => `${value}`} tick={{ fill: '#8884d8', fontSize: 12, fontWeight: 500 }} axisLine={{ stroke: '#ccc' }} tickLine={false} />
-                                        <Tooltip contentStyle={{ borderRadius: '10px', backgroundColor: '#ffffff', border: '1px solid #e0e0e0', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }} formatter={(value) => [`${value}`, 'Trainings Count']} />
-                                        <Line type="monotone" dataKey="value" stroke="#82ca9d" strokeWidth={3} dot={{ r: 4, stroke: '#82ca9d', strokeWidth: 2, fill: '#fff' }} activeDot={{ r: 6, stroke: '#82ca9d', strokeWidth: 3, fill: '#fff' }} />
-                                    </LineChart>
-                                </ResponsiveContainer>
-                            </Box>
-                        </CardContent>
-                    </Card>
-
-                </Grid>
-            </Container>
-            <Footer sx={{ mt: 'auto', width: '100%' }} />
-
-            {/* logout modal */}
-            <div>
-                <Modal
-                    aria-labelledby="transition-modal-title"
-                    aria-describedby="transition-modal-description"
-                    open={open}
-                    onClose={handleClose}
-                    closeAfterTransition
-                    slots={{ backdrop: Backdrop }}
-                    slotProps={{
-                        backdrop: {
-                            timeout: 500,
-                        },
-                    }}
-                >
-                    <Fade in={open}>
-                        <Box sx={style}>
-                            <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"}>
-                                <Typography id="transition-modal-title" variant="h6" component="h2">
-                                    Logout Confirmation
-                                </Typography>
-                                <CloseIcon onClick={handleClose} sx={{ cursor: 'pointer' }} />
-                            </Box>
-                            <Typography id="transition-modal-description" sx={{ mt: 2 }}>
-                                Are you sure you want to logout?
-                            </Typography>
-                            <Box display={'flex'} justifyContent={'flex-end'} gap={2} mt={3}>
-                                <Button variant="outlined" onClick={handleClose}>Cancel</Button>
-                                <Button variant="contained" color="error" onClick={handleLogOut}>Logout</Button>
-                            </Box>
-                        </Box>
-                    </Fade>
-                </Modal>
-            </div>
-        </>
-    )
-}
+            {/* Logout Confirmation */}
+            <Modal
+                open={open}
+                onClose={handleClose}
+                closeAfterTransition
+                slots={{ backdrop: Backdrop }}
+                slotProps={{ backdrop: { timeout: 500 } }}
+            >
+                <Fade in={open}>
+                    <Box sx={{
+                        position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                        width: 400, bgcolor: '#1a1a2e', borderRadius: '24px', p: 4,
+                        border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+                        color: 'white', textAlign: 'center'
+                    }}>
+                        <Typography variant="h5" sx={{ fontWeight: 800, mb: 1 }}>Confirm Exit</Typography>
+                        <Typography sx={{ color: 'rgba(255,255,255,0.6)', mb: 4 }}>Are you sure you want to end your administrative session?</Typography>
+                        <Stack direction="row" spacing={2} justifyContent="center">
+                            <Button fullWidth onClick={handleClose} sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.05)', borderRadius: '12px', py: 1.5, textTransform: 'none' }}>Stay</Button>
+                            <Button fullWidth onClick={handleLogOut} sx={{ background: 'linear-gradient(90deg, #e94560, #6f32bf)', color: 'white', borderRadius: '12px', py: 1.5, fontWeight: 700, textTransform: 'none' }}>Logout</Button>
+                        </Stack>
+                    </Box>
+                </Fade>
+            </Modal>
+        </Box>
+    );
+};
 
 export default AdminDashboard;

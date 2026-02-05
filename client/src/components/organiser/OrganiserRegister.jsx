@@ -1,394 +1,207 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import NavbarSigin from '../Navbar/NavbarSigin';
-import { Container, Stack, Typography, Box, TextField, styled, InputAdornment, Checkbox, Button } from '@mui/material';
+import {
+    Container, Stack, Typography, Box, TextField,
+    Checkbox, Button, Paper, Avatar, InputAdornment,
+    IconButton, Divider, Grid, CircularProgress
+} from '@mui/material';
 import profileFrame from "../../assets/image 42.png";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import PhoneIcon from '@mui/icons-material/Phone';
+import EmailIcon from '@mui/icons-material/Email';
+import LockIcon from '@mui/icons-material/Lock';
+import PersonIcon from '@mui/icons-material/Person';
+import HomeIcon from '@mui/icons-material/Home';
+import GroupsIcon from '@mui/icons-material/Groups';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import Footer from '../Footer/Footer';
 import axios from "axios";
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { baseUrl } from '../../baseUrl';
+import { motion } from 'framer-motion';
 
 const OrganiserRegister = () => {
-    const textFieldStyle = { height: "65px", width: "360px", display: "flex", flexDirection: "column", justifyContent: "start", position: "relative" }
-  const siginupStyle = { background: "white", boxShadow: "none" }
+    const navigate = useNavigate();
+    const [checked, setChecked] = useState(false);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState({});
 
-  const [checked, setChecked] = React.useState(false);
+    const [data, setData] = useState({
+        name: "",
+        email: "",
+        password: "",
+        confirmpassword: "",
+        address: "",
+        phone: "",
+        organizationName: "",
+        organizationType: "",
+        profilePic: null
+    });
 
-  const handleChange = (event) => {
-      setChecked(event.target.checked);
-      if (event.target.checked) {
-        setError((prevError) => ({
-            ...prevError,
-            terms: ""
-        }));
-    }
-  };
+    const handleDataChange = (e) => {
+        const { name, value } = e.target;
+        setData(prev => ({ ...prev, [name]: value }));
+        if (error[name]) {
+            setError(prev => ({ ...prev, [name]: "" }));
+        }
+    };
 
-  const [imagePreview, setImagePreview] = useState(null);
+    const handleFileUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setData(prev => ({ ...prev, profilePic: file }));
+            setImagePreview(URL.createObjectURL(file));
+        }
+    };
 
-//   const [message, setMessage] = useState({
-//       success: "",
-//       error: ""
-//   })
-  const [error, setError] = useState({})
+    const validation = () => {
+        let isValid = true;
+        let errorMessage = {};
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,15}$/;
 
-  const [data, setData] = useState({
-      name: "",
-      email: "",
-      password: "",
-      confirmpassword: "",
-      address: "",
-      phone: "",
-      organizationName:"",
-      organizationType:"",
-      profilePic: null
-  });
-  const handleDataChange = (e) => {
-    setError((prevError) => ({
-        ...prevError,
-        [name]: ""
-    }));
-      const { name, value } = e.target;
-      setData(prev => {
-          return { ...prev, [name]: value }
-      })
+        if (!data.name.trim()) errorMessage.name = "Representative name is required";
+        if (!data.email.trim()) errorMessage.email = "Email is required";
+        else if (!emailRegex.test(data.email)) errorMessage.email = "Invalid email";
 
-  }
+        if (!data.password.trim()) errorMessage.password = "Password is required";
+        else if (!passwordRegex.test(data.password)) errorMessage.password = "Password complexity not met";
 
-  const handleFileUpload = (e) => {
-      const file = e.target.files[0];
-      if (file) {
-          setData(prev => {
-              return { ...prev, profilePic: file }
-          });
-          const objectURL = URL.createObjectURL(file);
-          setImagePreview(objectURL);
-      }
+        if (data.password !== data.confirmpassword) errorMessage.confirmPassword = "Passwords match error";
+        if (!data.phone.trim() || data.phone.length !== 10) errorMessage.phone = "10-digit phone required";
+        if (!data.organizationName.trim()) errorMessage.organizationName = "Organization name required";
+        if (!data.organizationType.trim()) errorMessage.organizationType = "Org type required";
+        if (!checked) errorMessage.terms = "Accept terms to continue";
 
-  }
-  const validation = () => {
-      let isValid = true;
-      let errorMessage = {};
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,15}$/;
-      if (!data.name.trim()) {
-          errorMessage.name="Name should not be empty"
-          isValid = false;
-      }
-      
-      else if(data.name.length<3||data.name.length>20){
-          errorMessage.name="Name should be 3 to 20 char length"
-          isValid = false;
+        setError(errorMessage);
+        return Object.keys(errorMessage).length === 0;
+    };
 
-      }
-      if (!data.organizationName.trim()) {
-        errorMessage.organizationName="Organiser name should not be empty"
-        isValid = false;
-    }
-    if (!data.organizationType.trim()) {
-        errorMessage.organizationType="Organiser type should not be empty"
-        isValid = false;
-    }
-      if (!data.email.trim()) {
-          errorMessage.email = "Email should not be empty";
-          isValid = false;
-      }
-      else if (!emailRegex.test(data.email)) {
-          errorMessage.email = "Invalid email address";
-          isValid = false;
-      }
-      if (!data.password.trim()) {
-          errorMessage.password = "Password should not be empty";
-          isValid = false;
-      }
-      else if(!passwordRegex.test(data.password)){
-        errorMessage.password="Password should have atleast one Uppercase,smallcase,special charecter and should be 6 to 15 char length"
-        isValid = false;
-    }
-      if (!data.confirmpassword.trim()) {
-          errorMessage.confirmPassword = "Confirm Password should not be empty";
-          isValid = false;
-      }
-      else if(data.confirmpassword.length<8||data.confirmpassword.length>20){
-          errorMessage.confirmPassword="Confirm password should be 8 to 20 char length"
-          isValid = false;
-      }
-      if (data.password !== data.confirmpassword) {
-          errorMessage.confirmPassword = "Password and confirm password should be same";
-          isValid = false;
-      }
-      if(data.address.length<10){
-          errorMessage.address="Address should be 10 char length"
-          isValid = false;
-      }
-      else if(!data.address.trim()){
-          errorMessage.address="Address should not be empty"
-          isValid = false;
-      }
-      if(!data.phone.trim()){
-          errorMessage.phone="Phone should not be empty"
-          isValid = false;
-      }
-      else if(data.phone.length !==10){
-          errorMessage.phone="Phone should be 10 digit"
-          isValid = false;
-      }
-      if(!checked){
-          errorMessage.terms = "Please accept the terms and conditions";
-          isValid = false;
-      }
-      setError(errorMessage);
-      return isValid;
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!validation()) return;
 
-  }
+        setIsLoading(true);
+        const formData = new FormData();
+        Object.keys(data).forEach(key => {
+            if (data[key]) formData.append(key, data[key]);
+        });
+        formData.append('agreed', checked);
 
-const navigate=useNavigate();
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-      const isValid = validation();
-      if (!isValid) {
-          return;
-      }
-      
-      // console.log(data)
-      const formData = new FormData();
-      formData.append('name', data.name);
-      formData.append('email', data.email);
-      formData.append('password', data.password);
-      formData.append('confirmpassword', data.confirmpassword);
-      formData.append('address', data.address);
-      formData.append('phone', data.phone);
-      formData.append('organizationName',data.organizationName);
-      formData.append('organizationType',data.organizationType)
-      formData.append('profilePic', data.profilePic);
-      formData.append('agreed', checked)
+        try {
+            const response = await axios.post(`${baseUrl}organisation/registration`, formData);
+            if (response.data.message === "Organization created successfully") {
+                toast.success("Organization registered! Awaiting verification.");
+                navigate("/organiser/login");
+            } else {
+                toast.error(response.data.message || "Registration failed");
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Registration error occurred");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-      const response = await axios.post(`${baseUrl}organisation/registration`, formData);
+    return (
+        <Box sx={{ minHeight: '100vh', background: 'linear-gradient(135deg, #F6F0FF 0%, #FFFFFF 100%)' }}>
+            <NavbarSigin siginupStyle={{ background: "transparent", boxShadow: "none" }} />
 
-      const result = response.data;
-      console.log(result);
-      console.log(result.message);
+            <Container maxWidth="lg" sx={{ py: 8 }}>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+                    <Paper elevation={0} sx={{ p: { xs: 3, md: 6 }, borderRadius: '32px', boxShadow: '0 20px 40px rgba(111, 50, 191, 0.08)', position: 'relative', overflow: 'hidden' }}>
+                        <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, height: '8px', background: 'linear-gradient(90deg, #6F32BF, #3498db)' }} />
 
+                        <Box textAlign="center" sx={{ mb: 6 }}>
+                            <Typography variant="h3" sx={{ fontWeight: 900, color: '#6F32BF', mb: 1.5 }}>Join as an Organizer</Typography>
+                            <Typography variant="h6" color="text.secondary">Create impact and manage community events effortlessly</Typography>
+                        </Box>
 
-      console.log(data);
+                        <form onSubmit={handleSubmit}>
+                            <Grid container spacing={6}>
+                                {/* Left Column: Representative Info */}
+                                <Grid item xs={12} md={6}>
+                                    <Stack spacing={4}>
+                                        <Typography variant="h5" sx={{ fontWeight: 700, color: '#333', display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <PersonIcon color="primary" /> Representative Details
+                                        </Typography>
 
+                                        <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
+                                            <input type="file" id="profile-upload" accept="image/*" onChange={handleFileUpload} style={{ display: "none" }} />
+                                            <label htmlFor="profile-upload" style={{ cursor: "pointer" }}>
+                                                <motion.div whileHover={{ scale: 1.05 }}>
+                                                    <Avatar src={imagePreview || profileFrame} sx={{ width: 100, height: 100, border: '3px solid #F6F0FF' }} />
+                                                    <Typography variant="caption" display="block" textAlign="center" mt={1} color="primary">Upload Photo</Typography>
+                                                </motion.div>
+                                            </label>
+                                        </Box>
 
-      if (result.message === "Organization already registered with this phone number") {
-        //   return setMessage({
-        //       success: "",
-        //       error: "you have already registered with this phone number"
+                                        <TextField fullWidth label="Full Name" name="name" value={data.name} onChange={handleDataChange} error={!!error.name} helperText={error.name} InputProps={{ startAdornment: <InputAdornment position="start"><PersonIcon color="primary" /></InputAdornment> }} />
+                                        <TextField fullWidth label="Email Address" name="email" value={data.email} onChange={handleDataChange} error={!!error.email} helperText={error.email} InputProps={{ startAdornment: <InputAdornment position="start"><EmailIcon color="primary" /></InputAdornment> }} />
+                                        <TextField fullWidth label="Phone Number" name="phone" value={data.phone} onChange={handleDataChange} error={!!error.phone} helperText={error.phone} InputProps={{ startAdornment: <InputAdornment position="start"><PhoneIcon color="primary" /></InputAdornment> }} />
 
-        //   })
-            toast.error("you have already registered with this phone number")
-            
-      }
-      if (result.message === "Organization already registered with this email") {
-        //   return setMessage({
-        //       success: "",
-        //       error: "you have already registered with this email id"
+                                        <Stack direction="row" spacing={2}>
+                                            <TextField fullWidth label="Password" name="password" type={showPassword ? 'text' : 'password'} value={data.password} onChange={handleDataChange} error={!!error.password}
+                                                InputProps={{
+                                                    startAdornment: <InputAdornment position="start"><LockIcon color="primary" /></InputAdornment>,
+                                                    endAdornment: <InputAdornment position="end"><IconButton onClick={() => setShowPassword(!showPassword)}>{showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}</IconButton></InputAdornment>
+                                                }}
+                                            />
+                                            <TextField fullWidth label="Confirm" name="confirmpassword" type={showConfirmPassword ? 'text' : 'password'} value={data.confirmpassword} onChange={handleDataChange} error={!!error.confirmPassword}
+                                                InputProps={{
+                                                    startAdornment: <InputAdornment position="start"><LockIcon color="primary" /></InputAdornment>,
+                                                    endAdornment: <InputAdornment position="end"><IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)}>{showConfirmPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}</IconButton></InputAdornment>
+                                                }}
+                                            />
+                                        </Stack>
+                                    </Stack>
+                                </Grid>
 
-        //   })
-            toast.error("you have already registered with this email id")
-      }
-      if (result.message === "Organization created successfully") {
-          setData({
-              name: "",
-              email: "",
-              password: "",
-              confirmpassword: "",
-              address: "",
-              phone: "",
-              organizationName:"",
-              organizationType:"",
-              profilePic: null
-          });
-          setChecked(false);
-          setImagePreview(null);
+                                <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', md: 'block' }, mx: -0.5 }} />
 
-        //   return setMessage({ success: "organiser Profile created", error: "" });
-            toast.success("Organiser Profile created");
-            navigate("/organiser/login")
-      }
+                                {/* Right Column: Organization Info */}
+                                <Grid item xs={12} md={6}>
+                                    <Stack spacing={4}>
+                                        <Typography variant="h5" sx={{ fontWeight: 700, color: '#333', display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <GroupsIcon color="primary" /> Organization Details
+                                        </Typography>
 
+                                        <Box sx={{ height: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <GroupsIcon sx={{ fontSize: 80, color: '#F6F0FF' }} />
+                                        </Box>
 
-  }
-  return (
-    <>
-    <NavbarSigin siginupStyle={siginupStyle}/>
-    <Container sx={{ position: "relative",mb:"50px" ,siginupStyle }} maxWidth="x-lg">
-                
-                <Box display={'flex'} alignItems={'center'} justifyContent={'center'} flexDirection={'column'}>
-                    <Box display={'flex'} alignItems={'center'} justifyContent={'center'} sx={{mb:"60px"}}>
-                        <Stack spacing={2} sx={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column", marginTop: "60px" }}>
-                            <input
-                                type="file"
-                                id="profile-upload"
-                                accept="image/*"
-                                onChange={handleFileUpload}
-                                style={{ display: "none" }}
-                            />
+                                        <TextField fullWidth label="Organization Name" name="organizationName" value={data.organizationName} onChange={handleDataChange} error={!!error.organizationName} helperText={error.organizationName} InputProps={{ startAdornment: <InputAdornment position="start"><GroupsIcon color="primary" /></InputAdornment> }} />
+                                        <TextField fullWidth label="Organization Type" name="organizationType" placeholder="e.g. NGO, Community Group, Club" value={data.organizationType} onChange={handleDataChange} error={!!error.organizationType} helperText={error.organizationType} InputProps={{ startAdornment: <InputAdornment position="start"><AssignmentIcon color="primary" /></InputAdornment> }} />
+                                        <TextField fullWidth label="Base Address" name="address" value={data.address} onChange={handleDataChange} error={!!error.address} helperText={error.address} InputProps={{ startAdornment: <InputAdornment position="start"><HomeIcon color="primary" /></InputAdornment> }} />
+                                    </Stack>
+                                </Grid>
+                            </Grid>
 
-                            <Typography variant='p' color='secondary' sx={{ fontSize: "32px"}}>Sign Up!</Typography>
-                            
-                            <label htmlFor="profile-upload" style={{ cursor: "pointer", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "15px" }}>
-                                <Box component="img" src={imagePreview ? imagePreview : profileFrame} alt='profilepic' sx={{ width: "150px", height: "150px", borderRadius: "50%" }}></Box>
-                                {imagePreview ? <Typography></Typography> : <Typography variant='p'  sx={{ fontSize: "12px", fontWeight: "500" }}>+ add image</Typography>}
+                            <Box sx={{ mt: 6, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                                <Box display="flex" alignItems="center">
+                                    <Checkbox checked={checked} onChange={(e) => setChecked(e.target.checked)} color="primary" />
+                                    <Typography variant="body2">I agree to the <Link to="#" style={{ color: '#6F32BF', fontWeight: 700, textDecoration: 'none' }}>Terms & Conditions</Link></Typography>
+                                </Box>
+                                {error.terms && <Typography color="error" variant="caption">{error.terms}</Typography>}
 
-                            </label>
-                        </Stack>
-                    </Box>
-                    <Box sx={{ display: "flex", justifyContent: 'center', alignItems: "start", gap: "30px", height: "293px", flexDirection: "column", marginTop: '30px' }}>
-                        <Stack direction="row" sx={{ display: "flex", gap: "25px" }}>
+                                <Button fullWidth variant="contained" type="submit" disabled={isLoading} sx={{ borderRadius: '50px', py: 2, fontSize: '18px', fontWeight: 800, background: 'linear-gradient(90deg, #6F32BF, #3498db)', boxShadow: '0 10px 30px rgba(111, 50, 191, 0.2)', textTransform: 'none', maxWidth: '400px' }}>
+                                    {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Register Organization'}
+                                </Button>
 
-                            <div style={textFieldStyle}>
-                                <label>Organisation Name</label>
-                                <input style={{ height: "40px", borderRadius: "8px", border: " 1px solid #CCCCCC", padding: '8px' }}
-                                    onChange={handleDataChange}
-                                    name='organizationName'
-                                    value={data.organizationName}
-                                    type='text'
-
-                                />
-                                {error.organizationName && <span style={{ color: 'red', fontSize: '12px' }}>{error.organizationName}</span>}
-                            </div>
-
-                            <div style={textFieldStyle}>
-                                <label>Name</label>
-                                <input style={{ height: "40px", borderRadius: "8px", border: " 1px solid #CCCCCC", padding: '8px' }}
-                                    onChange={handleDataChange}
-                                    name='name'
-                                    value={data.name}
-
-                                />
-                                {error.name && <span style={{ color: 'red', fontSize: '12px' }}>{error.name}</span>}
-                            </div>
-                        </Stack>
-                        <Stack direction={'row'} sx={{ display: "flex", gap: "25px" }}>
-                            <div style={textFieldStyle}>
-                                <label>Email</label>
-                                <input style={{ height: "40px", borderRadius: "8px", border: " 1px solid #CCCCCC", padding: '8px' }}
-                                    onChange={handleDataChange}
-                                    name='email'
-                                    value={data.email}
-                                />
-                                {error.email && <span style={{ color: 'red', fontSize: '12px' }}>{error.email}</span>}
-                            </div>
-                            <div style={textFieldStyle}>
-                                <label>Address</label>
-                                <input style={{ height: "40px", borderRadius: "8px", border: " 1px solid #CCCCCC", padding: '8px' }}
-                                    onChange={handleDataChange}
-                                    name='address'
-                                    value={data.address}
-                                />
-                                {error.address && <span style={{ color: 'red', fontSize: '12px' }}>{error.address}</span>}
-                            </div>
-                            
-                        </Stack>
-                        <Stack direction={'row'} sx={{ display: "flex", gap: "25px" }}>
-                            <div style={textFieldStyle}>
-                                <label>Phone Number</label>
-                                <input style={{ height: "40px", borderRadius: "8px", border: " 1px solid #CCCCCC", padding: '8px' }}
-                                    onChange={handleDataChange}
-                                    name='phone'
-                                    value={data.phone}
-                                    type='tel'
-                                />
-                                {error.phone && <span style={{ color: 'red', fontSize: '12px' }}>{error.phone}</span>}
-                            </div>
-                            <div style={textFieldStyle}>
-                                <label>New Password</label>
-                                <input style={{ height: "40px", borderRadius: "8px", border: " 1px solid #CCCCCC", padding: '8px' }}
-                                    onChange={handleDataChange}
-                                    name='password'
-                                    value={data.password}
-                                    type='password'
-                                />
-                                {data.password.length > 0 ? "" : <VisibilityOffIcon
-                                    style={{
-                                        position: 'absolute',
-                                        right: '10px',
-                                        top: '70%',
-                                        transform: 'translateY(-50%)',
-                                        cursor: 'pointer',
-                                    }}
-                                />}
-                                {error.password && <span style={{ color: 'red', fontSize: '12px' }}>{error.password}</span>}
-                            </div>
-
-                        </Stack>
-                        <Stack direction={'row'} sx={{ display: "flex", gap: "25px" }}>
-                            <div style={textFieldStyle}>
-                                <label>Organisation Type</label>
-                                <input style={{ height: "40px", borderRadius: "8px", border: " 1px solid #CCCCCC", padding: '8px' }}
-                                    onChange={handleDataChange}
-                                    name='organizationType'
-                                    value={data.organizationType}
-                                    type='tel'
-                                />
-                                {error.organizationType && <span style={{ color: 'red', fontSize: '12px' }}>{error.organizationType}</span>}
-                            </div>
-                            <div style={textFieldStyle}>
-                                <label>Confirm password</label>
-                                <input style={{ height: "40px", borderRadius: "8px", border: " 1px solid #CCCCCC", padding: '8px' }}
-                                    onChange={handleDataChange}
-                                    name='confirmpassword'
-                                    value={data.confirmpassword}
-                                    type='password'
-                                />
-                                {data.confirmpassword?.length > 0 ? "" : <VisibilityOffIcon
-                                    style={{
-                                        position: 'absolute',
-                                        right: '10px',
-                                        top: '70%',
-                                        transform: 'translateY(-50%)',
-                                        cursor: 'pointer',
-                                    }}
-                                />}
-                                {error.confirmPassword && <span style={{ color: 'red', fontSize: '12px' }}>{error.confirmPassword}</span>}
-                            </div>
-
-                        </Stack>
-
-                        <Stack direction={'row'}>
-                            <Box display={'flex'} alignItems={'center'} justifyContent={'center'}>
-                                <Checkbox
-                                    checked={checked}
-                                    onChange={handleChange}
-                                    inputProps={{ 'aria-label': 'controlled' }}
-                                />
-                                <Typography sx={{ fontSize: "14px", fontWeight: "500" }}>
-                                    Agreed to <span style={{ color: "#6F32BF" }}>Terms and Conditions</span>
-                                </Typography>
-                                
-                               
-
-                            </Box >
-                            
-
-                        </Stack>
-                        {error.terms && <span style={{ color: 'red', fontSize: '12px',marginTop:"-30px" }}>{error.terms}</span>}
-
-
-                    </Box>
-                    {/*  */}
-                    <Box display={'flex'} alignItems={'center'} justifyContent={'center'} flexDirection={'column'} sx={{ width: '253px', height: "93px", gap: '10px' }}>
-                        <Button variant='contained' color='secondary' sx={{ borderRadius: "25px", marginTop: "20px", height: "40px", width: '200px', padding: '10px 35px' }}
-                            onClick={handleSubmit}
-                        >Register</Button>
-                        <Typography>
-                            Already have an account? <Link to="/organiser/login"><span style={{ textDecoration: "underline",color:"black" }}>Sign in</span></Link>
-                        </Typography>
-
-                    </Box>
-                </Box>
-                {/* {message.success && <p style={{ textAlign: "center", color: "green", fontSize: "32px", fontWeight: "600" }}>{message.success}</p>}
-                {message.error && <p style={{ textAlign: "center", color: "red", fontSize: "32px", fontWeight: "600" }}>{message.error}</p>} */}
-
+                                <Typography variant="body2">Already have an account? <Link to="/organiser/login" style={{ color: '#6F32BF', fontWeight: 700, textDecoration: 'none' }}>Sign In</Link></Typography>
+                            </Box>
+                        </form>
+                    </Paper>
+                </motion.div>
             </Container>
-<Footer userRole="organiser" />      
-    </>
-  )
-}
+            <Footer userRole="organiser" />
+        </Box>
+    );
+};
 
-export default OrganiserRegister
+export default OrganiserRegister;

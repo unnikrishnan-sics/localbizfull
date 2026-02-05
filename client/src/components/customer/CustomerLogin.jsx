@@ -1,102 +1,16 @@
 import React, { useState } from 'react';
 import NavbarSigin from '../Navbar/NavbarSigin';
-import { Box, Button, Container, Typography, CircularProgress } from '@mui/material';
+import { Box, Button, Container, Typography, CircularProgress, Paper, TextField, InputAdornment, IconButton, Stack } from '@mui/material';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import EmailIcon from '@mui/icons-material/Email';
+import LockIcon from '@mui/icons-material/Lock';
 import Footer from '../Footer/Footer';
 import axios from "axios";
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { baseUrl } from '../../baseUrl';
-import styled from '@emotion/styled';
-
-// Styled components
-const AuthContainer = styled(Container)({
-  minHeight: 'calc(100vh - 128px)',
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'center',
-  alignItems: 'center',
-  padding: '24px 0',
-});
-
-const AuthCard = styled(Box)(({ theme }) => ({
-  background: 'white',
-  borderRadius: '16px',
-  boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
-  padding: '40px',
-  width: '100%',
-  maxWidth: '480px',
-  position: 'relative',
-  overflow: 'hidden',
-  '&:before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '6px',
-    background: 'linear-gradient(90deg, #667eea, #764ba2)',
-  },
-}));
-
-const AuthInput = styled('input')({
-  width: '100%',
-  padding: '12px 16px',
-  borderRadius: '8px',
-  border: '1px solid #e0e0e0',
-  fontSize: '16px',
-  transition: 'all 0.3s ease',
-  '&:focus': {
-    borderColor: '#764ba2',
-    boxShadow: '0 0 0 2px rgba(118, 75, 162, 0.2)',
-    outline: 'none',
-  },
-});
-
-const AuthLabel = styled('label')({
-  display: 'block',
-  marginBottom: '8px',
-  fontSize: '14px',
-  fontWeight: '600',
-  color: '#555',
-});
-
-const AuthButton = styled(Button)({
-  background: 'linear-gradient(90deg, #667eea, #764ba2)',
-  borderRadius: '8px',
-  padding: '12px 24px',
-  fontSize: '16px',
-  fontWeight: '600',
-  textTransform: 'none',
-  color: 'white',
-  transition: 'background-color 0.3s ease',
-  '&:hover': {
-    background: 'linear-gradient(90deg, #5a6fdd, #6a3fab)',
-  },
-  '&:disabled': {
-    backgroundColor: '#cccccc',
-    color: '#888888',
-  }
-});
-
-const InputWrapper = styled(Box)({
-  position: 'relative',
-  marginBottom: '24px',
-});
-
-const PasswordToggle = styled(Box)({
-  position: 'absolute',
-  right: '12px',
-  top: '42px',
-  cursor: 'pointer',
-  color: '#888',
-  display: 'flex',
-  alignItems: 'center',
-  '&:hover': {
-    color: '#764ba2',
-  },
-});
+import { motion } from 'framer-motion';
 
 const CustomerLogin = () => {
   const [data, setData] = useState({
@@ -112,10 +26,6 @@ const CustomerLogin = () => {
     setData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -126,111 +36,136 @@ const CustomerLogin = () => {
 
       if (token && message === "customer logged in successfully") {
         localStorage.setItem("token", token);
-        toast.success("Logged in successfully!");
+        toast.success("Welcome back! Logged in successfully.");
         navigate("/customer/home");
       } else {
         toast.error(message || "Login failed. Please try again.");
       }
     } catch (error) {
-      if (error.response) {
-        toast.error(error.response.data.message || "An unexpected error occurred.");
-      } else if (error.request) {
-        toast.error("No response from server. Please check your network connection.");
-      } else {
-        toast.error("An error occurred during login. Please try again.");
-      }
-      console.error("Login error:", error);
+      toast.error(error.response?.data?.message || "Login failed. Check your credentials.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <>
-      <NavbarSigin siginupStyle={{ background: "white", boxShadow: "none" }} />
-      
-      <AuthContainer>
-        <AuthCard>
-          <Typography variant="h4" component="h1" align="center" sx={{
-            mb: 4,
-            fontWeight: '700',
-            background: 'linear-gradient(90deg, #667eea, #764ba2)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}>
-            Welcome Back!
-          </Typography>
+    <Box sx={{ minHeight: '100vh', background: 'linear-gradient(135deg, #F6F0FF 0%, #FFFFFF 100%)' }}>
+      <NavbarSigin siginupStyle={{ background: "transparent", boxShadow: "none" }} />
 
-          <form onSubmit={handleLogin}>
-            <InputWrapper>
-              <AuthLabel htmlFor="email">Email Address</AuthLabel>
-              <AuthInput
-                id="email"
-                onChange={handleInputChange}
-                name="email"
-                value={data.email}
-                type="email"
-                placeholder="Enter your email"
-                required
-              />
-            </InputWrapper>
+      <Container maxWidth="sm" sx={{ py: { xs: 8, md: 12 } }}>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 4, md: 6 },
+              borderRadius: '24px',
+              boxShadow: '0 20px 40px rgba(111, 50, 191, 0.1)',
+              background: 'white',
+              position: 'relative',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Top Accent Line */}
+            <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, height: '8px', background: 'linear-gradient(90deg, #6F32BF, #9b70d3)' }} />
 
-            <InputWrapper>
-              <AuthLabel htmlFor="password">Password</AuthLabel>
-              <AuthInput
-                id="password"
-                onChange={handleInputChange}
-                name="password"
-                value={data.password}
-                type={showPassword ? "text" : "password"}
-                placeholder="Enter your password"
-                required
-              />
-              <PasswordToggle onClick={togglePasswordVisibility}>
-                {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-              </PasswordToggle>
-            </InputWrapper>
+            <Stack spacing={4}>
+              <Box textAlign="center">
+                <Typography variant="h4" sx={{ fontWeight: 800, color: '#6F32BF', mb: 1.5 }}>Welcome Back</Typography>
+                <Typography color="text.secondary">Please enter your details to sign in</Typography>
+              </Box>
 
-            <Box sx={{ textAlign: 'right', mb: 3 }}>
-              <Link to="/customer/forgotpassword" style={{
-                textDecoration: 'none',
-                color: '#764ba2',
-                fontSize: '14px',
-                fontWeight: '600'
-              }}>
-                Forgot password?
-              </Link>
-            </Box>
+              <Box component="form" onSubmit={handleLogin}>
+                <Stack spacing={3}>
+                  <TextField
+                    fullWidth
+                    label="Email Address"
+                    name="email"
+                    type="email"
+                    value={data.email}
+                    onChange={handleInputChange}
+                    required
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <EmailIcon sx={{ color: '#6F32BF' }} />
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
+                  />
 
-            <AuthButton
-              fullWidth
-              variant="contained"
-              type="submit"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <CircularProgress size={24} sx={{ color: 'white' }} />
-              ) : (
-                'Login'
-              )}
-            </AuthButton>
-          </form>
+                  <Box>
+                    <TextField
+                      fullWidth
+                      label="Password"
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      value={data.password}
+                      onChange={handleInputChange}
+                      required
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <LockIcon sx={{ color: '#6F32BF' }} />
+                          </InputAdornment>
+                        ),
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                              {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
+                    />
+                    <Box sx={{ mt: 1.5, textAlign: 'right' }}>
+                      <Link to="/customer/forgotpassword" style={{ color: '#6F32BF', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>
+                        Forgot Password?
+                      </Link>
+                    </Box>
+                  </Box>
 
-          <Typography align="center" sx={{ mt: 3, color: '#666' }}>
-            Don't have an account?{' '}
-            <Link to="/customer/registration" style={{
-              color: '#764ba2',
-              fontWeight: '600',
-              textDecoration: 'none'
-            }}>
-              Sign up
-            </Link>
-          </Typography>
-        </AuthCard>
-      </AuthContainer>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    size="large"
+                    type="submit"
+                    disabled={isLoading}
+                    sx={{
+                      borderRadius: '50px',
+                      py: 1.8,
+                      fontSize: '18px',
+                      fontWeight: 700,
+                      background: 'linear-gradient(90deg, #6F32BF, #9b70d3)',
+                      boxShadow: '0 10px 20px rgba(111, 50, 191, 0.2)',
+                      textTransform: 'none',
+                      mt: 2,
+                      '&:hover': {
+                        boxShadow: '0 15px 30px rgba(111, 50, 191, 0.3)',
+                        transform: 'translateY(-2px)'
+                      }
+                    }}
+                  >
+                    {isLoading ? <CircularProgress size={26} color="inherit" /> : 'Sign In'}
+                  </Button>
+
+                  <Typography align="center" variant="body2" color="text.secondary">
+                    New to LocalBiz? <Link to="/customer/registration" style={{ color: '#6F32BF', fontWeight: 600, textDecoration: 'none' }}>Create an account</Link>
+                  </Typography>
+                </Stack>
+              </Box>
+            </Stack>
+          </Paper>
+        </motion.div>
+      </Container>
 
       <Footer userRole="customer" />
-    </>
+    </Box>
   );
 };
 

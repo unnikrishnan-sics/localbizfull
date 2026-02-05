@@ -1,41 +1,37 @@
-const mongoose=require("mongoose");
-const bussinessSchema=mongoose.Schema(
+const mongoose = require("mongoose");
+const bussinessSchema = mongoose.Schema(
     {
-        name:{
-            type:String,
-            require:true,
+        name: {
+            type: String,
+            require: true,
         },
-        email:{
-            type:String,
-            require:true,
-            unique:true
+        email: {
+            type: String,
+            require: true,
+            unique: true
         },
-        password:{
-            type:String,
-            require:true
+        password: {
+            type: String,
+            require: true
         },
-        confirmpassword:{
-            type:String,
-            require:true
+        dateOfBirth: {
+            type: Date,
         },
-        dateOfBirth:{
-            type:Date,
+        phone: {
+            type: Number,
+            require: true
         },
-        phone:{
-            type:Number,
-            require:true
+        profilePic: {
+            type: Object,
+            require: true
         },
-        profilePic:{
-            type:Object,
-            require:true
+        address: {
+            type: String,
+            require: true
         },
-        address:{
-            type:String,
-            require:true
-        },
-        agreed:{
-            type:Boolean,
-            require:true
+        agreed: {
+            type: Boolean,
+            require: true
         },
         isVerified: {
             type: Boolean,
@@ -43,29 +39,29 @@ const bussinessSchema=mongoose.Schema(
         },
         resetPasswordToken: String,
         resetPasswordExpires: Date,
-        isActive:{
-            type:Boolean,
-            default:true
+        isActive: {
+            type: Boolean,
+            default: true
         },
-        isAdminApproved:{
-            type:Boolean,
-            default:false
+        isAdminApproved: {
+            type: Boolean,
+            default: false
         },
-        bussinessName:{
-            type:String,
-            require:true
+        bussinessName: {
+            type: String,
+            require: true
         },
-        bussinessCategory:{
-            type:String,
-            require:true
+        bussinessCategory: {
+            type: String,
+            require: true
         },
-        bussinessDescription:{
-            type:String,
-            require:true
+        bussinessDescription: {
+            type: String,
+            require: true
         },
-        bussinessLogo:{
-            type:Object,
-            require:true
+        bussinessLogo: {
+            type: Object,
+            require: true
         },
         location: {
             type: {
@@ -78,9 +74,9 @@ const bussinessSchema=mongoose.Schema(
                 index: '2dsphere'
             }
         }
-    },{timeStamps:true}
+    }, { timeStamps: true }
 );
 
-bussinessSchema.index({ location: '2dsphere' },{background:false})
+bussinessSchema.index({ location: '2dsphere' }, { background: false })
 
-module.exports=mongoose.model("bussiness",bussinessSchema)
+module.exports = mongoose.model("bussiness", bussinessSchema)

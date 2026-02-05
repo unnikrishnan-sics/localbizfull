@@ -1,358 +1,392 @@
-import React, { useState } from 'react'
-import NavbarSigin from '../Navbar/NavbarSigin'
-import { Container, Stack, Typography, Box, TextField, styled, InputAdornment, Checkbox, Button } from '@mui/material';
+import React, { useState } from 'react';
+import NavbarSigin from '../Navbar/NavbarSigin';
+import { Container, Stack, Typography, Box, TextField, Checkbox, Button, Paper, Avatar, InputAdornment, IconButton } from '@mui/material';
 import profileFrame from "../../assets/image 42.png";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import PhoneIcon from '@mui/icons-material/Phone';
+import EmailIcon from '@mui/icons-material/Email';
+import LockIcon from '@mui/icons-material/Lock';
+import PersonIcon from '@mui/icons-material/Person';
+import HomeIcon from '@mui/icons-material/Home';
 import Footer from '../Footer/Footer';
 import axios from "axios";
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { baseUrl } from '../../baseUrl';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const CustomerRegistration = () => {
-  const textFieldStyle = { height: "65px", width: "360px", display: "flex", flexDirection: "column", justifyContent: "start", position: "relative" }
-  const siginupStyle = { background: "white", boxShadow: "none" }
+    const navigate = useNavigate();
+    const [checked, setChecked] = useState(false);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState({});
 
-  const [checked, setChecked] = React.useState(false);
+    const [data, setData] = useState({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        address: "",
+        phone: "",
+        profilePic: null
+    });
 
-  const handleChange = (event) => {
-    if (event.target.checked) {
-        setError((prevError) => ({
-            ...prevError,
-            terms: ""
-        }));
-    }
-      setChecked(event.target.checked);
-  };
+    const handleDataChange = (e) => {
+        const { name, value } = e.target;
+        setData(prev => ({ ...prev, [name]: value }));
+        if (error[name]) {
+            setError(prev => ({ ...prev, [name]: "" }));
+        }
+    };
 
-  const [imagePreview, setImagePreview] = useState(null);
+    const handleFileUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setData(prev => ({ ...prev, profilePic: file }));
+            const objectURL = URL.createObjectURL(file);
+            setImagePreview(objectURL);
+        }
+    };
 
-  const [message, setMessage] = useState({
-      success: "",
-      error: ""
-  })
-  const [error, setError] = useState({})
+    const validation = () => {
+        let isValid = true;
+        let errorMessage = {};
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,15}$/;
 
-  const [data, setData] = useState({
-      name: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      address: "",
-      phone: "",
-      profilePic: null
-  });
-  const handleDataChange = (e) => {
-    setError((prevError) => ({
-        ...prevError,
-        [name]: ""
-    }));
-      const { name, value } = e.target;
-      setData(prev => {
-          return { ...prev, [name]: value }
-      })
+        if (!data.name.trim()) {
+            errorMessage.name = "Name is required";
+            isValid = false;
+        } else if (data.name.length < 3) {
+            errorMessage.name = "Name must be at least 3 characters";
+            isValid = false;
+        }
 
-  }
+        if (!data.email.trim()) {
+            errorMessage.email = "Email is required";
+            isValid = false;
+        } else if (!emailRegex.test(data.email)) {
+            errorMessage.email = "Invalid email address";
+            isValid = false;
+        }
 
-  const handleFileUpload = (e) => {
-      const file = e.target.files[0];
-      if (file) {
-          setData(prev => {
-              return { ...prev, profilePic: file }
-          });
-          const objectURL = URL.createObjectURL(file);
-          setImagePreview(objectURL);
-      }
+        if (!data.password.trim()) {
+            errorMessage.password = "Password is required";
+            isValid = false;
+        } else if (!passwordRegex.test(data.password)) {
+            errorMessage.password = "Password must be 6-15 chars with upper, lower, number & special char";
+            isValid = false;
+        }
 
-  }
-  const validation = () => {
-      let isValid = true;
-      let errorMessage = {};
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,15}$/;
-      if (!data.name.trim()) {
-          errorMessage.name="Name should not be empty"
-          isValid = false;
-      }
-      else if(data.name.length<3||data.name.length>20){
-          errorMessage.name="Name should be 3 to 20 char length"
-          isValid = false;
+        if (data.password !== data.confirmPassword) {
+            errorMessage.confirmPassword = "Passwords do not match";
+            isValid = false;
+        }
 
-      }
-      if (!data.email.trim()) {
-          errorMessage.email = "Email should not be empty";
-          isValid = false;
-      }
-      else if (!emailRegex.test(data.email)) {
-          errorMessage.email = "Invalid email address";
-          isValid = false;
-      }
-      if (!data.password.trim()) {
-          errorMessage.password = "Password should not be empty";
-          isValid = false;
-      }
-      else if(!passwordRegex.test(data.password)){
-        errorMessage.password="Password should have atleast one Uppercase,smallcase,special charecter and should be 6 to 15 char length"
-        isValid = false;
-    }
-      if (!data.confirmPassword.trim()) {
-          errorMessage.confirmPassword = "Confirm Password should not be empty";
-          isValid = false;
-      }
-      else if(data.confirmPassword.length<8||data.confirmPassword.length>20){
-          errorMessage.confirmPassword="Confirm password should be 8 to 20 char length"
-          isValid = false;
-      }
-      if (data.password !== data.confirmPassword) {
-          errorMessage.confirmPassword = "Password and confirm password should be same";
-          isValid = false;
-      }
-      if(data.address.length<10){
-          errorMessage.address="Address should be 10 char length"
-          isValid = false;
-      }
-      else if(!data.address.trim()){
-          errorMessage.address="Address should not be empty"
-          isValid = false;
-      }
-      if(!data.phone.trim()){
-          errorMessage.phone="Phone should not be empty"
-          isValid = false;
-      }
-      else if(data.phone.length !==10){
-          errorMessage.phone="Phone should be 10 digit"
-          isValid = false;
-      }
-      if(!checked){
-          errorMessage.terms = "Please accept the terms and conditions";
-          isValid = false;
-      }
-      setError(errorMessage);
-      return isValid;
+        if (!data.address.trim()) {
+            errorMessage.address = "Address is required";
+            isValid = false;
+        } else if (data.address.length < 10) {
+            errorMessage.address = "Address must be at least 10 characters";
+            isValid = false;
+        }
 
-  }
+        if (!data.phone.trim()) {
+            errorMessage.phone = "Phone number is required";
+            isValid = false;
+        } else if (data.phone.length !== 10) {
+            errorMessage.phone = "Phone number must be 10 digits";
+            isValid = false;
+        }
 
-const navigate=useNavigate();
-  const handleSubmit = async (e) => {
-      const isValid = validation();
-      if (!isValid) {
-          return;
-      }
-      e.preventDefault();
-      // console.log(data)
-      const formData = new FormData();
-      formData.append('name', data.name);
-      formData.append('email', data.email);
-      formData.append('password', data.password);
-      formData.append('confirmpassword', data.confirmPassword);
-      formData.append('address', data.address);
-      formData.append('phone', data.phone);
-      formData.append('profilePic', data.profilePic);
-      formData.append('agreed', checked)
+        if (!checked) {
+            errorMessage.terms = "You must accept the terms";
+            isValid = false;
+        }
 
-      const response = await axios.post(`${baseUrl}customer/registration`, formData);
+        setError(errorMessage);
+        return isValid;
+    };
 
-      const result = response.data;
-      console.log(result);
-      console.log(result.message);
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!validation()) return;
 
+        setIsLoading(true);
+        const formData = new FormData();
+        formData.append('name', data.name);
+        formData.append('email', data.email);
+        formData.append('password', data.password);
+        formData.append('address', data.address);
+        formData.append('phone', data.phone);
+        formData.append('profilePic', data.profilePic);
+        formData.append('agreed', checked);
 
-      console.log(data);
+        try {
+            const response = await axios.post(`${baseUrl}customer/registration`, formData);
+            if (response.status === 201 || response.data.message === "Customer created successfully") {
+                toast.success("Registration successful! Welcome aboard.");
+                navigate("/customer/login");
+            } else {
+                toast.error(response.data.message || "Registration failed");
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.message || "An error occurred during registration");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
+    return (
+        <Box sx={{ minHeight: '100vh', background: 'linear-gradient(135deg, #F6F0FF 0%, #FFFFFF 100%)' }}>
+            <NavbarSigin siginupStyle={{ background: "transparent", boxShadow: "none" }} />
 
-      if (result.message === "Customer already registered with this phone number") {
-        //   return setMessage({
-        //       success: "",
-        //       error: "you have already registered with this phone number"
+            <Container maxWidth="md" sx={{ py: 8 }}>
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                >
+                    <Paper
+                        elevation={0}
+                        sx={{
+                            p: { xs: 3, md: 6 },
+                            borderRadius: '24px',
+                            boxShadow: '0 20px 40px rgba(111, 50, 191, 0.08)',
+                            background: 'white',
+                            position: 'relative',
+                            overflow: 'hidden'
+                        }}
+                    >
+                        {/* Top Accent Line */}
+                        <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, height: '8px', background: 'linear-gradient(90deg, #6F32BF, #9b70d3)' }} />
 
-        //   })
-        toast.error("you have already registered with this phone number")
-      }
-      if (result.message === "Customer already registered with this email") {
-        //   return setMessage({
-        //       success: "",
-        //       error: "you have already registered with this email id"
+                        <Stack spacing={4} alignItems="center">
+                            <Box textAlign="center">
+                                <Typography variant="h4" sx={{ fontWeight: 800, color: '#6F32BF', mb: 1 }}>Create Your Account</Typography>
+                                <Typography color="text.secondary">Join LocalBiz and discover the best deals around you</Typography>
+                            </Box>
 
-        //   })
-        toast.error("you have already registered with this email id")
-      }
-      if (result.message === "Customer created successfully") {
-          setData({
-              name: "",
-              email: "",
-              password: "",
-              confirmPassword: "",
-              address: "",
-              phone: "",
-              profilePic: null
-          });
-          setChecked(false);
-          setImagePreview(null);
+                            <Box sx={{ position: 'relative' }}>
+                                <input
+                                    type="file"
+                                    id="profile-upload"
+                                    accept="image/*"
+                                    onChange={handleFileUpload}
+                                    style={{ display: "none" }}
+                                />
+                                <label htmlFor="profile-upload" style={{ cursor: "pointer" }}>
+                                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                                        <Avatar
+                                            src={imagePreview || profileFrame}
+                                            sx={{
+                                                width: 120,
+                                                height: 120,
+                                                border: '4px solid #F6F0FF',
+                                                boxShadow: '0 8px 16px rgba(111, 50, 191, 0.1)'
+                                            }}
+                                        />
+                                        <Box sx={{
+                                            position: 'absolute',
+                                            bottom: 5,
+                                            right: 5,
+                                            bgcolor: '#6F32BF',
+                                            color: 'white',
+                                            borderRadius: '50%',
+                                            width: 32,
+                                            height: 32,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
+                                        }}>
+                                            <PersonIcon fontSize="small" />
+                                        </Box>
+                                    </motion.div>
+                                </label>
+                            </Box>
 
-        //   return setMessage({ success: "Customer Profile created", error: "" });
-        toast.success("Customer Profile created");
-        navigate("/customer/login");
-        
-      }
+                            <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+                                <Stack spacing={3}>
+                                    <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
+                                        <TextField
+                                            fullWidth
+                                            label="Full Name"
+                                            name="name"
+                                            value={data.name}
+                                            onChange={handleDataChange}
+                                            error={!!error.name}
+                                            helperText={error.name}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <PersonIcon sx={{ color: '#6F32BF' }} />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                            sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
+                                        />
+                                        <TextField
+                                            fullWidth
+                                            label="Phone Number"
+                                            name="phone"
+                                            value={data.phone}
+                                            onChange={handleDataChange}
+                                            error={!!error.phone}
+                                            helperText={error.phone}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <PhoneIcon sx={{ color: '#6F32BF' }} />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                            sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
+                                        />
+                                    </Stack>
 
+                                    <TextField
+                                        fullWidth
+                                        label="Email Address"
+                                        name="email"
+                                        value={data.email}
+                                        onChange={handleDataChange}
+                                        error={!!error.email}
+                                        helperText={error.email}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <EmailIcon sx={{ color: '#6F32BF' }} />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
+                                    />
 
-  }
-  return (
-    <>
-    <NavbarSigin siginupStyle={siginupStyle}/>
-    <Container sx={{ position: "relative",mb:"50px" ,siginupStyle }} maxWidth="x-lg">
-                
-                <Box display={'flex'} alignItems={'center'} justifyContent={'center'} flexDirection={'column'}>
-                    <Box display={'flex'} alignItems={'center'} justifyContent={'center'}>
-                        <Stack spacing={2} sx={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column", marginTop: "60px" }}>
-                            <input
-                                type="file"
-                                id="profile-upload"
-                                accept="image/*"
-                                onChange={handleFileUpload}
-                                style={{ display: "none" }}
-                            />
+                                    <TextField
+                                        fullWidth
+                                        label="Residential Address"
+                                        name="address"
+                                        multiline
+                                        rows={2}
+                                        value={data.address}
+                                        onChange={handleDataChange}
+                                        error={!!error.address}
+                                        helperText={error.address}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <HomeIcon sx={{ color: '#6F32BF', mt: -2 }} />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
+                                    />
 
-                            <Typography variant='p' color='secondary' sx={{ fontSize: "32px"}}>Sign Up!</Typography>
-                            
-                            <label htmlFor="profile-upload" style={{ cursor: "pointer", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "15px" }}>
-                                <Box component="img" src={imagePreview ? imagePreview : profileFrame} alt='profilepic' sx={{ width: "150px", height: "150px", borderRadius: "50%" }}></Box>
-                                {imagePreview ? <Typography></Typography> : <Typography variant='p'  sx={{ fontSize: "12px", fontWeight: "500" }}>+ add image</Typography>}
+                                    <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
+                                        <TextField
+                                            fullWidth
+                                            label="Password"
+                                            name="password"
+                                            type={showPassword ? 'text' : 'password'}
+                                            value={data.password}
+                                            onChange={handleDataChange}
+                                            error={!!error.password}
+                                            helperText={error.password}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <LockIcon sx={{ color: '#6F32BF' }} />
+                                                    </InputAdornment>
+                                                ),
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                                                            {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                                                        </IconButton>
+                                                    </InputAdornment>
+                                                )
+                                            }}
+                                            sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
+                                        />
+                                        <TextField
+                                            fullWidth
+                                            label="Confirm Password"
+                                            name="confirmPassword"
+                                            type={showConfirmPassword ? 'text' : 'password'}
+                                            value={data.confirmPassword}
+                                            onChange={handleDataChange}
+                                            error={!!error.confirmPassword}
+                                            helperText={error.confirmPassword}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <LockIcon sx={{ color: '#6F32BF' }} />
+                                                    </InputAdornment>
+                                                ),
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">
+                                                            {showConfirmPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                                                        </IconButton>
+                                                    </InputAdornment>
+                                                )
+                                            }}
+                                            sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
+                                        />
+                                    </Stack>
 
-                            </label>
+                                    <Box display="flex" alignItems="center">
+                                        <Checkbox
+                                            checked={checked}
+                                            onChange={(e) => setChecked(e.target.checked)}
+                                            sx={{ color: '#6F32BF', '&.Mui-checked': { color: '#6F32BF' } }}
+                                        />
+                                        <Typography variant="body2">
+                                            I agree to the <Link to="#" style={{ color: '#6F32BF', fontWeight: 600, textDecoration: 'none' }}>Terms and Conditions</Link>
+                                        </Typography>
+                                    </Box>
+                                    {error.terms && <Typography color="error" variant="caption" sx={{ ml: 2, mt: -1 }}>{error.terms}</Typography>}
+
+                                    <Button
+                                        fullWidth
+                                        variant="contained"
+                                        size="large"
+                                        type="submit"
+                                        disabled={isLoading}
+                                        sx={{
+                                            borderRadius: '50px',
+                                            py: 1.8,
+                                            fontSize: '18px',
+                                            fontWeight: 700,
+                                            background: 'linear-gradient(90deg, #6F32BF, #9b70d3)',
+                                            boxShadow: '0 10px 20px rgba(111, 50, 191, 0.2)',
+                                            textTransform: 'none',
+                                            '&:hover': {
+                                                boxShadow: '0 15px 30px rgba(111, 50, 191, 0.3)',
+                                                transform: 'translateY(-2px)'
+                                            }
+                                        }}
+                                    >
+                                        {isLoading ? 'Creating Account...' : 'Register Now'}
+                                    </Button>
+
+                                    <Typography align="center" variant="body2" color="text.secondary">
+                                        Already have an account? <Link to="/customer/login" style={{ color: '#6F32BF', fontWeight: 600, textDecoration: 'none' }}>Sign In</Link>
+                                    </Typography>
+                                </Stack>
+                            </Box>
                         </Stack>
-                    </Box>
-                    <Box sx={{ display: "flex", justifyContent: 'center', alignItems: "start", gap: "30px", height: "293px", flexDirection: "column", marginTop: '30px' }}>
-                        <Stack direction="row" sx={{ display: "flex", gap: "25px" }}>
-
-                            <div style={textFieldStyle}>
-                                <label>Name</label>
-                                <input style={{ height: "40px", borderRadius: "8px", border: " 1px solid #CCCCCC", padding: '8px' }}
-                                    onChange={handleDataChange}
-                                    name='name'
-                                    value={data.name}
-                                    type='text'
-
-                                />
-                                {error.name && <span style={{ color: 'red', fontSize: '12px' }}>{error.name}</span>}
-                            </div>
-
-                            <div style={textFieldStyle}>
-                                <label>Address</label>
-                                <input style={{ height: "40px", borderRadius: "8px", border: " 1px solid #CCCCCC", padding: '8px' }}
-                                    onChange={handleDataChange}
-                                    name='address'
-                                    value={data.address}
-
-                                />
-                                {error.address && <span style={{ color: 'red', fontSize: '12px' }}>{error.address}</span>}
-                            </div>
-                        </Stack>
-                        <Stack direction={'row'} sx={{ display: "flex", gap: "25px" }}>
-                            <div style={textFieldStyle}>
-                                <label>Email</label>
-                                <input style={{ height: "40px", borderRadius: "8px", border: " 1px solid #CCCCCC", padding: '8px' }}
-                                    onChange={handleDataChange}
-                                    name='email'
-                                    value={data.email}
-                                />
-                                {error.email && <span style={{ color: 'red', fontSize: '12px' }}>{error.email}</span>}
-                            </div>
-                            <div style={textFieldStyle}>
-                                <label>New Password</label>
-                                <input style={{ height: "40px", borderRadius: "8px", border: " 1px solid #CCCCCC", padding: '8px' }}
-                                    onChange={handleDataChange}
-                                    name='password'
-                                    value={data.password}
-                                    type='password'
-                                />
-                                {data.password.length > 0 ? "" : <VisibilityOffIcon
-                                    style={{
-                                        position: 'absolute',
-                                        right: '10px',
-                                        top: '70%',
-                                        transform: 'translateY(-50%)',
-                                        cursor: 'pointer',
-                                    }}
-                                />}
-                                {error.password && <span style={{ color: 'red', fontSize: '12px' }}>{error.password}</span>}
-
-                            </div>
-                        </Stack>
-                        <Stack direction={'row'} sx={{ display: "flex", gap: "25px" }}>
-                            <div style={textFieldStyle}>
-                                <label>Phone Number</label>
-                                <input style={{ height: "40px", borderRadius: "8px", border: " 1px solid #CCCCCC", padding: '8px' }}
-                                    onChange={handleDataChange}
-                                    name='phone'
-                                    value={data.phone}
-                                    type='tel'
-                                />
-                                {error.phone && <span style={{ color: 'red', fontSize: '12px' }}>{error.phone}</span>}
-                            </div>
-                            <div style={textFieldStyle}>
-                                <label>Confirm Password</label>
-                                <input style={{ height: "40px", borderRadius: "8px", border: " 1px solid #CCCCCC", padding: '8px' }}
-                                    onChange={handleDataChange}
-                                    name='confirmPassword'
-                                    value={data.confirmPassword}
-                                    type='password'
-                                />
-                                {data.confirmPassword.length > 0 ? "" : <VisibilityOffIcon
-                                    style={{
-                                        position: 'absolute',
-                                        right: '10px',
-                                        top: '70%',
-                                        transform: 'translateY(-50%)',
-                                        cursor: 'pointer',
-                                    }}
-                                />}
-                                {error.confirmPassword && <span style={{ color: 'red', fontSize: '12px' }}>{error.confirmPassword}</span>}
-                            </div>
-
-                        </Stack>
-
-                        <Stack direction={'row'}>
-                            <Box display={'flex'} alignItems={'center'} justifyContent={'center'}>
-                                <Checkbox
-                                    checked={checked}
-                                    onChange={handleChange}
-                                    inputProps={{ 'aria-label': 'controlled' }}
-                                />
-                                <Typography sx={{ fontSize: "14px", fontWeight: "500" }}>
-                                    Agreed to <span style={{ color: "#6F32BF" }}>Terms and Conditions</span>
-                                </Typography>
-                                
-                               
-
-                            </Box >
-                            
-
-                        </Stack>
-                        {error.terms && <span style={{ color: 'red', fontSize: '12px',marginTop:"-30px" }}>{error.terms}</span>}
-
-
-                    </Box>
-                    {/*  */}
-                    <Box display={'flex'} alignItems={'center'} justifyContent={'center'} flexDirection={'column'} sx={{ width: '253px', height: "93px", gap: '10px' }}>
-                        <Button variant='contained' color='secondary' sx={{ borderRadius: "25px", marginTop: "20px", height: "40px", width: '200px', padding: '10px 35px' }}
-                            onClick={handleSubmit}
-                        >Register</Button>
-                        <Typography>
-                            Already have an account? <Link to="/customer/login"><span style={{ textDecoration: "underline",color:"black" }}>Sign in</span></Link>
-                        </Typography>
-
-                    </Box>
-                </Box>
-                {message.success && <p style={{ textAlign: "center", color: "green", fontSize: "32px", fontWeight: "600" }}>{message.success}</p>}
-                {message.error && <p style={{ textAlign: "center", color: "red", fontSize: "32px", fontWeight: "600" }}>{message.error}</p>}
-
+                    </Paper>
+                </motion.div>
             </Container>
-<Footer userRole="customer" />
-    
-      
-    </>
-  )
-}
+            <Footer userRole="customer" />
+        </Box>
+    );
+};
 
-export default CustomerRegistration
+export default CustomerRegistration;

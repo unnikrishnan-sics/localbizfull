@@ -39,7 +39,6 @@ const bussinessRegister = async (req, res) => {
             name,
             email,
             password: hashedPassword,
-            confirmpassword: hashedPassword,
             address,
             phone,
             agreed,
@@ -56,18 +55,18 @@ const bussinessRegister = async (req, res) => {
 
         let existingBussiness = await bussinessModel.findOne({ email });
         if (existingBussiness) {
-            return res.json({
+            return res.status(400).json({
                 message: "Bussiness already registered with this email"
             })
         };
         existingBussiness = await bussinessModel.findOne({ phone });
         if (existingBussiness) {
-            return res.json({
+            return res.status(400).json({
                 message: "Bussiness already registered with this phone number"
             })
         }
         if (password !== confirmpassword) {
-            return res.json({ message: "Password and Confirm Password should be same." })
+            return res.status(400).json({ message: "Password and Confirm Password should be same." })
         }
 
         await newBussiness.save();
@@ -86,11 +85,11 @@ const bussinessLogin = async (req, res) => {
         const { email, password } = req.body;
         const bussiness = await bussinessModel.findOne({ email });
         if (!bussiness) {
-            return res.json({ message: "bussiness not found with this email." })
+            return res.status(404).json({ message: "bussiness not found with this email." })
         }
         const isMatch = await bcrypt.compare(password, bussiness.password);
         if (!isMatch) {
-            return res.json({ message: "Invalid Password." })
+            return res.status(400).json({ message: "Invalid Password." })
         }
         const token = await jwt.sign({ id: bussiness._id }, process.env.SECRET_KEY, { expiresIn: "1hr" });
         res.status(200).json({ message: "bussiness logged in successfully", token: token });
@@ -107,15 +106,15 @@ const bussinessForgotPassword = async (req, res) => {
         const bussiness = await bussinessModel.findOne({ email });
 
         if (!bussiness) {
-            return res.status(404).json({ 
+            return res.status(404).json({
                 success: false,
-                message: "No business found with this email." 
+                message: "No business found with this email."
             });
         }
 
-        res.status(200).json({ 
+        res.status(200).json({
             success: true,
-            message: "Email verified. You can reset your password now." 
+            message: "Email verified. You can reset your password now."
         });
 
     } catch (error) {
@@ -130,9 +129,9 @@ const bussinessResetPassword = async (req, res) => {
         const bussiness = await bussinessModel.findOne({ email });
 
         if (!bussiness) {
-            return res.status(404).json({ 
+            return res.status(404).json({
                 success: false,
-                message: "No business found with this email." 
+                message: "No business found with this email."
             });
         }
 
@@ -141,9 +140,9 @@ const bussinessResetPassword = async (req, res) => {
         bussiness.confirmpassword = hashedPassword;
 
         await bussiness.save();
-        res.status(200).json({ 
+        res.status(200).json({
             success: true,
-            message: "Password reset successfully." 
+            message: "Password reset successfully."
         });
 
     } catch (error) {
@@ -178,7 +177,7 @@ const editBussinessById = async (req, res) => {
 
         const updatedBussiness = await bussinessModel.findByIdAndUpdate(
             bussinessId,
-            { name, email, phone, address ,...(profilePic && { profilePic })},
+            { name, email, phone, address, ...(profilePic && { profilePic }) },
             { new: true }
         );
 

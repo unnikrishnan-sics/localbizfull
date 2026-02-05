@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const bussinessModel = require("./Models/bussinessModel"); // Import the model
 
-mongoose.connect("mongodb://127.0.0.1:27017/localbiz");
+mongoose.connect(process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/localbiz");
 const db = mongoose.connection;
 
 db.on("error", () => {
@@ -17,4 +17,4 @@ db.once("open", async () => {
     }
 });
 
-module.exports=db;
+module.exports = db;

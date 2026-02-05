@@ -5,7 +5,7 @@ dotenv.config();
 const PORT = process.env.PORT || 4056
 const db = require("./dbConnection");
 const router = require("./router");
-const cors=require("cors")
+const cors = require("cors")
 var morgan = require('morgan')
 
 app.use(cors());
@@ -16,7 +16,10 @@ app.use('/uploads', express.static('uploads'));
 
 
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-})
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+}
 
+module.exports = app;

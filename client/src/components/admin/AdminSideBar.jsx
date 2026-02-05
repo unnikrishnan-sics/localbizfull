@@ -3,21 +3,25 @@ import {
   Button,
   Typography,
   Menu,
-  MenuItem
+  MenuItem,
+  Stack,
+  alpha
 } from '@mui/material';
 import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
 import TaskOutlinedIcon from '@mui/icons-material/TaskOutlined';
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import adminlogo from "../../assets/admindashboard.png";
+import ShieldIcon from '@mui/icons-material/Shield';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const AdminSidebar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  const navigate = useNavigate(); // ✅ Correct hook
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const handleUsersClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -32,166 +36,126 @@ const AdminSidebar = () => {
     handleClose();
   };
 
+  const isActive = (path) => location.pathname === path;
+
+  const NavButton = ({ label, icon, path, onClick, hasDropdown }) => (
+    <Button
+      fullWidth
+      onClick={onClick || (() => navigate(path))}
+      sx={{
+        justifyContent: 'flex-start',
+        height: "50px",
+        px: 3,
+        mb: 1,
+        textTransform: 'none',
+        borderRadius: '12px',
+        color: isActive(path) ? '#e94560' : 'rgba(255, 255, 255, 0.7)',
+        background: isActive(path) ? 'rgba(233, 69, 96, 0.1)' : 'transparent',
+        '&:hover': {
+          background: 'rgba(255, 255, 255, 0.05)',
+          color: '#e94560'
+        },
+        transition: 'all 0.3s ease'
+      }}
+      startIcon={icon}
+      endIcon={hasDropdown ? <ArrowDropDownIcon /> : null}
+    >
+      <Typography sx={{ fontSize: "15px", fontWeight: isActive(path) ? 700 : 500, ml: 1, flexGrow: 1, textAlign: 'left' }}>
+        {label}
+      </Typography>
+    </Button>
+  );
+
   return (
     <Box sx={{
-      height: "100%",
-      background: "white",
-      margin: "15px 0px",
-      borderRadius: "8px",
+      height: "calc(100vh - 40px)",
+      background: 'rgba(255, 255, 255, 0.03)',
+      backdropFilter: 'blur(10px)',
+      borderRight: '1px solid rgba(255, 255, 255, 0.1)',
+      margin: "20px 0px 20px 20px",
+      borderRadius: "24px",
       display: 'flex',
       flexDirection: 'column',
-      alignItems: 'center',
-      width: '200px'
+      width: '260px',
+      overflow: 'hidden',
+      position: 'sticky',
+      top: 20
     }}>
-      {/* Logo */}
-      <Box sx={{
-        width: "122px",
-        height: "30px",
-        marginTop: "30px",
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}>
-        <Box component="img" src={adminlogo} alt="Admin Logo" />
+      {/* Brand Header */}
+      <Box sx={{ p: 4, textAlign: 'center' }}>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1 }}>
+          <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="center">
+            <ShieldIcon sx={{ fontSize: 32, color: '#e94560' }} />
+            <Typography variant="h5" sx={{ fontWeight: 900, color: 'white', letterSpacing: '1px' }}>
+              LOCAL<span style={{ color: '#e94560' }}>BIZ</span>
+            </Typography>
+          </Stack>
+          <Typography sx={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', mt: 0.5, letterSpacing: '2px', fontWeight: 600 }}>
+            ADMIN CONTROL PANEL
+          </Typography>
+        </motion.div>
       </Box>
 
-      {/* Menu Items */}
-      <Box sx={{
-        width: '100%',
-        marginTop: "20px",
-        padding: '0 16px'
-      }}>
-        <Button
-          fullWidth
-          onClick={() => navigate('/admin/dashboard')}
-          sx={{
-            justifyContent: 'flex-start',
-            height: "40px",
-            marginBottom: "10px",
-            textTransform: 'none',
-            color: 'primary.main',
-            '&:hover': {
-              backgroundColor: 'action.hover'
-            }
-          }}
-          startIcon={<DashboardOutlinedIcon sx={{ width: "24px" }} />}
-        >
-          <Typography sx={{
-            fontSize: "14px",
-            fontWeight: "500",
-            ml: 1,
-            textAlign: 'left'
-          }}>
-            Dashboard
-          </Typography>
-        </Button>
+      {/* Navigation */}
+      <Box sx={{ flexGrow: 1, mt: 2, px: 2 }}>
+        <NavButton label="Dashboard" icon={<DashboardOutlinedIcon />} path="/admin/dashboard" />
+        <NavButton label="Requests" icon={<TaskOutlinedIcon />} path="/admin/requests" />
+        <NavButton label="Complaints" icon={<ReceiptLongOutlinedIcon />} path="/admin/complaints" />
 
-        <Button
-          fullWidth
-          onClick={() => navigate('/admin/requests')}
-          sx={{
-            justifyContent: 'flex-start',
-            height: "40px",
-            marginBottom: "10px",
-            textTransform: 'none',
-            color: 'primary.main',
-            '&:hover': {
-              backgroundColor: 'action.hover'
-            }
-          }}
-          startIcon={<TaskOutlinedIcon sx={{ width: "24px" }} />}
-        >
-          <Typography sx={{
-            fontSize: "14px",
-            fontWeight: "500",
-            ml: 1,
-            textAlign: 'left'
-          }}>
-            Request
-          </Typography>
-        </Button>
-
-        <Button
-          fullWidth
-          onClick={() => navigate('/admin/complaints')}
-          sx={{
-            justifyContent: 'flex-start',
-            height: "40px",
-            marginBottom: "10px",
-            textTransform: 'none',
-            color: 'primary.main',
-            '&:hover': {
-              backgroundColor: 'action.hover'
-            }
-          }}
-          startIcon={<ReceiptLongOutlinedIcon sx={{ width: "24px" }} />}
-        >
-          <Typography sx={{
-            fontSize: "14px",
-            fontWeight: "500",
-            ml: 1,
-            textAlign: 'left'
-          }}>
-            Complaints
-          </Typography>
-        </Button>
-
-        {/* Dropdown Button */}
-        <Button
-          fullWidth
-          id="users-button"
-          aria-controls={open ? 'users-menu' : undefined}
-          aria-haspopup="true"
-          aria-expanded={open ? 'true' : undefined}
+        <NavButton
+          label="Users"
+          icon={<PersonOutlineOutlinedIcon />}
           onClick={handleUsersClick}
-          sx={{
-            justifyContent: 'space-between',
-            height: "40px",
-            marginBottom: "10px",
-            textTransform: 'none',
-            color: 'primary.main',
-            '&:hover': {
-              backgroundColor: 'action.hover'
-            }
-          }}
-          startIcon={<PersonOutlineOutlinedIcon sx={{ width: "24px" }} />}
-          endIcon={<ArrowDropDownIcon />}
-        >
-          <Typography sx={{
-            fontSize: "14px",
-            fontWeight: "500",
-            ml: 1,
-            textAlign: 'left',
-            flexGrow: 1
-          }}>
-            Users
-          </Typography>
-        </Button>
+          hasDropdown
+          path="/admin/viewusers" // Active if any sub is active? Simplification for now.
+        />
 
         <Menu
           id="users-menu"
           anchorEl={anchorEl}
           open={open}
           onClose={handleClose}
-          MenuListProps={{ 'aria-labelledby': 'users-button' }}
           PaperProps={{
-            style: {
-              width: '200px',
-              marginLeft: '16px',
-              boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)'
+            sx: {
+              width: '220px',
+              mt: 1,
+              background: '#1a1a2e',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+              borderRadius: '16px',
+              '& .MuiMenuItem-root': {
+                color: 'rgba(255,255,255,0.7)',
+                m: 1,
+                borderRadius: '8px',
+                '&:hover': {
+                  background: 'rgba(233, 69, 96, 0.1)',
+                  color: '#e94560'
+                }
+              }
             }
           }}
         >
-          <MenuItem onClick={() => handleMenuItemClick('/admin/viewusers')}>
-            <Typography sx={{ fontSize: "14px", fontWeight: "500" }}>View Users</Typography>
-          </MenuItem>
-          <MenuItem onClick={() => handleMenuItemClick('/admin/bussinessowners')}>
-            <Typography sx={{ fontSize: "14px", fontWeight: "500" }}>Business Owners</Typography>
-          </MenuItem>
-          <MenuItem onClick={() => handleMenuItemClick('/admin/organizations')}>
-            <Typography sx={{ fontSize: "14px", fontWeight: "500" }}>Community Organizer</Typography>
-          </MenuItem>
+          <MenuItem onClick={() => handleMenuItemClick('/admin/viewusers')}>Customers</MenuItem>
+          <MenuItem onClick={() => handleMenuItemClick('/admin/bussinessowners')}>Business Owners</MenuItem>
+          <MenuItem onClick={() => handleMenuItemClick('/admin/organizations')}>Community Organizers</MenuItem>
         </Menu>
+      </Box>
+
+      {/* Footer Info */}
+      <Box sx={{ p: 4, borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
+        <Box sx={{
+          p: 2,
+          borderRadius: '16px',
+          background: 'linear-gradient(45deg, rgba(233, 69, 96, 0.1), rgba(111, 50, 191, 0.1))',
+          textAlign: 'center'
+        }}>
+          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)', display: 'block' }}>
+            System Status
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#00e676', fontWeight: 700, mt: 0.5 }}>
+            ONLINE
+          </Typography>
+        </Box>
       </Box>
     </Box>
   );

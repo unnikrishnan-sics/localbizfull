@@ -14,10 +14,6 @@ const CustomerSchema=mongoose.Schema(
             type:String,
             require:true
         },
-        confirmpassword:{
-            type:String,
-            require:true
-        },
         dateOfBirth:{
             type:Date,
         },
