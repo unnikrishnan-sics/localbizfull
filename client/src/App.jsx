@@ -145,9 +145,9 @@ function App() {
           <Route path='/organiser/ViewWorkShop' element={<ViewWorkshopsTable />} />
           <Route path='/organiser/EditEvents/:id' element={<EditEvents />} />
           <Route path='/organiser/EditTrainning/:id' element={<EditTrainning />} />
-          <Route path='/organiser/EditWorkShop/:id' element={<EditWorkShop />} />
+          <Route path='/organiser/EditWorkShop/:id' element={<EditWorkShop />} /> */}
           <Route path='/organiser/ViewProductList/:bussinessId' element={<OrganaiserViewProductList />} />
-          <Route path='/organiser/joined-members' element={<JointMembers />} /> */}
+          <Route path='/organiser/joined-members' element={<JointMembers />} />
 
 
         </Routes>

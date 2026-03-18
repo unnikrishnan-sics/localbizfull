@@ -1,24 +1,12 @@
-import { Box, Button, Container, Grid, Typography, Modal, Fade, Backdrop } from '@mui/material';
+import { Box, Button, Container, Grid, Typography, Modal, Fade, Backdrop, Stack, Card, IconButton } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import CloseIcon from '@mui/icons-material/Close';
+import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import AdminSidebar from './AdminSideBar';
-import Footer from '../Footer/Footer';
-import axiosInstance from '../../api/axiosInstance'; // Import axiosInstance
-
-const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 400,
-  bgcolor: 'background.paper',
-  borderRadius: "10px",
-  boxShadow: 24,
-  p: 4,
-};
+import axiosInstance from '../../api/axiosInstance';
 
 const AdminViewUsers = () => {
   const [users, setUsers] = useState([]);
@@ -44,9 +32,6 @@ const AdminViewUsers = () => {
           return;
         }
 
-        // API to fetch all customers is not explicitly provided in README.md.
-        // Assuming a hypothetical endpoint for demonstration.
-        // In a real application, this API would need to be implemented on the backend.
         const response = await axiosInstance.get('/api/admin/customers', {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -54,11 +39,10 @@ const AdminViewUsers = () => {
         });
 
         setUsers(response.data.customers || []);
-        // toast.success(response.data.message || "Users fetched successfully.");
       } catch (error) {
         console.error("Error fetching users:", error);
         toast.error(error.response?.data?.message || "Failed to fetch users.");
-        setUsers([]); // Clear users on error
+        setUsers([]);
       }
     };
 
@@ -66,66 +50,92 @@ const AdminViewUsers = () => {
   }, [navigate]);
 
   return (
-    <>
-      <Container maxWidth="x-lg" sx={{ background: "#fffff", minHeight: '100vh', display: 'flex', flexDirection: 'row', p: 0 }}>
-        <Grid sx={{ p: 0 }}>
-          <AdminSidebar />
-        </Grid>
+    <Box sx={{ minHeight: '100vh', bgcolor: '#0a0a1a', display: 'flex' }}>
+      <AdminSidebar />
 
-        <Grid container spacing={2} sx={{ flex: 1, width: "100%", display: "flex", flexDirection: "column", gap: 2, m: 0 }}>
-          <Grid item xs={12}>
-            <Box sx={{ height: "70px", background: "white", borderRadius: "8px", width: "98%", px: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant='h3' sx={{ fontSize: "24px", fontWeight: "500" }} color='primary'>Dashboard</Typography>
-              <Button onClick={handleOpen} variant="text" color='primary' sx={{ borderRadius: "25px", height: "40px", width: '200px', padding: '10px 35px' }} startIcon={<LogoutIcon />}>logout</Button>
+      <Box sx={{ flexGrow: 1, p: 4, overflowY: 'auto', height: '100vh', boxSizing: 'border-box' }}>
+        <Container maxWidth="xl">
+          {/* Top Header */}
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 6 }}>
+            <Box>
+              <Typography variant="h4" sx={{ color: 'white', fontWeight: 900 }}>Users Directory</Typography>
+              <Typography sx={{ color: 'rgba(255,255,255,0.5)', mt: 0.5 }}>Manage registered platform customers</Typography>
             </Box>
-          </Grid>
+            <Stack direction="row" spacing={2} alignItems="center">
+              <IconButton sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.05)', p: 1.5 }}>
+                <NotificationsNoneIcon />
+              </IconButton>
+              <Button
+                onClick={handleOpen}
+                variant="outlined"
+                startIcon={<LogoutIcon />}
+                sx={{
+                  color: '#e94560',
+                  borderColor: 'rgba(233, 69, 96, 0.3)',
+                  borderRadius: '12px',
+                  px: 3,
+                  height: '48px',
+                  textTransform: 'none',
+                  fontWeight: 700,
+                  '&:hover': { borderColor: '#e94560', bgcolor: 'rgba(233, 69, 96, 0.05)' }
+                }}
+              >
+                Logout
+              </Button>
+            </Stack>
+          </Stack>
 
-          <Grid item sx={{ p: 3 }}>
-            <Typography variant="h4" sx={{ textAlign: 'center', fontWeight: 100, fontSize: '2rem', fontFamily: 'Roboto, sans-serif', mb: 4 }}>Users</Typography>
-            <Box sx={{ width: '100%', overflow: 'hidden', borderRadius: 2, boxShadow: 1 }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#f5f5f5', borderBottom: '2px solid #9c27b0' }}>
-                    <th style={headerStyle}>S No</th>
-                    <th style={headerStyle}>Profile</th>
-                    <th style={headerStyle}>Full Name</th>
-                    <th style={headerStyle}>Email</th>
-                    <th style={headerStyle}>Phone Number</th>
-                    <th style={headerStyle}>Address</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.length > 0 ? (
-                    users.map((user, index) => (
-                      <tr key={user._id} style={{ borderBottom: '1px solid #e0e0e0' }}>
-                        <td style={cellStyle}>{index + 1}</td>
-                        <td style={cellStyle}>
-                          <Box sx={{ width: 40, height: 40, borderRadius: '50%', backgroundImage: `url(${user.profilePic?.path || ''})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
-                        </td>
-                        <td style={cellStyle}>{user.name}</td>
-                        <td style={cellStyle}>{user.email}</td>
-                        <td style={cellStyle}>{user.phone}</td>
-                        <td style={cellStyle}>{user.address}</td>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <Card sx={{
+                borderRadius: '24px',
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.05)',
+                p: 4,
+                color: 'white'
+              }}>
+                <Box sx={{ width: '100%', overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', color: 'white' }}>
+                    <thead>
+                      <tr>
+                        <th style={headerStyle}>S No</th>
+                        <th style={headerStyle}>Profile</th>
+                        <th style={headerStyle}>Full Name</th>
+                        <th style={headerStyle}>Email</th>
+                        <th style={headerStyle}>Phone Number</th>
+                        <th style={headerStyle}>Address</th>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>No users found or API not available.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </Box>
+                    </thead>
+                    <tbody>
+                      {users.length > 0 ? (
+                        users.map((user, index) => (
+                          <tr key={user._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                            <td style={cellStyle}>{index + 1}</td>
+                            <td style={cellStyle}>
+                              <Box sx={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.1)', backgroundImage: `url(${user.profilePic?.path || ''})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                            </td>
+                            <td style={{ padding: '16px', fontWeight: 600 }}>{user.name}</td>
+                            <td style={{ padding: '16px', color: 'rgba(255,255,255,0.6)' }}>{user.email}</td>
+                            <td style={{ padding: '16px', color: 'rgba(255,255,255,0.8)' }}>{user.phone}</td>
+                            <td style={{ padding: '16px', color: 'rgba(255,255,255,0.8)' }}>{user.address}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: 'rgba(255,255,255,0.5)' }}>No users found.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </Box>
+              </Card>
+            </Grid>
           </Grid>
-        </Grid>
-      </Container>
+        </Container>
+      </Box>
 
-      <Footer sx={{ mt: 'auto', width: '100%' }} />
-
-      {/* Logout Modal */}
+      {/* Logout Confirmation */}
       <Modal
-        aria-labelledby="transition-modal-title"
-        aria-describedby="transition-modal-description"
         open={open}
         onClose={handleClose}
         closeAfterTransition
@@ -133,37 +143,35 @@ const AdminViewUsers = () => {
         slotProps={{ backdrop: { timeout: 500 } }}
       >
         <Fade in={open}>
-          <Box sx={style}>
-            <Box display="flex" justifyContent="space-between">
-              <Typography variant='h4' sx={{ fontSize: "18px", fontWeight: "600" }}>Logout</Typography>
-              <CloseIcon onClick={handleClose} sx={{ fontSize: "18px", cursor: 'pointer' }} />
-            </Box>
-            <hr />
-            <Box display="flex" flexDirection="column" alignItems="center" mt={2}>
-              <Typography color='primary' sx={{ fontSize: "14px", fontWeight: '500', mb: 2 }}>
-                Are you sure you want to log out?
-              </Typography>
-              <Box display="flex" gap={2}>
-                <Button variant='outlined' color='secondary' onClick={handleLogOut}>Yes</Button>
-                <Button variant='contained' color='secondary' onClick={handleClose}>No</Button>
-              </Box>
-            </Box>
+          <Box sx={{
+            position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+            width: 400, bgcolor: '#1a1a2e', borderRadius: '24px', p: 4,
+            border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+            color: 'white', textAlign: 'center'
+          }}>
+            <Typography variant="h5" sx={{ fontWeight: 800, mb: 1 }}>Confirm Exit</Typography>
+            <Typography sx={{ color: 'rgba(255,255,255,0.6)', mb: 4 }}>Are you sure you want to end your administrative session?</Typography>
+            <Stack direction="row" spacing={2} justifyContent="center">
+              <Button fullWidth onClick={handleClose} sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.05)', borderRadius: '12px', py: 1.5, textTransform: 'none' }}>Stay</Button>
+              <Button fullWidth onClick={handleLogOut} sx={{ background: 'linear-gradient(90deg, #e94560, #6f32bf)', color: 'white', borderRadius: '12px', py: 1.5, fontWeight: 700, textTransform: 'none' }}>Logout</Button>
+            </Stack>
           </Box>
         </Fade>
       </Modal>
-    </>
+    </Box>
   );
 };
 
 const headerStyle = {
-  padding: '12px 16px',
+  padding: '16px',
   textAlign: 'left',
-  color: '#9c27b0',
-  fontWeight: 600
+  color: 'rgba(255,255,255,0.5)',
+  fontWeight: 600,
+  borderBottom: '1px solid rgba(255,255,255,0.1)'
 };
 
 const cellStyle = {
-  padding: '12px 16px'
+  padding: '16px'
 };
 
 export default AdminViewUsers;

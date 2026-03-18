@@ -10,18 +10,11 @@ import AdminSidebar from './AdminSideBar';
 import { toast } from 'react-toastify';
 import Footer from '../Footer/Footer';
 import axiosInstance from '../../api/axiosInstance';
+import { Stack, Card, IconButton } from '@mui/material';
+import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 
-const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 400,
-  bgcolor: 'background.paper',
-  borderRadius: '10px',
-  boxShadow: 24,
-  p: 4,
-};
+// Removing old modal style
+
 
 const AdminComplaints = () => {
   const [open, setOpen] = useState(false);
@@ -53,7 +46,7 @@ const AdminComplaints = () => {
     try {
       const response = await axiosInstance.get('/api/admin/complaints');
       console.log(response);
-      
+
       if (response.data && response.data.data) {
         setComplaints(response.data.data);
       } else {
@@ -92,83 +85,126 @@ const AdminComplaints = () => {
   };
 
   return (
-    <>
-      <Container maxWidth="x-lg" sx={{ background: '#fffff', minHeight: '100vh', display: 'flex', flexDirection: 'row', p: 0 }}>
-        <Grid item xs={6} md={2} sx={{ p: 0 }}>
-          <AdminSidebar />
-        </Grid>
+    <Box sx={{ minHeight: '100vh', bgcolor: '#0a0a1a', display: 'flex' }}>
+      <AdminSidebar />
 
-        <Grid container spacing={2} sx={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', gap: 2, m: 0 }}>
-          <Grid item xs={12}>
-            <Box sx={{ height: '70px', background: 'white', borderRadius: '8px', width: '98%', px: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="h3" sx={{ fontSize: '24px', fontWeight: '500' }} color="primary">Complaints</Typography>
-              <Button onClick={handleOpen} variant="text" color="primary" sx={{ borderRadius: '25px', height: '40px', width: '200px', padding: '10px 35px' }} startIcon={<LogoutIcon />}>logout</Button>
+      <Box sx={{ flexGrow: 1, p: 4, overflowY: 'auto', height: '100vh', boxSizing: 'border-box' }}>
+        <Container maxWidth="xl">
+          {/* Top Header */}
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 6 }}>
+            <Box>
+              <Typography variant="h4" sx={{ color: 'white', fontWeight: 900 }}>Complaints</Typography>
+              <Typography sx={{ color: 'rgba(255,255,255,0.5)', mt: 0.5 }}>Review and resolve user grievances</Typography>
             </Box>
-          </Grid>
+            <Stack direction="row" spacing={2} alignItems="center">
+              <IconButton sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.05)', p: 1.5 }}>
+                <NotificationsNoneIcon />
+              </IconButton>
+              <Button
+                onClick={handleOpen}
+                variant="outlined"
+                startIcon={<LogoutIcon />}
+                sx={{
+                  color: '#e94560',
+                  borderColor: 'rgba(233, 69, 96, 0.3)',
+                  borderRadius: '12px',
+                  px: 3,
+                  height: '48px',
+                  textTransform: 'none',
+                  fontWeight: 700,
+                  '&:hover': { borderColor: '#e94560', bgcolor: 'rgba(233, 69, 96, 0.05)' }
+                }}
+              >
+                Logout
+              </Button>
+            </Stack>
+          </Stack>
 
-          <Grid item xs={12} sx={{ p: 3 }}>
-            <Typography variant="h4" sx={{ textAlign: 'center', fontWeight: 100, fontSize: '2rem', fontFamily: 'Roboto, sans-serif', mb: 4 }}>Complaints List</Typography>
-            <Box sx={{ width: '100%', overflow: 'hidden', borderRadius: 2, boxShadow: 1 }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#f5f5f5', borderBottom: '2px solid #9c27b0' }}>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', color: '#9c27b0', fontWeight: 600 }}>S No</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', color: '#9c27b0', fontWeight: 600 }}>Consumer Name</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', color: '#9c27b0', fontWeight: 600 }}>Email</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', color: '#9c27b0', fontWeight: 600 }}>Description</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', color: '#9c27b0', fontWeight: 600 }}>Status</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', color: '#9c27b0', fontWeight: 600 }}>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {complaints.length > 0 ? (
-                    complaints.map((complaint, index) => (
-                      <tr key={complaint._id} style={{ borderBottom: '1px solid #e0e0e0' }}>
-                        <td style={{ padding: '12px 16px' }}>{index + 1}</td>
-                        <td style={{ padding: '12px 16px' }}>{complaint.consumer.name}</td>
-                        <td style={{ padding: '12px 16px' }}>{complaint.consumer.email}</td>
-                        <td style={{ padding: '12px 16px' }}>{complaint.description}</td>
-                        <td style={{ padding: '12px 16px' }}>
-                          <span style={{ 
-                            color: complaint.status === 'pending' ? '#ff9800' : '#4caf50',
-                            fontWeight: '500'
-                          }}>
-                            {complaint.status}
-                          </span>
-                        </td>
-                        <td style={{ padding: '12px 16px' }}>
-                          {complaint.status === 'pending' && (
-                            <Button 
-                              variant="contained" 
-                              color="primary" 
-                              size="small"
-                              onClick={() => handleResolveComplaint(complaint._id)}
-                            >
-                              Resolve
-                            </Button>
-                          )}
-                        </td>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <Card sx={{
+                borderRadius: '24px',
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.05)',
+                p: 4,
+                color: 'white'
+              }}>
+                <Box sx={{ width: '100%', overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', color: 'white' }}>
+                    <thead>
+                      <tr>
+                        <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>S No</th>
+                        <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Consumer Name</th>
+                        <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Email</th>
+                        <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Description</th>
+                        <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Status</th>
+                        <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Action</th>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="6" style={{ padding: '20px', textAlign: 'center' }}>
-                        No complaints found
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </Box>
+                    </thead>
+                    <tbody>
+                      {complaints.length > 0 ? (
+                        complaints.map((complaint, index) => (
+                          <tr key={complaint._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                            <td style={{ padding: '16px' }}>{index + 1}</td>
+                            <td style={{ padding: '16px', fontWeight: 600 }}>{complaint.consumer.name}</td>
+                            <td style={{ padding: '16px', color: 'rgba(255,255,255,0.6)' }}>{complaint.consumer.email}</td>
+                            <td style={{ padding: '16px', color: 'rgba(255,255,255,0.8)' }}>{complaint.description}</td>
+                            <td style={{ padding: '16px' }}>
+                              <span style={{
+                                padding: '6px 12px',
+                                borderRadius: '20px',
+                                fontSize: '13px',
+                                fontWeight: 700,
+                                textTransform: 'uppercase',
+                                backgroundColor: complaint.status === 'pending' ? 'rgba(255, 152, 0, 0.1)' : 'rgba(76, 175, 80, 0.1)',
+                                color: complaint.status === 'pending' ? '#ff9800' : '#4caf50'
+                              }}>
+                                {complaint.status}
+                              </span>
+                            </td>
+                            <td style={{ padding: '16px' }}>
+                              {complaint.status === 'pending' && (
+                                <Button
+                                  variant="contained"
+                                  size="small"
+                                  onClick={() => handleResolveComplaint(complaint._id)}
+                                  sx={{
+                                    bgcolor: 'rgba(0, 230, 118, 0.1)',
+                                    color: '#00e676',
+                                    borderRadius: '8px',
+                                    fontWeight: 700,
+                                    textTransform: 'none',
+                                    boxShadow: 'none',
+                                    '&:hover': {
+                                      bgcolor: 'rgba(0, 230, 118, 0.2)',
+                                      boxShadow: 'none',
+                                    }
+                                  }}
+                                >
+                                  Resolve
+                                </Button>
+                              )}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="6" style={{ padding: '30px', textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>
+                            No complaints currently.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </Box>
+              </Card>
+            </Grid>
           </Grid>
-        </Grid>
-      </Container>
+        </Container>
+      </Box>
 
-      <Footer sx={{ mt: 'auto', width: '100%' }} />
-
+      {/* Logout Confirmation */}
       <Modal
-        aria-labelledby="transition-modal-title"
-        aria-describedby="transition-modal-description"
         open={open}
         onClose={handleClose}
         closeAfterTransition
@@ -176,25 +212,22 @@ const AdminComplaints = () => {
         slotProps={{ backdrop: { timeout: 500 } }}
       >
         <Fade in={open}>
-          <Box sx={style}>
-            <Box display="flex" justifyContent="space-between" alignItems="space-between">
-              <Typography variant="h4" sx={{ fontSize: '18px', fontWeight: '600' }}>Logout</Typography>
-              <CloseIcon onClick={handleClose} sx={{ fontSize: '18px' }} />
-            </Box>
-            <hr />
-            <Box display="flex" alignItems="center" justifyContent="center" flexDirection="column">
-              <Typography color="primary" sx={{ fontSize: '12px', fontWeight: '500' }} variant="p">
-                Are you sure you want to log out?
-              </Typography>
-              <Box display="flex" alignItems="center" justifyContent="center" sx={{ gap: '10px' }}>
-                <Button variant="outlined" color="secondary" sx={{ borderRadius: '25px', mt: 2, height: '40px', width: '100px', px: '35px' }} onClick={handleLogOut}>Yes</Button>
-                <Button variant="contained" color="secondary" sx={{ borderRadius: '25px', mt: 2, height: '40px', width: '100px', px: '35px' }} onClick={handleClose}>No</Button>
-              </Box>
-            </Box>
+          <Box sx={{
+            position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+            width: 400, bgcolor: '#1a1a2e', borderRadius: '24px', p: 4,
+            border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+            color: 'white', textAlign: 'center'
+          }}>
+            <Typography variant="h5" sx={{ fontWeight: 800, mb: 1 }}>Confirm Exit</Typography>
+            <Typography sx={{ color: 'rgba(255,255,255,0.6)', mb: 4 }}>Are you sure you want to end your administrative session?</Typography>
+            <Stack direction="row" spacing={2} justifyContent="center">
+              <Button fullWidth onClick={handleClose} sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.05)', borderRadius: '12px', py: 1.5, textTransform: 'none' }}>Stay</Button>
+              <Button fullWidth onClick={handleLogOut} sx={{ background: 'linear-gradient(90deg, #e94560, #6f32bf)', color: 'white', borderRadius: '12px', py: 1.5, fontWeight: 700, textTransform: 'none' }}>Logout</Button>
+            </Stack>
           </Box>
         </Fade>
       </Modal>
-    </>
+    </Box>
   );
 };
 
