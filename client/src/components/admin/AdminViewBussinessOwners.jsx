@@ -1,7 +1,7 @@
 import { Box, Button, Container, Grid, Typography, Modal, Fade, Backdrop, Stack, Card, IconButton } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import CloseIcon from '@mui/icons-material/Close';
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
+import MenuIcon from '@mui/icons-material/Menu';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -11,6 +11,8 @@ import axiosInstance from '../../api/axiosInstance';
 const AdminViewBussinessOwners = () => {
   const [businessOwners, setBusinessOwners] = useState([]);
   const [open, setOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const handleDrawerToggle = () => { setMobileOpen(!mobileOpen); };
   const navigate = useNavigate();
 
   const handleOpen = () => setOpen(true);
@@ -51,20 +53,28 @@ const AdminViewBussinessOwners = () => {
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#0a0a1a', display: 'flex' }}>
-      <AdminSidebar />
+      <AdminSidebar mobileOpen={mobileOpen} handleDrawerToggle={handleDrawerToggle} />
 
       <Box sx={{ flexGrow: 1, p: 4, overflowY: 'auto', height: '100vh', boxSizing: 'border-box' }}>
         <Container maxWidth="xl">
           {/* Top Header */}
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 6 }}>
-            <Box>
-              <Typography variant="h4" sx={{ color: 'white', fontWeight: 900 }}>Business Owners</Typography>
-              <Typography sx={{ color: 'rgba(255,255,255,0.5)', mt: 0.5 }}>Manage registered businesses on the platform</Typography>
-            </Box>
-            <Stack direction="row" spacing={2} alignItems="center">
-              <IconButton sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.05)', p: 1.5 }}>
-                <NotificationsNoneIcon />
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <IconButton
+                color="inherit"
+                aria-label="open drawer"
+                edge="start"
+                onClick={handleDrawerToggle}
+                sx={{ display: { md: 'none' }, color: 'white', bgcolor: 'rgba(255,255,255,0.05)', p: 1.5 }}
+              >
+                <MenuIcon />
               </IconButton>
+              <Box>
+                <Typography variant="h4" sx={{ color: 'white', fontWeight: 900 }}>Business Owners</Typography>
+                <Typography sx={{ color: 'rgba(255,255,255,0.5)', mt: 0.5 }}>Manage registered businesses on the platform</Typography>
+              </Box>
+            </Stack>
+            <Stack direction="row" spacing={2} alignItems="center">
               <Button
                 onClick={handleOpen}
                 variant="outlined"
@@ -85,63 +95,61 @@ const AdminViewBussinessOwners = () => {
             </Stack>
           </Stack>
 
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <Card sx={{
-                borderRadius: '24px',
-                background: 'rgba(255, 255, 255, 0.03)',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
-                p: 4,
-                color: 'white'
-              }}>
-                <Box sx={{ width: '100%', overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', color: 'white' }}>
-                    <thead>
-                      <tr>
-                        <th style={headerStyle}>S No</th>
-                        <th style={headerStyle}>Business Name</th>
-                        <th style={headerStyle}>Full Name</th>
-                        <th style={headerStyle}>Email</th>
-                        <th style={headerStyle}>Phone Number</th>
-                        <th style={headerStyle}>Business Category</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {businessOwners.length > 0 ? (
-                        businessOwners.map((owner, index) => (
-                          <tr key={owner._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                            <td style={cellStyle}>{index + 1}</td>
-                            <td style={{ padding: '16px', fontWeight: 600 }}>{owner.bussinessName}</td>
-                            <td style={{ padding: '16px', color: 'rgba(255,255,255,0.8)' }}>{owner.name}</td>
-                            <td style={{ padding: '16px', color: 'rgba(255,255,255,0.6)' }}>{owner.email}</td>
-                            <td style={{ padding: '16px', color: 'rgba(255,255,255,0.8)' }}>{owner.phone}</td>
-                            <td style={{ padding: '16px' }}>
-                              <Box sx={{
-                                display: 'inline-block',
-                                px: 1.5,
-                                py: 0.5,
-                                borderRadius: '8px',
-                                bgcolor: 'rgba(111, 50, 191, 0.1)',
-                                color: '#b388ff',
-                                fontSize: '13px',
-                                fontWeight: 700
-                              }}>
-                                {owner.bussinessCategory}
-                              </Box>
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: 'rgba(255,255,255,0.5)' }}>No business owners found.</td>
+          <Box sx={{ width: '100%' }}>
+            <Card sx={{
+              borderRadius: '24px',
+              background: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(255, 255, 255, 0.05)',
+              p: 4,
+              color: 'white'
+            }}>
+              <Box sx={{ width: '100%', overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', color: 'white' }}>
+                  <thead>
+                    <tr>
+                      <th style={headerStyle}>S No</th>
+                      <th style={headerStyle}>Business Name</th>
+                      <th style={headerStyle}>Full Name</th>
+                      <th style={headerStyle}>Email</th>
+                      <th style={headerStyle}>Phone Number</th>
+                      <th style={headerStyle}>Business Category</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {businessOwners.length > 0 ? (
+                      businessOwners.map((owner, index) => (
+                        <tr key={owner._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                          <td style={cellStyle}>{index + 1}</td>
+                          <td style={{ padding: '16px', fontWeight: 600 }}>{owner.bussinessName}</td>
+                          <td style={{ padding: '16px', color: 'rgba(255,255,255,0.8)' }}>{owner.name}</td>
+                          <td style={{ padding: '16px', color: 'rgba(255,255,255,0.6)' }}>{owner.email}</td>
+                          <td style={{ padding: '16px', color: 'rgba(255,255,255,0.8)' }}>{owner.phone}</td>
+                          <td style={{ padding: '16px' }}>
+                            <Box sx={{
+                              display: 'inline-block',
+                              px: 1.5,
+                              py: 0.5,
+                              borderRadius: '8px',
+                              bgcolor: 'rgba(111, 50, 191, 0.1)',
+                              color: '#b388ff',
+                              fontSize: '13px',
+                              fontWeight: 700
+                            }}>
+                              {owner.bussinessCategory}
+                            </Box>
+                          </td>
                         </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </Box>
-              </Card>
-            </Grid>
-          </Grid>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: 'rgba(255,255,255,0.5)' }}>No business owners found.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </Box>
+            </Card>
+          </Box>
         </Container>
       </Box>
 

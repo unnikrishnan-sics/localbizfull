@@ -1,128 +1,110 @@
 import React from 'react'
 import Navbar from '../Navbar/Navbar';
 import contactbg from "../../assets/contactbg.png"
-import { Box, Button, Container, Stack, TextField, Typography, styled } from '@mui/material';
+import { Box, Button, Container, Stack, TextField, Typography, Paper, Grid } from '@mui/material';
 import PhoneIcon from '@mui/icons-material/Phone';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import Footer from '../Footer/Footer';
 
 const Contact = () => {
-    const StyledTextField = styled(TextField)({
-        borderRadius: "8px",
-        width: "100%",
-        border: "1px solid #CCCCCC",
-        '& .MuiInputBase-root': {
-          height: "40px",
-          '& .MuiInputBase-input': {
-            padding: '10px 0px',
-          }
-        }
-      });
-    
-      const StyledTextFieldComment = styled(TextField)({
-        borderRadius: "8px",
-        width: "100%",
-        border: "1px solid #CCCCCC",
-        '& .MuiInputBase-root': {
-          height: "100px",
-          '& .MuiInputBase-input': {
-            padding: '10px 0px',
-          }
-        }
-      });
   return (
-    <>
-      <Navbar contactbg={contactbg} />
+    <Box sx={{ bgcolor: '#FFFFFF', minHeight: '100vh', overflowX: 'hidden' }}>
+      <Navbar />
 
-{/* Top Section with Background Image */}
-<Box
-  sx={{
-    backgroundImage: `url(${contactbg})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    height:"500px",
-    padding: 0,
-  }}
->
-  <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" sx={{ height: "370px", gap: "35px" }}>
-    <Typography variant='h3' color='primary' sx={{ fontSize: "24px", fontWeight: "500" }}>
-      Contact Us
-    </Typography>
-    <Typography variant='h2' color='secondary' sx={{ fontSize: "32px", fontWeight: "600" }}>
-      We’re Here to Help!
-    </Typography>
-    <Typography textAlign="center" variant='p' color='primary' sx={{ fontSize: "14px", fontWeight: "500" }}>
-      We’d love to hear from you! Whether it’s a query, feedback, or assistance, feel free to connect with us anytime.<br />
-      Our team is here to assist you every step of the way. Reach out and let us help you!
-    </Typography>
-  </Box>
-</Box>
-
-{/* Form and Contact Info Section */}
-<Container maxWidth="false">
-  <Box display="flex" justifyContent="center" alignItems="center">
-    <Stack direction="row" justifyContent="center" alignItems="center" spacing={2} sx={{ height: "528px", width: "70%", gap: "100px" }}>
-      
-      {/* Form */}
-      {/* <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" sx={{ gap: "15px", border: "1px solid #CCCCCC", borderRadius: "15px", padding: "20px" }}>
-        <Typography variant='h3' color='primary' sx={{ fontSize: "24px", fontWeight: "500" }}>Get in Touch</Typography>
-        <Box sx={{ height: "65px", width: "360px" }}>
-          <label>Name</label>
-          <StyledTextField />
-        </Box>
-        <Box sx={{ height: "65px", width: "360px" }}>
-          <label>E-mail</label>
-          <StyledTextField />
-        </Box>
-        <Box sx={{ height: "125px", width: "360px" }}>
-          <label>Comments</label>
-          <StyledTextFieldComment />
-        </Box>
-        <Button variant='contained' color='secondary' sx={{ borderRadius: "25px", marginTop: "20px", height: "40px", width: '150px', padding: '10px 35px' }}>
-          Submit
-        </Button>
-      </Box> */}
-
-      {/* Contact Info */}
-      <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" sx={{ gap: "35px" }}>
-        {/* Phone */}
-        <Box display="flex" justifyContent="space-evenly" alignItems="center" sx={{ gap: "25px", border: "1px solid #CCCCCC", borderRadius: "10px", width: "360px", height: "100px" }}>
-          <PhoneIcon />
-          <Box display="flex" flexDirection="column" alignItems="start" sx={{ gap: "15px" }}>
-            <Typography color='primary' sx={{ fontSize: "18px", fontWeight: "500" }}>+91 1234123423</Typography>
-            <Typography color='primary' sx={{ fontSize: "14px", fontWeight: "500" }}>
-              Available Monday to Friday,<br />9 AM - 6 PM
-            </Typography>
-          </Box>
-        </Box>
-
-        {/* Email */}
-        <Box display="flex" justifyContent="space-evenly" alignItems="center" sx={{ gap: "25px", border: "1px solid #CCCCCC", borderRadius: "10px", width: "360px", height: "100px" }}>
-          <MailOutlineIcon />
-          <Box display="flex" flexDirection="column" alignItems="start" sx={{ gap: "15px" }}>
-            <Typography color='primary' sx={{ fontSize: "18px", fontWeight: "500" }}>localbiz@gmail.com</Typography>
-            <Typography color='primary' sx={{ fontSize: "14px", fontWeight: "500" }}>
-              We will respond within 24 hours on <br /> weekdays.
-            </Typography>
-          </Box>
-        </Box>
-
-        {/* Location */}
-        <Box display="flex" justifyContent="space-evenly" alignItems="center" sx={{ gap: "25px", border: "1px solid #CCCCCC", borderRadius: "10px", width: "360px", height: "100px" }}>
-          <LocationOnIcon />
-          <Box display="flex" flexDirection="column" alignItems="start" sx={{ gap: "15px" }}>
-            <Typography color='primary' sx={{ fontSize: "18px", fontWeight: "500" }}>Local Biz Headquarters</Typography>
-            <Typography color='primary' sx={{ fontSize: "14px", fontWeight: "500" }}>1234 Avenue, Suite 567</Typography>
-          </Box>
-        </Box>
+      {/* Clean Hero Header */}
+      <Box sx={{ bgcolor: '#6F32BF', py: { xs: 8, md: 12 }, textAlign: 'center', color: '#FFFFFF' }}>
+        <Container maxWidth="md">
+          <Typography variant='h2' sx={{ fontSize: { xs: "2.5rem", md: "3.5rem" }, fontWeight: 900, mb: 2 }}>
+            We’re Here to Help!
+          </Typography>
+          <Typography variant='body1' sx={{ fontSize: "1.125rem", fontWeight: 400, opacity: 0.9, maxWidth: '600px', mx: 'auto' }}>
+            We’d love to hear from you. Whether it’s a query, feedback, or assistance, our team is standing by.
+          </Typography>
+        </Container>
       </Box>
-    </Stack>
-  </Box>
-</Container>
 
-<Footer />
-    </>
+      {/* Form and Contact Info Section */}
+      <Box sx={{ py: { xs: 8, md: 12 }, bgcolor: '#F9FAFB' }}>
+        <Container maxWidth="lg">
+          <Grid container spacing={6} alignItems="flex-start">
+
+            {/* Left: Contact Info Cards */}
+            <Grid item xs={12} md={5}>
+              <Stack spacing={4}>
+                <Paper elevation={0} sx={{ p: 4, borderRadius: '16px', bgcolor: '#FFFFFF', border: '1px solid #E5E7EB', display: 'flex', alignItems: 'flex-start', gap: 3 }}>
+                  <Box sx={{ width: 48, height: 48, bgcolor: '#EDE9FE', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <PhoneIcon sx={{ color: '#6F32BF' }} />
+                  </Box>
+                  <Box>
+                    <Typography sx={{ fontSize: "1.125rem", fontWeight: 800, color: '#111827', mb: 1 }}>+91 1234123423</Typography>
+                    <Typography sx={{ fontSize: "0.875rem", color: '#4B5563', lineHeight: 1.6 }}>Available Monday to Friday,<br />9 AM - 6 PM</Typography>
+                  </Box>
+                </Paper>
+
+                <Paper elevation={0} sx={{ p: 4, borderRadius: '16px', bgcolor: '#FFFFFF', border: '1px solid #E5E7EB', display: 'flex', alignItems: 'flex-start', gap: 3 }}>
+                  <Box sx={{ width: 48, height: 48, bgcolor: '#EDE9FE', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <MailOutlineIcon sx={{ color: '#6F32BF' }} />
+                  </Box>
+                  <Box>
+                    <Typography sx={{ fontSize: "1.125rem", fontWeight: 800, color: '#111827', mb: 1 }}>localbiz@gmail.com</Typography>
+                    <Typography sx={{ fontSize: "0.875rem", color: '#4B5563', lineHeight: 1.6 }}>We typically respond within<br />24 hours on weekdays.</Typography>
+                  </Box>
+                </Paper>
+
+                <Paper elevation={0} sx={{ p: 4, borderRadius: '16px', bgcolor: '#FFFFFF', border: '1px solid #E5E7EB', display: 'flex', alignItems: 'flex-start', gap: 3 }}>
+                  <Box sx={{ width: 48, height: 48, bgcolor: '#EDE9FE', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <LocationOnIcon sx={{ color: '#6F32BF' }} />
+                  </Box>
+                  <Box>
+                    <Typography sx={{ fontSize: "1.125rem", fontWeight: 800, color: '#111827', mb: 1 }}>Headquarters</Typography>
+                    <Typography sx={{ fontSize: "0.875rem", color: '#4B5563', lineHeight: 1.6 }}>1234 Avenue, Suite 567<br />New Delhi, India</Typography>
+                  </Box>
+                </Paper>
+              </Stack>
+            </Grid>
+
+            {/* Right: Contact Form */}
+            <Grid item xs={12} md={7}>
+              <Paper elevation={0} sx={{ p: { xs: 4, md: 6 }, borderRadius: '16px', bgcolor: '#FFFFFF', border: '1px solid #E5E7EB' }}>
+                <Typography variant='h4' sx={{ fontSize: "1.75rem", fontWeight: 900, color: '#111827', mb: 1 }}>
+                  Get in Touch
+                </Typography>
+                <Typography variant='body1' sx={{ color: '#4B5563', mb: 4 }}>
+                  Fill out the form below and we'll get back to you shortly.
+                </Typography>
+
+                <Stack spacing={3}>
+                  <TextField
+                    fullWidth label="Full Name" variant="outlined"
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
+                  />
+                  <TextField
+                    fullWidth label="Email Address" variant="outlined" type="email"
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
+                  />
+                  <TextField
+                    fullWidth label="Your Message" variant="outlined" multiline rows={5}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
+                  />
+                  <Button
+                    variant='contained' disableElevation size="large"
+                    sx={{
+                      borderRadius: "8px", py: 1.5, fontWeight: 800,
+                      bgcolor: '#6F32BF', '&:hover': { bgcolor: '#5B21B6' }, textTransform: 'none'
+                    }}
+                  >
+                    Submit Message
+                  </Button>
+                </Stack>
+              </Paper>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+
+      <Footer />
+    </Box>
   )
 }
 

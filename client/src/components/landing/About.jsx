@@ -1,88 +1,101 @@
 import React from 'react'
 import Navbar from '../Navbar/Navbar'
-import { Box, Card, CardContent, CardMedia, Typography } from '@mui/material';
+import { Box, Typography, Container, Grid, Paper, Stack } from '@mui/material';
 import aboutframe from "../../assets/aboutframe.png"
 import mission from "../../assets/mission.png"
 import vission from "../../assets/vission.png"
 import Footer from '../Footer/Footer';
 
 const About = () => {
-    const aboutbg = {
-        backgroundColor: "#F6F7F9"
-    }
     return (
-        <>
-            <Navbar aboutbg={aboutbg} />
-            <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"} sx={{ height: "706px", background: "#F6F7F9", padding: "0px 100px" }}>
-                <Box display={"flex"} flexDirection={"column"} alignItems={"start"} justifyContent={"center"} sx={{ gap: '30px' }}>
-                    <Typography variant='h5' color='parimary' sx={{ fontSize: '18px', fontWeight: "400" }}>About Us</Typography>
-                    <Typography variant='h5' color='parimary' sx={{ fontSize: '24px', fontWeight: "400" }}>Empowering Local Connections - <span style={{ color: '#6F32BF' }}>with Local Biz</span> </Typography>
-                    <Typography variant='p' color='parimary' sx={{ fontSize: '15px', fontWeight: "400" }}>Local Biz Connect is a platform dedicated to connecting <br /> communities with trusted local businesses. We simplify <br /> discovery, enhance visibility, and support growth through smart <br /> digital tools. Our mission is to strengthen local economies—one <br /> business at a time.</Typography>
-                </Box>
-                <Box>
-                    <Box component="img" src={aboutframe} sx={{ height: '486px', width: "auto" }}></Box>
-                </Box>
+        <Box sx={{ bgcolor: '#FFFFFF', minHeight: '100vh', overflowX: 'hidden' }}>
+            <Navbar />
 
+            {/* Hero Section */}
+            <Box sx={{ pt: { xs: 8, md: 12 }, pb: { xs: 8, md: 12 }, bgcolor: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
+                <Container maxWidth="lg">
+                    <Grid container spacing={4} alignItems="center">
+                        <Grid item xs={12} md={6}>
+                            <Typography sx={{ fontWeight: 800, color: '#6F32BF', textTransform: 'uppercase', letterSpacing: 1, mb: 2, fontSize: '0.875rem' }}>
+                                About Us
+                            </Typography>
+                            <Typography variant='h2' sx={{ fontSize: { xs: '2.5rem', md: '3.5rem' }, fontWeight: 900, color: '#111827', mb: 3, lineHeight: 1.1 }}>
+                                Empowering Local Connections
+                            </Typography>
+                            <Typography variant='body1' sx={{ fontSize: '1.125rem', color: '#4B5563', lineHeight: 1.7 }}>
+                                Local Biz Connect is a platform dedicated to bridging the gap between communities and trusted local businesses. We simplify discovery, enhance visibility, and support growth through smart, modern digital tools. Our mission is to strengthen local economies—one business at a time.
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                                <Box component="img" src={aboutframe} sx={{ width: '100%', maxWidth: '500px', height: 'auto', display: 'block' }} />
+                            </Box>
+                        </Grid>
+                    </Grid>
+                </Container>
             </Box>
-            <Box display={"flex"} alignItems={"center"} justifyContent={"center"} gap={25}>
-                <Box display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"} sx={{ height: '292',width:"auto", border: "1px solid black", borderRadius: '20px', padding:"20px",margin:"80px"}}>
 
-                    <Box component="img" src={mission} sx={{ height: '106px', width: "88px" }}>
-                        
-                    </Box>
-
-                    <Typography gutterBottom color='secondary' variant="h5" component="div">
-                        Mission
-                    </Typography>
-                    <Typography variant="p" color='primary' sx={{textAlign:'center'}}>
-                        To empower local businesses and consumers through a smart, <br /> user-friendly platform that fosters lasting local relationships.
-                    </Typography>
-
-
-
-                </Box>
-                <Box display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"} sx={{ height: '292',width:"auto", border: "1px solid black", borderRadius: '20px', padding:"20px",margin:"80px"}}>
-
-                    <Box component="img" src={vission} sx={{ height: '106px', width: "88px" }}>
-                        
-                    </Box>
-
-
-
-                    <Typography gutterBottom color='secondary' variant="h5" component="div">
-                        Vission
-                    </Typography>
-                    <Typography variant="p" color='primary' sx={{textAlign:'center'}}>
-                    To become the go-to digital hub for local business discovery,  <br />driving community connection and sustainable economic growth <br />worldwide.
-                    </Typography>
-
-
-
-                </Box>
+            {/* Mission & Vision strictly aligned */}
+            <Box sx={{ py: { xs: 8, md: 12 }, bgcolor: '#FFFFFF' }}>
+                <Container maxWidth="lg">
+                    <Grid container spacing={4} alignItems="stretch">
+                        <Grid item xs={12} md={6}>
+                            <Paper elevation={0} sx={{ p: { xs: 4, md: 6 }, height: '100%', bgcolor: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                                <Box component="img" src={mission} sx={{ width: '80px', height: 'auto', mb: 4 }} />
+                                <Typography variant="h4" sx={{ fontWeight: 900, color: '#111827', mb: 2 }}>
+                                    Our Mission
+                                </Typography>
+                                <Typography variant="body1" sx={{ color: '#4B5563', lineHeight: 1.7, flexGrow: 1 }}>
+                                    To empower local businesses and consumers through a smart, user-friendly platform that fosters lasting local relationships. We believe in strengthening community bonds through accessible technology.
+                                </Typography>
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <Paper elevation={0} sx={{ p: { xs: 4, md: 6 }, height: '100%', bgcolor: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                                <Box component="img" src={vission} sx={{ width: '80px', height: 'auto', mb: 4 }} />
+                                <Typography variant="h4" sx={{ fontWeight: 900, color: '#111827', mb: 2 }}>
+                                    Our Vision
+                                </Typography>
+                                <Typography variant="body1" sx={{ color: '#4B5563', lineHeight: 1.7, flexGrow: 1 }}>
+                                    To become the ultimate digital hub for local business discovery, driving community connection and fostering sustainable, community-first economic growth globally.
+                                </Typography>
+                            </Paper>
+                        </Grid>
+                    </Grid>
+                </Container>
             </Box>
-            {/* why us */}
-            <Box sx={{ width:'100%',mb:"100px"}} display={"flex"} justifyContent={"center"} alignItems={"center"}>
-                <Box sx={{ gap:"20px" }} display={"flex"} alignItems={"start"} flexDirection={"column"}>
-                    <Typography variant='h3' color='secondary' sx={{ fontSize: "32px", fontWeight: "600",marginTop:'20px' }}>Why Choose Skill Swap?</Typography>
-                    <Box display={"flex"} alignItems={"start"} flexDirection={"column"} sx={{marginLeft:'10px',gap:'25px'}}>
-                        <Box display={"flex"} alignItems={"start"} flexDirection={"column"} sx={{gap:'25px'}}>
-                            <Typography variant='p' color='primary' sx={{ fontSize: "18px", fontWeight: "500" }}>1.All-in-One Platform – Discover, connect, and engage with local businesses—all from one easy-to-use interface.</Typography>
-                            <Typography variant='p' color='primary' sx={{ fontSize: "18px", fontWeight: "500" }}>2.Boost Local Visibility – We help small businesses grow with powerful promotion tools and verified listings.</Typography>
-                            <Typography variant='p' color='primary' sx={{ fontSize: "18px", fontWeight: "500" }}>3.Location-Based Discovery – Find what you need, when you need it, right in your neighborhood.</Typography>
-                            <Typography variant='p' color='primary' sx={{ fontSize: "18px", fontWeight: "500" }}>4.Real Reviews, Real People – Make informed choices with trusted reviews from real local users.</Typography>
-                            <Typography variant='p' color='primary' sx={{ fontSize: "18px", fontWeight: "500" }}>5.Exclusive Local Deals – Unlock special offers and discounts only available on our platform.</Typography>
-                            
-                            
-                        </Box>
-                    </Box>
 
-                </Box>
+            {/* Why Choose Us */}
+            <Box sx={{ py: { xs: 8, md: 12 }, bgcolor: '#F9FAFB', borderTop: '1px solid #E5E7EB' }}>
+                <Container maxWidth="md">
+                    <Typography variant='h3' sx={{ fontSize: { xs: '2rem', md: '3rem' }, fontWeight: 900, color: '#111827', textAlign: 'center', mb: 8 }}>
+                        Why Choose Local Biz?
+                    </Typography>
 
-
+                    <Stack spacing={3}>
+                        {[
+                            { title: "All-in-One Platform", desc: "Discover, connect, and engage with local businesses—all from one clean interface." },
+                            { title: "Boost Local Visibility", desc: "For small businesses, we provide powerful promotion tools and verified listings." },
+                            { title: "Location-Based Discovery", desc: "Find exactly what you need, exactly when you need it, naturally sorted by proximity." },
+                            { title: "Real Reviews, Real People", desc: "Make informed choices based on transparent reviews from authentic local shoppers." },
+                            { title: "Exclusive Local Deals", desc: "Unlock special members-only offers and discounts unavailable elsewhere." }
+                        ].map((item, index) => (
+                            <Paper key={index} elevation={0} sx={{ p: 4, borderRadius: '16px', bgcolor: '#FFFFFF', border: '1px solid #E5E7EB', display: 'flex', gap: 3, alignItems: 'flex-start' }}>
+                                <Typography sx={{ fontSize: '1.5rem', fontWeight: 900, color: '#6F32BF', lineHeight: 1, minWidth: '40px' }}>
+                                    0{index + 1}
+                                </Typography>
+                                <Box>
+                                    <Typography variant="h6" sx={{ fontWeight: 800, color: '#111827', mb: 1 }}>{item.title}</Typography>
+                                    <Typography variant="body1" sx={{ color: '#4B5563', lineHeight: 1.6 }}>{item.desc}</Typography>
+                                </Box>
+                            </Paper>
+                        ))}
+                    </Stack>
+                </Container>
             </Box>
-            <Footer/>
 
-        </>
+            <Footer />
+        </Box>
     )
 }
 

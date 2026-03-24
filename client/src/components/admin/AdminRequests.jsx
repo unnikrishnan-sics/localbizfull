@@ -14,13 +14,15 @@ import Footer from '../Footer/Footer';
 import axiosInstance from '../../api/axiosInstance';
 import { baseUrl } from '../../baseUrl';
 import { Stack, Card, IconButton } from '@mui/material';
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
+import MenuIcon from '@mui/icons-material/Menu';
 
 // Removing old modal style
 
 
 const AdminRequests = () => {
     const [open, setOpen] = React.useState(false);
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const handleDrawerToggle = () => { setMobileOpen(!mobileOpen); };
     const [requests, setRequests] = useState({ businesses: [], organisations: [] });
     const [loading, setLoading] = useState(true);
 
@@ -91,20 +93,28 @@ const AdminRequests = () => {
 
     return (
         <Box sx={{ minHeight: '100vh', bgcolor: '#0a0a1a', display: 'flex' }}>
-            <AdminSidebar />
+            <AdminSidebar mobileOpen={mobileOpen} handleDrawerToggle={handleDrawerToggle} />
 
             <Box sx={{ flexGrow: 1, p: 4, overflowY: 'auto', height: '100vh', boxSizing: 'border-box' }}>
                 <Container maxWidth="xl">
                     {/* Top Header */}
                     <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 6 }}>
-                        <Box>
-                            <Typography variant="h4" sx={{ color: 'white', fontWeight: 900 }}>Requests</Typography>
-                            <Typography sx={{ color: 'rgba(255,255,255,0.5)', mt: 0.5 }}>Manage pending business and organization requests</Typography>
-                        </Box>
-                        <Stack direction="row" spacing={2} alignItems="center">
-                            <IconButton sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.05)', p: 1.5 }}>
-                                <NotificationsNoneIcon />
+                        <Stack direction="row" alignItems="center" spacing={2}>
+                            <IconButton
+                                color="inherit"
+                                aria-label="open drawer"
+                                edge="start"
+                                onClick={handleDrawerToggle}
+                                sx={{ display: { md: 'none' }, color: 'white', bgcolor: 'rgba(255,255,255,0.05)', p: 1.5 }}
+                            >
+                                <MenuIcon />
                             </IconButton>
+                            <Box>
+                                <Typography variant="h4" sx={{ color: 'white', fontWeight: 900 }}>Requests</Typography>
+                                <Typography sx={{ color: 'rgba(255,255,255,0.5)', mt: 0.5 }}>Manage pending business and organization requests</Typography>
+                            </Box>
+                        </Stack>
+                        <Stack direction="row" spacing={2} alignItems="center">
                             <Button
                                 onClick={handleOpen}
                                 variant="outlined"
@@ -125,147 +135,145 @@ const AdminRequests = () => {
                         </Stack>
                     </Stack>
 
-                    <Grid container spacing={3}>
-                        <Grid item xs={12}>
-                            <Card sx={{
-                                borderRadius: '24px',
-                                background: 'rgba(255, 255, 255, 0.03)',
-                                border: '1px solid rgba(255, 255, 255, 0.05)',
-                                p: 4,
-                                color: 'white'
-                            }}>
-                                {loading ? (
-                                    <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-                                        <Typography sx={{ color: 'rgba(255,255,255,0.6)' }}>Loading requests...</Typography>
-                                    </Box>
-                                ) : (
-                                    <Box sx={{ width: '100%', overflowX: 'auto' }}>
-                                        {requests.businesses.length > 0 && (
-                                            <Box sx={{ mb: 6 }}>
-                                                <Typography variant="h6" sx={{ color: 'white', fontWeight: 800, mb: 3 }}>
-                                                    Business Requests
-                                                </Typography>
-                                                <table style={{ width: '100%', borderCollapse: 'collapse', color: 'white' }}>
-                                                    <thead>
-                                                        <tr>
-                                                            <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>S No</th>
-                                                            <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Profile</th>
-                                                            <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Business Details</th>
-                                                            <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Action</th>
+                    <Box sx={{ width: '100%' }}>
+                        <Card sx={{
+                            borderRadius: '24px',
+                            background: 'rgba(255, 255, 255, 0.03)',
+                            border: '1px solid rgba(255, 255, 255, 0.05)',
+                            p: 4,
+                            color: 'white'
+                        }}>
+                            {loading ? (
+                                <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+                                    <Typography sx={{ color: 'rgba(255,255,255,0.6)' }}>Loading requests...</Typography>
+                                </Box>
+                            ) : (
+                                <Box sx={{ width: '100%', overflowX: 'auto' }}>
+                                    {requests.businesses.length > 0 && (
+                                        <Box sx={{ mb: 6 }}>
+                                            <Typography variant="h6" sx={{ color: 'white', fontWeight: 800, mb: 3 }}>
+                                                Business Requests
+                                            </Typography>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse', color: 'white' }}>
+                                                <thead>
+                                                    <tr>
+                                                        <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>S No</th>
+                                                        <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Profile</th>
+                                                        <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Business Details</th>
+                                                        <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {requests.businesses.map((request, index) => (
+                                                        <tr key={request._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                            <td style={{ padding: '16px' }}>{index + 1}</td>
+                                                            <td style={{ padding: '16px' }}>
+                                                                <Box sx={{
+                                                                    width: 48,
+                                                                    height: 48,
+                                                                    borderRadius: '50%',
+                                                                    backgroundColor: 'rgba(255,255,255,0.1)',
+                                                                    backgroundImage: request.profilePic ? `url(${baseUrl}uploads/${request.profilePic})` : 'none',
+                                                                    backgroundSize: 'cover',
+                                                                    backgroundPosition: 'center'
+                                                                }} />
+                                                            </td>
+                                                            <td style={{ padding: '16px' }}>
+                                                                <Typography sx={{ fontWeight: 600 }}>{request.bussinessName}</Typography>
+                                                                <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px' }}>Name: {request.name}</Typography>
+                                                                <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px' }}>Email: {request.email}</Typography>
+                                                                <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px' }}>Phone: {request.phone}</Typography>
+                                                            </td>
+                                                            <td style={{ padding: '16px' }}>
+                                                                <Button
+                                                                    variant="contained"
+                                                                    sx={{ minWidth: 0, p: 1, mr: 1, borderRadius: "12px", bgcolor: 'rgba(0, 230, 118, 0.1)', color: '#00e676', '&:hover': { bgcolor: 'rgba(0, 230, 118, 0.2)' }, boxShadow: 'none' }}
+                                                                    onClick={() => handleRequestAction(request._id, 'bussiness', 'approved')}
+                                                                >
+                                                                    <CheckCircleOutlinedIcon />
+                                                                </Button>
+                                                                <Button
+                                                                    variant="contained"
+                                                                    sx={{ minWidth: 0, p: 1, borderRadius: "12px", bgcolor: 'rgba(233, 69, 96, 0.1)', color: '#e94560', '&:hover': { bgcolor: 'rgba(233, 69, 96, 0.2)' }, boxShadow: 'none' }}
+                                                                    onClick={() => handleRequestAction(request._id, 'bussiness', 'rejected')}
+                                                                >
+                                                                    <CancelOutlinedIcon />
+                                                                </Button>
+                                                            </td>
                                                         </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {requests.businesses.map((request, index) => (
-                                                            <tr key={request._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                                                <td style={{ padding: '16px' }}>{index + 1}</td>
-                                                                <td style={{ padding: '16px' }}>
-                                                                    <Box sx={{
-                                                                        width: 48,
-                                                                        height: 48,
-                                                                        borderRadius: '50%',
-                                                                        backgroundColor: 'rgba(255,255,255,0.1)',
-                                                                        backgroundImage: request.profilePic ? `url(${baseUrl}uploads/${request.profilePic})` : 'none',
-                                                                        backgroundSize: 'cover',
-                                                                        backgroundPosition: 'center'
-                                                                    }} />
-                                                                </td>
-                                                                <td style={{ padding: '16px' }}>
-                                                                    <Typography sx={{ fontWeight: 600 }}>{request.bussinessName}</Typography>
-                                                                    <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px' }}>Name: {request.name}</Typography>
-                                                                    <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px' }}>Email: {request.email}</Typography>
-                                                                    <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px' }}>Phone: {request.phone}</Typography>
-                                                                </td>
-                                                                <td style={{ padding: '16px' }}>
-                                                                    <Button
-                                                                        variant="contained"
-                                                                        sx={{ minWidth: 0, p: 1, mr: 1, borderRadius: "12px", bgcolor: 'rgba(0, 230, 118, 0.1)', color: '#00e676', '&:hover': { bgcolor: 'rgba(0, 230, 118, 0.2)' }, boxShadow: 'none' }}
-                                                                        onClick={() => handleRequestAction(request._id, 'bussiness', 'approved')}
-                                                                    >
-                                                                        <CheckCircleOutlinedIcon />
-                                                                    </Button>
-                                                                    <Button
-                                                                        variant="contained"
-                                                                        sx={{ minWidth: 0, p: 1, borderRadius: "12px", bgcolor: 'rgba(233, 69, 96, 0.1)', color: '#e94560', '&:hover': { bgcolor: 'rgba(233, 69, 96, 0.2)' }, boxShadow: 'none' }}
-                                                                        onClick={() => handleRequestAction(request._id, 'bussiness', 'rejected')}
-                                                                    >
-                                                                        <CancelOutlinedIcon />
-                                                                    </Button>
-                                                                </td>
-                                                            </tr>
-                                                        ))}
-                                                    </tbody>
-                                                </table>
-                                            </Box>
-                                        )}
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </Box>
+                                    )}
 
-                                        {requests.organisations.length > 0 && (
-                                            <Box sx={{ mb: 4 }}>
-                                                <Typography variant="h6" sx={{ color: 'white', fontWeight: 800, mb: 3 }}>
-                                                    Organization Requests
-                                                </Typography>
-                                                <table style={{ width: '100%', borderCollapse: 'collapse', color: 'white' }}>
-                                                    <thead>
-                                                        <tr>
-                                                            <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>S No</th>
-                                                            <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Profile</th>
-                                                            <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Organization Details</th>
-                                                            <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Action</th>
+                                    {requests.organisations.length > 0 && (
+                                        <Box sx={{ mb: 4 }}>
+                                            <Typography variant="h6" sx={{ color: 'white', fontWeight: 800, mb: 3 }}>
+                                                Organization Requests
+                                            </Typography>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse', color: 'white' }}>
+                                                <thead>
+                                                    <tr>
+                                                        <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>S No</th>
+                                                        <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Profile</th>
+                                                        <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Organization Details</th>
+                                                        <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {requests.organisations.map((request, index) => (
+                                                        <tr key={request._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                            <td style={{ padding: '16px' }}>{index + 1}</td>
+                                                            <td style={{ padding: '16px' }}>
+                                                                <Box sx={{
+                                                                    width: 48,
+                                                                    height: 48,
+                                                                    borderRadius: '50%',
+                                                                    backgroundColor: 'rgba(255,255,255,0.1)',
+                                                                    backgroundImage: request.profilePic ? `url(${baseUrl}uploads/${request.profilePic})` : 'none',
+                                                                    backgroundSize: 'cover',
+                                                                    backgroundPosition: 'center'
+                                                                }} />
+                                                            </td>
+                                                            <td style={{ padding: '16px' }}>
+                                                                <Typography sx={{ fontWeight: 600 }}>{request.organizationName}</Typography>
+                                                                <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px' }}>Name: {request.name}</Typography>
+                                                                <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px' }}>Email: {request.email}</Typography>
+                                                                <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px' }}>Phone: {request.phone}</Typography>
+                                                            </td>
+                                                            <td style={{ padding: '16px' }}>
+                                                                <Button
+                                                                    variant="contained"
+                                                                    sx={{ minWidth: 0, p: 1, mr: 1, borderRadius: "12px", bgcolor: 'rgba(0, 230, 118, 0.1)', color: '#00e676', '&:hover': { bgcolor: 'rgba(0, 230, 118, 0.2)' }, boxShadow: 'none' }}
+                                                                    onClick={() => handleRequestAction(request._id, 'organisation', 'approved')}
+                                                                >
+                                                                    <CheckCircleOutlinedIcon />
+                                                                </Button>
+                                                                <Button
+                                                                    variant="contained"
+                                                                    sx={{ minWidth: 0, p: 1, borderRadius: "12px", bgcolor: 'rgba(233, 69, 96, 0.1)', color: '#e94560', '&:hover': { bgcolor: 'rgba(233, 69, 96, 0.2)' }, boxShadow: 'none' }}
+                                                                    onClick={() => handleRequestAction(request._id, 'organisation', 'rejected')}
+                                                                >
+                                                                    <CancelOutlinedIcon />
+                                                                </Button>
+                                                            </td>
                                                         </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {requests.organisations.map((request, index) => (
-                                                            <tr key={request._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                                                <td style={{ padding: '16px' }}>{index + 1}</td>
-                                                                <td style={{ padding: '16px' }}>
-                                                                    <Box sx={{
-                                                                        width: 48,
-                                                                        height: 48,
-                                                                        borderRadius: '50%',
-                                                                        backgroundColor: 'rgba(255,255,255,0.1)',
-                                                                        backgroundImage: request.profilePic ? `url(${baseUrl}uploads/${request.profilePic})` : 'none',
-                                                                        backgroundSize: 'cover',
-                                                                        backgroundPosition: 'center'
-                                                                    }} />
-                                                                </td>
-                                                                <td style={{ padding: '16px' }}>
-                                                                    <Typography sx={{ fontWeight: 600 }}>{request.organizationName}</Typography>
-                                                                    <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px' }}>Name: {request.name}</Typography>
-                                                                    <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px' }}>Email: {request.email}</Typography>
-                                                                    <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px' }}>Phone: {request.phone}</Typography>
-                                                                </td>
-                                                                <td style={{ padding: '16px' }}>
-                                                                    <Button
-                                                                        variant="contained"
-                                                                        sx={{ minWidth: 0, p: 1, mr: 1, borderRadius: "12px", bgcolor: 'rgba(0, 230, 118, 0.1)', color: '#00e676', '&:hover': { bgcolor: 'rgba(0, 230, 118, 0.2)' }, boxShadow: 'none' }}
-                                                                        onClick={() => handleRequestAction(request._id, 'organisation', 'approved')}
-                                                                    >
-                                                                        <CheckCircleOutlinedIcon />
-                                                                    </Button>
-                                                                    <Button
-                                                                        variant="contained"
-                                                                        sx={{ minWidth: 0, p: 1, borderRadius: "12px", bgcolor: 'rgba(233, 69, 96, 0.1)', color: '#e94560', '&:hover': { bgcolor: 'rgba(233, 69, 96, 0.2)' }, boxShadow: 'none' }}
-                                                                        onClick={() => handleRequestAction(request._id, 'organisation', 'rejected')}
-                                                                    >
-                                                                        <CancelOutlinedIcon />
-                                                                    </Button>
-                                                                </td>
-                                                            </tr>
-                                                        ))}
-                                                    </tbody>
-                                                </table>
-                                            </Box>
-                                        )}
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </Box>
+                                    )}
 
-                                        {requests.businesses.length === 0 && requests.organisations.length === 0 && (
-                                            <Box sx={{ p: 4, textAlign: 'center' }}>
-                                                <Typography sx={{ color: 'rgba(255,255,255,0.6)' }}>No pending requests.</Typography>
-                                            </Box>
-                                        )}
-                                    </Box>
-                                )}
-                            </Card>
-                        </Grid>
-                    </Grid>
+                                    {requests.businesses.length === 0 && requests.organisations.length === 0 && (
+                                        <Box sx={{ p: 4, textAlign: 'center' }}>
+                                            <Typography sx={{ color: 'rgba(255,255,255,0.6)' }}>No pending requests.</Typography>
+                                        </Box>
+                                    )}
+                                </Box>
+                            )}
+                        </Card>
+                    </Box>
                 </Container>
             </Box>
 

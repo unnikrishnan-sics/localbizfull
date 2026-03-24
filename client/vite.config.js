@@ -9,7 +9,7 @@ export default defineConfig({
     setupFiles: './src/tests/setup.js',
     css: true,
   },
-  base: "local_biz/",
+  base: "/local_biz/",
   server: {},
   preprocessorOptions: {
     sass: {

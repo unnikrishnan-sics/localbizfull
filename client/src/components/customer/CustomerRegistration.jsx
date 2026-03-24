@@ -121,6 +121,7 @@ const CustomerRegistration = () => {
         formData.append('name', data.name);
         formData.append('email', data.email);
         formData.append('password', data.password);
+        formData.append('confirmpassword', data.confirmPassword);
         formData.append('address', data.address);
         formData.append('phone', data.phone);
         formData.append('profilePic', data.profilePic);

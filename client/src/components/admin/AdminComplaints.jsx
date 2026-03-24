@@ -11,13 +11,15 @@ import { toast } from 'react-toastify';
 import Footer from '../Footer/Footer';
 import axiosInstance from '../../api/axiosInstance';
 import { Stack, Card, IconButton } from '@mui/material';
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
+import MenuIcon from '@mui/icons-material/Menu';
 
 // Removing old modal style
 
 
 const AdminComplaints = () => {
   const [open, setOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const handleDrawerToggle = () => { setMobileOpen(!mobileOpen); };
   const [complaints, setComplaints] = useState([]);
 
   const navigate = useNavigate();
@@ -86,20 +88,28 @@ const AdminComplaints = () => {
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#0a0a1a', display: 'flex' }}>
-      <AdminSidebar />
+      <AdminSidebar mobileOpen={mobileOpen} handleDrawerToggle={handleDrawerToggle} />
 
       <Box sx={{ flexGrow: 1, p: 4, overflowY: 'auto', height: '100vh', boxSizing: 'border-box' }}>
         <Container maxWidth="xl">
           {/* Top Header */}
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 6 }}>
-            <Box>
-              <Typography variant="h4" sx={{ color: 'white', fontWeight: 900 }}>Complaints</Typography>
-              <Typography sx={{ color: 'rgba(255,255,255,0.5)', mt: 0.5 }}>Review and resolve user grievances</Typography>
-            </Box>
-            <Stack direction="row" spacing={2} alignItems="center">
-              <IconButton sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.05)', p: 1.5 }}>
-                <NotificationsNoneIcon />
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <IconButton
+                color="inherit"
+                aria-label="open drawer"
+                edge="start"
+                onClick={handleDrawerToggle}
+                sx={{ display: { md: 'none' }, color: 'white', bgcolor: 'rgba(255,255,255,0.05)', p: 1.5 }}
+              >
+                <MenuIcon />
               </IconButton>
+              <Box>
+                <Typography variant="h4" sx={{ color: 'white', fontWeight: 900 }}>Complaints</Typography>
+                <Typography sx={{ color: 'rgba(255,255,255,0.5)', mt: 0.5 }}>Review and resolve user grievances</Typography>
+              </Box>
+            </Stack>
+            <Stack direction="row" spacing={2} alignItems="center">
               <Button
                 onClick={handleOpen}
                 variant="outlined"
@@ -120,86 +130,84 @@ const AdminComplaints = () => {
             </Stack>
           </Stack>
 
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <Card sx={{
-                borderRadius: '24px',
-                background: 'rgba(255, 255, 255, 0.03)',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
-                p: 4,
-                color: 'white'
-              }}>
-                <Box sx={{ width: '100%', overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', color: 'white' }}>
-                    <thead>
-                      <tr>
-                        <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>S No</th>
-                        <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Consumer Name</th>
-                        <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Email</th>
-                        <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Description</th>
-                        <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Status</th>
-                        <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {complaints.length > 0 ? (
-                        complaints.map((complaint, index) => (
-                          <tr key={complaint._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                            <td style={{ padding: '16px' }}>{index + 1}</td>
-                            <td style={{ padding: '16px', fontWeight: 600 }}>{complaint.consumer.name}</td>
-                            <td style={{ padding: '16px', color: 'rgba(255,255,255,0.6)' }}>{complaint.consumer.email}</td>
-                            <td style={{ padding: '16px', color: 'rgba(255,255,255,0.8)' }}>{complaint.description}</td>
-                            <td style={{ padding: '16px' }}>
-                              <span style={{
-                                padding: '6px 12px',
-                                borderRadius: '20px',
-                                fontSize: '13px',
-                                fontWeight: 700,
-                                textTransform: 'uppercase',
-                                backgroundColor: complaint.status === 'pending' ? 'rgba(255, 152, 0, 0.1)' : 'rgba(76, 175, 80, 0.1)',
-                                color: complaint.status === 'pending' ? '#ff9800' : '#4caf50'
-                              }}>
-                                {complaint.status}
-                              </span>
-                            </td>
-                            <td style={{ padding: '16px' }}>
-                              {complaint.status === 'pending' && (
-                                <Button
-                                  variant="contained"
-                                  size="small"
-                                  onClick={() => handleResolveComplaint(complaint._id)}
-                                  sx={{
-                                    bgcolor: 'rgba(0, 230, 118, 0.1)',
-                                    color: '#00e676',
-                                    borderRadius: '8px',
-                                    fontWeight: 700,
-                                    textTransform: 'none',
+          <Box sx={{ width: '100%' }}>
+            <Card sx={{
+              borderRadius: '24px',
+              background: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(255, 255, 255, 0.05)',
+              p: 4,
+              color: 'white'
+            }}>
+              <Box sx={{ width: '100%', overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', color: 'white' }}>
+                  <thead>
+                    <tr>
+                      <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>S No</th>
+                      <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Consumer Name</th>
+                      <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Email</th>
+                      <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Description</th>
+                      <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Status</th>
+                      <th style={{ padding: '16px', textAlign: 'left', color: 'rgba(255,255,255,0.5)', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {complaints.length > 0 ? (
+                      complaints.map((complaint, index) => (
+                        <tr key={complaint._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                          <td style={{ padding: '16px' }}>{index + 1}</td>
+                          <td style={{ padding: '16px', fontWeight: 600 }}>{complaint.consumer.name}</td>
+                          <td style={{ padding: '16px', color: 'rgba(255,255,255,0.6)' }}>{complaint.consumer.email}</td>
+                          <td style={{ padding: '16px', color: 'rgba(255,255,255,0.8)' }}>{complaint.description}</td>
+                          <td style={{ padding: '16px' }}>
+                            <span style={{
+                              padding: '6px 12px',
+                              borderRadius: '20px',
+                              fontSize: '13px',
+                              fontWeight: 700,
+                              textTransform: 'uppercase',
+                              backgroundColor: complaint.status === 'pending' ? 'rgba(255, 152, 0, 0.1)' : 'rgba(76, 175, 80, 0.1)',
+                              color: complaint.status === 'pending' ? '#ff9800' : '#4caf50'
+                            }}>
+                              {complaint.status}
+                            </span>
+                          </td>
+                          <td style={{ padding: '16px' }}>
+                            {complaint.status === 'pending' && (
+                              <Button
+                                variant="contained"
+                                size="small"
+                                onClick={() => handleResolveComplaint(complaint._id)}
+                                sx={{
+                                  bgcolor: 'rgba(0, 230, 118, 0.1)',
+                                  color: '#00e676',
+                                  borderRadius: '8px',
+                                  fontWeight: 700,
+                                  textTransform: 'none',
+                                  boxShadow: 'none',
+                                  '&:hover': {
+                                    bgcolor: 'rgba(0, 230, 118, 0.2)',
                                     boxShadow: 'none',
-                                    '&:hover': {
-                                      bgcolor: 'rgba(0, 230, 118, 0.2)',
-                                      boxShadow: 'none',
-                                    }
-                                  }}
-                                >
-                                  Resolve
-                                </Button>
-                              )}
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="6" style={{ padding: '30px', textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>
-                            No complaints currently.
+                                  }
+                                }}
+                              >
+                                Resolve
+                              </Button>
+                            )}
                           </td>
                         </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </Box>
-              </Card>
-            </Grid>
-          </Grid>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="6" style={{ padding: '30px', textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>
+                          No complaints currently.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </Box>
+            </Card>
+          </Box>
         </Container>
       </Box>
 

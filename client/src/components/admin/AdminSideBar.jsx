@@ -2,46 +2,49 @@ import {
   Box,
   Button,
   Typography,
-  Menu,
-  MenuItem,
   Stack,
-  alpha
+  alpha,
+  Drawer,
+  Collapse,
+  List
 } from '@mui/material';
 import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
 import TaskOutlinedIcon from '@mui/icons-material/TaskOutlined';
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ShieldIcon from '@mui/icons-material/Shield';
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-const AdminSidebar = () => {
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
-  const navigate = useNavigate();
+const AdminSidebar = ({ mobileOpen, handleDrawerToggle }) => {
   const location = useLocation();
+  const [usersOpen, setUsersOpen] = useState(
+    location.pathname === '/admin/viewusers' ||
+    location.pathname === '/admin/bussinessowners' ||
+    location.pathname === '/admin/organizations'
+  );
+  const navigate = useNavigate();
 
-  const handleUsersClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
+  const handleUsersClick = () => {
+    setUsersOpen(!usersOpen);
   };
 
   const handleMenuItemClick = (path) => {
     navigate(path);
-    handleClose();
+    if (mobileOpen && handleDrawerToggle) {
+      handleDrawerToggle();
+    }
   };
 
   const isActive = (path) => location.pathname === path;
 
-  const NavButton = ({ label, icon, path, onClick, hasDropdown }) => (
+  const NavButton = ({ label, icon, path, onClick, hasDropdown, isOpen }) => (
     <Button
       fullWidth
-      onClick={onClick || (() => navigate(path))}
+      onClick={onClick || (() => handleMenuItemClick(path))}
       sx={{
         justifyContent: 'flex-start',
         height: "50px",
@@ -58,7 +61,7 @@ const AdminSidebar = () => {
         transition: 'all 0.3s ease'
       }}
       startIcon={icon}
-      endIcon={hasDropdown ? <ArrowDropDownIcon /> : null}
+      endIcon={hasDropdown ? (isOpen ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />) : null}
     >
       <Typography sx={{ fontSize: "15px", fontWeight: isActive(path) ? 700 : 500, ml: 1, flexGrow: 1, textAlign: 'left' }}>
         {label}
@@ -66,20 +69,45 @@ const AdminSidebar = () => {
     </Button>
   );
 
-  return (
+  const SubNavButton = ({ label, path }) => (
+    <Button
+      fullWidth
+      onClick={() => handleMenuItemClick(path)}
+      sx={{
+        justifyContent: 'flex-start',
+        height: "40px",
+        pl: 6,
+        pr: 3,
+        mb: 0.5,
+        textTransform: 'none',
+        borderRadius: '12px',
+        color: isActive(path) ? '#e94560' : 'rgba(255, 255, 255, 0.5)',
+        background: isActive(path) ? 'rgba(233, 69, 96, 0.1)' : 'transparent',
+        '&:hover': {
+          background: 'rgba(255, 255, 255, 0.05)',
+          color: '#e94560'
+        },
+        transition: 'all 0.3s ease'
+      }}
+    >
+      <Typography sx={{ fontSize: "14px", fontWeight: isActive(path) ? 700 : 500, textAlign: 'left' }}>
+        {label}
+      </Typography>
+    </Button>
+  );
+
+  const drawerContent = (
     <Box sx={{
-      height: "calc(100vh - 40px)",
-      background: 'rgba(255, 255, 255, 0.03)',
+      height: "100%",
+      background: 'rgba(10, 10, 26, 0.95)',
       backdropFilter: 'blur(10px)',
-      borderRight: '1px solid rgba(255, 255, 255, 0.1)',
-      margin: "20px 0px 20px 20px",
-      borderRadius: "24px",
       display: 'flex',
       flexDirection: 'column',
       width: '260px',
-      overflow: 'hidden',
-      position: 'sticky',
-      top: 20
+      overflowX: 'hidden',
+      overflowY: 'auto',
+      '&::-webkit-scrollbar': { width: '4px' },
+      '&::-webkit-scrollbar-thumb': { background: 'rgba(255,255,255,0.1)', borderRadius: '4px' }
     }}>
       {/* Brand Header */}
       <Box sx={{ p: 4, textAlign: 'center' }}>
@@ -107,38 +135,17 @@ const AdminSidebar = () => {
           icon={<PersonOutlineOutlinedIcon />}
           onClick={handleUsersClick}
           hasDropdown
-          path="/admin/viewusers" // Active if any sub is active? Simplification for now.
+          isOpen={usersOpen}
+          path="/admin/viewusers"
         />
 
-        <Menu
-          id="users-menu"
-          anchorEl={anchorEl}
-          open={open}
-          onClose={handleClose}
-          PaperProps={{
-            sx: {
-              width: '220px',
-              mt: 1,
-              background: '#1a1a2e',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
-              borderRadius: '16px',
-              '& .MuiMenuItem-root': {
-                color: 'rgba(255,255,255,0.7)',
-                m: 1,
-                borderRadius: '8px',
-                '&:hover': {
-                  background: 'rgba(233, 69, 96, 0.1)',
-                  color: '#e94560'
-                }
-              }
-            }
-          }}
-        >
-          <MenuItem onClick={() => handleMenuItemClick('/admin/viewusers')}>Customers</MenuItem>
-          <MenuItem onClick={() => handleMenuItemClick('/admin/bussinessowners')}>Business Owners</MenuItem>
-          <MenuItem onClick={() => handleMenuItemClick('/admin/organizations')}>Community Organizers</MenuItem>
-        </Menu>
+        <Collapse in={usersOpen} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            <SubNavButton label="Customers" path="/admin/viewusers" />
+            <SubNavButton label="Business Owners" path="/admin/bussinessowners" />
+            <SubNavButton label="Community Organizers" path="/admin/organizations" />
+          </List>
+        </Collapse>
       </Box>
 
       {/* Footer Info */}
@@ -156,6 +163,49 @@ const AdminSidebar = () => {
             ONLINE
           </Typography>
         </Box>
+      </Box>
+    </Box>
+  );
+
+  return (
+    <Box component="nav" sx={{ width: { md: 260 }, flexShrink: { md: 0 } }}>
+      {/* Mobile Drawer */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{ keepMounted: true }}
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': {
+            boxSizing: 'border-box',
+            width: 260,
+            background: 'transparent',
+            border: 'none'
+          },
+        }}
+      >
+        <Box sx={{
+          height: "100%",
+          borderRadius: "0px 24px 24px 0px",
+          overflow: 'hidden',
+        }}>
+          {drawerContent}
+        </Box>
+      </Drawer>
+
+      {/* Desktop Permanent Sidebar */}
+      <Box sx={{
+        display: { xs: 'none', md: 'block' },
+        height: "calc(100vh - 40px)",
+        margin: "20px 0px 20px 20px",
+        borderRadius: "24px",
+        borderRight: '1px solid rgba(255, 255, 255, 0.1)',
+        overflow: 'hidden',
+        position: 'sticky',
+        top: 20
+      }}>
+        {drawerContent}
       </Box>
     </Box>
   );

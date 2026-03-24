@@ -12,7 +12,7 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import BusinessIcon from '@mui/icons-material/Business';
 import GroupsIcon from '@mui/icons-material/Groups';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
+import MenuIcon from '@mui/icons-material/Menu';
 import { useNavigate } from 'react-router-dom';
 import AdminSidebar from './AdminSideBar';
 import {
@@ -26,6 +26,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const AdminDashboard = () => {
     const [open, setOpen] = useState(false);
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const handleDrawerToggle = () => { setMobileOpen(!mobileOpen); };
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
 
@@ -105,7 +107,7 @@ const AdminDashboard = () => {
     }, [allFetchedEvents, eventTimeRange, processEventsForCharts]);
 
     const MetricCard = ({ title, value, icon, color, trend }) => (
-        <motion.div whileHover={{ y: -5 }}>
+        <motion.div whileHover={{ y: -5 }} style={{ width: '100%', height: '100%' }}>
             <Card sx={{
                 borderRadius: '24px',
                 background: 'rgba(255, 255, 255, 0.05)',
@@ -148,20 +150,28 @@ const AdminDashboard = () => {
 
     return (
         <Box sx={{ minHeight: '100vh', bgcolor: '#0a0a1a', display: 'flex' }}>
-            <AdminSidebar />
+            <AdminSidebar mobileOpen={mobileOpen} handleDrawerToggle={handleDrawerToggle} />
 
             <Box sx={{ flexGrow: 1, p: 4 }}>
                 <Container maxWidth="xl">
                     {/* Top Header */}
                     <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 6 }}>
-                        <Box>
-                            <Typography variant="h4" sx={{ color: 'white', fontWeight: 900 }}>Command Center</Typography>
-                            <Typography sx={{ color: 'rgba(255,255,255,0.5)', mt: 0.5 }}>Real-time platform overview and controls</Typography>
-                        </Box>
-                        <Stack direction="row" spacing={2} alignItems="center">
-                            <IconButton sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.05)', p: 1.5 }}>
-                                <NotificationsNoneIcon />
+                        <Stack direction="row" alignItems="center" spacing={2}>
+                            <IconButton
+                                color="inherit"
+                                aria-label="open drawer"
+                                edge="start"
+                                onClick={handleDrawerToggle}
+                                sx={{ display: { md: 'none' }, color: 'white', bgcolor: 'rgba(255,255,255,0.05)', p: 1.5 }}
+                            >
+                                <MenuIcon />
                             </IconButton>
+                            <Box>
+                                <Typography variant="h4" sx={{ color: 'white', fontWeight: 900 }}>Command Center</Typography>
+                                <Typography sx={{ color: 'rgba(255,255,255,0.5)', mt: 0.5 }}>Real-time platform overview and controls</Typography>
+                            </Box>
+                        </Stack>
+                        <Stack direction="row" spacing={2} alignItems="center">
                             <Button
                                 onClick={handleOpen}
                                 variant="outlined"
@@ -183,97 +193,95 @@ const AdminDashboard = () => {
                     </Stack>
 
                     {/* Performance Metrics */}
-                    <Grid container spacing={3} sx={{ mb: 6 }}>
-                        <Grid item xs={12} md={4}>
+                    <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} sx={{ mb: 6, width: '100%' }}>
+                        <Box sx={{ flex: 1 }}>
                             <MetricCard title="System Users" value={totalUsers} icon={<PersonOutlineIcon />} color="#e94560" trend="12.5" />
-                        </Grid>
-                        <Grid item xs={12} md={4}>
+                        </Box>
+                        <Box sx={{ flex: 1 }}>
                             <MetricCard title="Registered Businesses" value={totalBusinesses} icon={<BusinessIcon />} color="#0f3460" trend="8.2" />
-                        </Grid>
-                        <Grid item xs={12} md={4}>
+                        </Box>
+                        <Box sx={{ flex: 1 }}>
                             <MetricCard title="Active Organizers" value={totalOrganizers} icon={<GroupsIcon />} color="#6f32bf" trend="15.0" />
-                        </Grid>
-                    </Grid>
+                        </Box>
+                    </Stack>
 
                     {/* Analytics Section */}
-                    <Grid container spacing={3}>
-                        <Grid item xs={12}>
-                            <Card sx={{
-                                borderRadius: '24px',
-                                background: 'rgba(255, 255, 255, 0.03)',
-                                border: '1px solid rgba(255, 255, 255, 0.05)',
-                                p: 4
-                            }}>
-                                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 4 }}>
-                                    <Box>
-                                        <Typography variant="h6" sx={{ color: 'white', fontWeight: 800 }}>Platform Activity</Typography>
-                                        <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px' }}>Monthly event creations and engagement tracking</Typography>
-                                    </Box>
-                                    <Select
-                                        value={eventTimeRange}
-                                        onChange={(e) => setEventTimeRange(e.target.value)}
-                                        size="small"
-                                        sx={{
-                                            color: 'white',
-                                            bgcolor: 'rgba(255,255,255,0.05)',
-                                            borderRadius: '12px',
-                                            border: 'none',
-                                            '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
-                                            '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' }
-                                        }}
-                                    >
-                                        {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map(m => (
-                                            <MenuItem key={m} value={m}>{m}</MenuItem>
-                                        ))}
-                                    </Select>
-                                </Stack>
-
-                                <Box sx={{ height: 400, width: '100%', mt: 2 }}>
-                                    <ResponsiveContainer>
-                                        <AreaChart data={eventsChartData}>
-                                            <defs>
-                                                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                                    <stop offset="5%" stopColor="#e94560" stopOpacity={0.3} />
-                                                    <stop offset="95%" stopColor="#e94560" stopOpacity={0} />
-                                                </linearGradient>
-                                            </defs>
-                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                                            <XAxis
-                                                dataKey="name"
-                                                axisLine={false}
-                                                tickLine={false}
-                                                tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 12 }}
-                                                dy={15}
-                                            />
-                                            <YAxis
-                                                axisLine={false}
-                                                tickLine={false}
-                                                tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 12 }}
-                                                dx={-10}
-                                            />
-                                            <Tooltip
-                                                contentStyle={{
-                                                    background: '#1a1a2e',
-                                                    border: '1px solid rgba(255,255,255,0.1)',
-                                                    borderRadius: '12px',
-                                                    boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
-                                                }}
-                                                itemStyle={{ color: '#e94560' }}
-                                            />
-                                            <Area
-                                                type="monotone"
-                                                dataKey="value"
-                                                stroke="#e94560"
-                                                strokeWidth={3}
-                                                fillOpacity={1}
-                                                fill="url(#colorValue)"
-                                            />
-                                        </AreaChart>
-                                    </ResponsiveContainer>
+                    <Box sx={{ width: '100%' }}>
+                        <Card sx={{
+                            borderRadius: '24px',
+                            background: 'rgba(255, 255, 255, 0.03)',
+                            border: '1px solid rgba(255, 255, 255, 0.05)',
+                            p: 4
+                        }}>
+                            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 4 }}>
+                                <Box>
+                                    <Typography variant="h6" sx={{ color: 'white', fontWeight: 800 }}>Platform Activity</Typography>
+                                    <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px' }}>Monthly event creations and engagement tracking</Typography>
                                 </Box>
-                            </Card>
-                        </Grid>
-                    </Grid>
+                                <Select
+                                    value={eventTimeRange}
+                                    onChange={(e) => setEventTimeRange(e.target.value)}
+                                    size="small"
+                                    sx={{
+                                        color: 'white',
+                                        bgcolor: 'rgba(255,255,255,0.05)',
+                                        borderRadius: '12px',
+                                        border: 'none',
+                                        '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+                                        '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' }
+                                    }}
+                                >
+                                    {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map(m => (
+                                        <MenuItem key={m} value={m}>{m}</MenuItem>
+                                    ))}
+                                </Select>
+                            </Stack>
+
+                            <Box sx={{ height: 400, width: '100%', mt: 2 }}>
+                                <ResponsiveContainer>
+                                    <AreaChart data={eventsChartData}>
+                                        <defs>
+                                            <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#e94560" stopOpacity={0.3} />
+                                                <stop offset="95%" stopColor="#e94560" stopOpacity={0} />
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                                        <XAxis
+                                            dataKey="name"
+                                            axisLine={false}
+                                            tickLine={false}
+                                            tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 12 }}
+                                            dy={15}
+                                        />
+                                        <YAxis
+                                            axisLine={false}
+                                            tickLine={false}
+                                            tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 12 }}
+                                            dx={-10}
+                                        />
+                                        <Tooltip
+                                            contentStyle={{
+                                                background: '#1a1a2e',
+                                                border: '1px solid rgba(255,255,255,0.1)',
+                                                borderRadius: '12px',
+                                                boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+                                            }}
+                                            itemStyle={{ color: '#e94560' }}
+                                        />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="value"
+                                            stroke="#e94560"
+                                            strokeWidth={3}
+                                            fillOpacity={1}
+                                            fill="url(#colorValue)"
+                                        />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            </Box>
+                        </Card>
+                    </Box>
                 </Container>
             </Box>
 
