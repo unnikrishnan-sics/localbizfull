@@ -1,148 +1,157 @@
 import React, { useState } from 'react';
-import Navbar from '../Navbar/Navbar';
-import { Box, Button, Typography, Container, Grid, Paper, Stack, Fab, Slide, IconButton } from '@mui/material';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import { 
+    Box, Button, Typography, Container, Grid, Paper, Stack, 
+    Fab, Slide, IconButton, Avatar, useTheme, useMediaQuery 
+} from '@mui/material';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import VerifiedIcon from '@mui/icons-material/Verified';
-import ChatIcon from '@mui/icons-material/Chat';
+import ChatBubbleIcon from '@mui/icons-material/ChatBubble';
 import CloseIcon from '@mui/icons-material/Close';
 import { Link } from 'react-router-dom';
 
-import homemain from "../../assets/homemain.png";
-import search from "../../assets/search.png";
-import profile from "../../assets/profile.png"
-import clock from "../../assets/clock.png"
-import support from "../../assets/support.png";
+// Import components/assets
+import Navbar from '../Navbar/Navbar';
 import Footer from '../Footer/Footer';
 import ChatBot from '../ChatBot/ChatBot';
+import homemain from "../../assets/homemain.png";
 
 const Home = () => {
     const [showChatBot, setShowChatBot] = useState(false);
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+    // Theme Constants
+    const PRIMARY_PURPLE = '#6F32BF';
+    const DARK_NAVY = '#0F172A';
 
     return (
-        <Box sx={{ bgcolor: '#ffffff', minHeight: '100vh', overflowX: 'hidden', fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif' }}>
+        <Box sx={{ bgcolor: '#FFFFFF', minHeight: '100vh', overflowX: 'hidden' }}>
             <Navbar />
 
-            {/* Apple/SaaS Style Centered Hero Section */}
-            <Box sx={{
-                pt: { xs: 8, md: 16 },
-                pb: { xs: 8, md: 12 },
-                background: 'radial-gradient(circle at top, #F3E8FF 0%, #FFFFFF 60%)',
-                textAlign: 'center',
-                borderBottom: '1px solid #F3F4F6'
+            {/* --- PREMIUM HERO SECTION --- */}
+            <Box sx={{ 
+                position: 'relative',
+                pt: { xs: 12, md: 24 }, 
+                pb: { xs: 10, md: 20 },
+                background: 'radial-gradient(circle at 0% 0%, #F5F3FF 0%, #FFFFFF 40%)',
+                overflow: 'hidden'
             }}>
-                <Container maxWidth="md">
-                    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, bgcolor: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '50px', px: 2, py: 0.75, mb: 4, boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
-                        <Typography variant="caption" sx={{ fontWeight: 800, color: '#6F32BF', textTransform: 'uppercase', letterSpacing: 1.5 }}>
-                            The #1 Local Networking Platform
-                        </Typography>
-                    </Box>
-                    <Typography variant="h1" sx={{ fontWeight: 900, fontSize: { xs: '3.5rem', md: '5.5rem' }, lineHeight: 1.05, color: '#111827', mb: 3, letterSpacing: '-0.02em' }}>
-                        Your City.<br />
-                        <span style={{ background: 'linear-gradient(90deg, #6F32BF, #9b70d3)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                            One App.
-                        </span>
-                    </Typography>
-                    <Typography variant="h6" sx={{ color: '#6B7280', fontWeight: 400, mb: 6, lineHeight: 1.6, fontSize: { xs: '1.1rem', md: '1.25rem' }, maxWidth: '700px', mx: 'auto' }}>
-                        Discover local services, support neighborhood businesses, and unlock exclusive community deals—all seamlessly integrated into one beautiful platform.
-                    </Typography>
-
-                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center" sx={{ mb: 10 }}>
-                        <Button
-                            component={Link} to="/customer/registration"
-                            variant="contained" size="large" disableElevation
-                            sx={{
-                                bgcolor: '#111827', color: '#FFF', px: 5, py: 1.8, borderRadius: '50px', fontWeight: 700, fontSize: '1.1rem',
-                                transition: 'all 0.2s ease', '&:hover': { bgcolor: '#374151', transform: 'translateY(-2px)', boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }
-                            }}
-                        >
-                            Get Started Free
-                        </Button>
-                        <Button
-                            component={Link} to="/about"
-                            variant="outlined" size="large" endIcon={<ArrowForwardIosIcon sx={{ fontSize: '14px !important' }} />}
-                            sx={{
-                                borderColor: '#E5E7EB', color: '#111827', px: 5, py: 1.8, borderRadius: '50px', fontWeight: 700, fontSize: '1.1rem',
-                                transition: 'all 0.2s ease', '&:hover': { bgcolor: '#F9FAFB', borderColor: '#D1D5DB' }
-                            }}
-                        >
-                            See How It Works
-                        </Button>
-                    </Stack>
-
-                    {/* Highly prominent centered image */}
-                    <Box sx={{ position: 'relative', width: '100%', maxWidth: '900px', mx: 'auto' }}>
-                        <Box sx={{
-                            position: 'absolute', top: -40, left: '50%', transform: 'translateX(-50%)',
-                            width: '80%', height: '100%', bgcolor: '#6F32BF', filter: 'blur(120px)', opacity: 0.15, zIndex: 0, borderRadius: '50%'
-                        }} />
-                        <Box
-                            component="img"
-                            src={homemain}
-                            sx={{
-                                width: '100%', height: 'auto', display: 'block', position: 'relative', zIndex: 1,
-                                filter: 'drop-shadow(0 25px 50px rgba(0,0,0,0.15))'
-                            }}
-                        />
-                    </Box>
-                </Container>
-            </Box>
-
-            {/* Premium Features Section */}
-            <Box sx={{ py: { xs: 10, md: 16 }, bgcolor: '#FFFFFF' }}>
+                {/* Visual Flourishes */}
+                <Box sx={{ position: 'absolute', top: '10%', right: '-5%', width: '350px', height: '350px', bgcolor: '#6F32BF', filter: 'blur(150px)', opacity: 0.05, borderRadius: '50%' }} />
+                
                 <Container maxWidth="lg">
-                    <Grid container spacing={6} alignItems="stretch">
-                        {[
-                            { icon: StorefrontIcon, title: 'Smart Search', desc: 'Find unique shops, cozy cafes, and essential services instantly with our lightning-fast, location-aware discovery engine.' },
-                            { icon: LocalOfferIcon, title: 'Live Deals', desc: 'Secure real-time promotions, flash sales, and massive discounts totally exclusive to registered community members.' },
-                            { icon: VerifiedIcon, title: 'Verified Hub', desc: 'You can rest easy knowing every single business on our platform is strictly vetted, verified, and community-trusted.' }
-                        ].map((item, i) => (
-                            <Grid item xs={12} md={4} key={i}>
-                                <Paper elevation={0} sx={{
-                                    height: '100%', p: 5, bgcolor: '#F9FAFB', borderRadius: '24px',
-                                    display: 'flex', flexDirection: 'column', transition: 'transform 0.3s ease, background 0.3s',
-                                    '&:hover': { bgcolor: '#F3E8FF', transform: 'translateY(-5px)' }
+                    <Grid container spacing={8} alignItems="center">
+                        <Grid item xs={12} md={6}>
+                            <Stack spacing={4} alignItems={isMobile ? 'center' : 'flex-start'} textAlign={isMobile ? 'center' : 'left'}>
+                                <Box sx={{ 
+                                    display: 'inline-flex', alignItems: 'center', gap: 1.5, 
+                                    px: 2.5, py: 1, borderRadius: '100px', 
+                                    bgcolor: 'rgba(111, 50, 191, 0.06)', color: PRIMARY_PURPLE,
+                                    border: '1px solid rgba(111, 50, 191, 0.1)'
                                 }}>
-                                    <Box sx={{ width: 64, height: 64, bgcolor: '#FFFFFF', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 4, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-                                        <item.icon sx={{ color: '#6F32BF', fontSize: 32 }} />
-                                    </Box>
-                                    <Typography variant="h5" sx={{ fontWeight: 800, color: '#111827', mb: 2, letterSpacing: '-0.01em' }}>{item.title}</Typography>
-                                    <Typography variant="body1" sx={{ color: '#6B7280', flexGrow: 1, lineHeight: 1.7 }}>{item.desc}</Typography>
+                                    <VerifiedIcon sx={{ fontSize: 18 }} />
+                                    <Typography sx={{ fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: 1 }}>
+                                        #1 Local Networking Platform
+                                    </Typography>
+                                </Box>
+
+                                <Typography variant="h1" sx={{ 
+                                    fontWeight: 900, fontSize: { xs: '3rem', md: '4.5rem' }, 
+                                    lineHeight: { xs: 1.1, md: 1.05 }, color: DARK_NAVY,
+                                    letterSpacing: '-0.03em'
+                                }}>
+                                    Discover. Connect. <br />
+                                    <span style={{ background: 'linear-gradient(90deg, #6F32BF, #4F46E5)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                                        Grow Local.
+                                    </span>
+                                </Typography>
+
+                                <Typography sx={{ 
+                                    color: '#4B5563', fontSize: { xs: '1.1rem', md: '1.25rem' }, 
+                                    maxWidth: '550px', lineHeight: 1.7, fontWeight: 500
+                                }}>
+                                    The all-in-one platform to discover verified neighborhood gems, unlock exclusive daily deals, and chat directly with business owners.
+                                </Typography>
+
+                                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2.5} sx={{ width: isMobile ? '100%' : 'auto' }}>
+                                    <Button
+                                        component={Link} to="/customer/registration"
+                                        variant="contained" disableElevation
+                                        sx={{ 
+                                            bgcolor: DARK_NAVY, color: '#FFF', px: 6, py: 2.2, borderRadius: '16px', 
+                                            fontWeight: 800, textTransform: 'none', fontSize: '1.1rem',
+                                            transition: 'all 0.3s ease',
+                                            '&:hover': { bgcolor: '#1E293B', transform: 'translateY(-4px)', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }
+                                        }}
+                                    >
+                                        Create Free Account
+                                    </Button>
+                                    <Button
+                                        component={Link} to="/about"
+                                        variant="outlined"
+                                        endIcon={<ArrowForwardIcon />}
+                                        sx={{ 
+                                            borderColor: '#E2E8F0', color: DARK_NAVY, px: 6, py: 2.2, 
+                                            borderRadius: '16px', fontWeight: 800, textTransform: 'none', fontSize: '1.1rem',
+                                            '&:hover': { borderColor: PRIMARY_PURPLE, color: PRIMARY_PURPLE, bgcolor: 'transparent' }
+                                        }}
+                                    >
+                                        How it Works
+                                    </Button>
+                                </Stack>
+                            </Stack>
+                        </Grid>
+
+                        <Grid item xs={12} md={6}>
+                            <Box sx={{ width: '100%', position: 'relative' }}>
+                                <Box sx={{ 
+                                    position: 'absolute', top: '-10%', right: '-10%', width: '100%', height: '100%',
+                                    bgcolor: '#6F32BF', filter: 'blur(120px)', opacity: 0.08, zIndex: 0
+                                }} />
+                                <Paper elevation={0} sx={{ 
+                                    position: 'relative', zIndex: 1, borderRadius: '40px', overflow: 'hidden', 
+                                    border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 40px 80px -20px rgba(0,0,0,0.12)'
+                                }}>
+                                    <Box component="img" src={homemain} sx={{ width: '100%', height: 'auto', display: 'block' }} />
                                 </Paper>
-                            </Grid>
-                        ))}
+                            </Box>
+                        </Grid>
                     </Grid>
                 </Container>
             </Box>
 
-            {/* How It Works - Grid Layout */}
-            <Box sx={{ py: { xs: 10, md: 16 }, bgcolor: '#111827', color: '#FFFFFF' }}>
+            {/* --- FEATURES SECTION --- */}
+            <Box sx={{ py: { xs: 12, md: 20 }, bgcolor: '#FFFFFF' }}>
                 <Container maxWidth="lg">
                     <Box sx={{ textAlign: 'center', mb: 10 }}>
-                        <Typography variant="h2" sx={{ fontWeight: 900, mb: 3, letterSpacing: '-0.02em' }}>Simplicity is Key.</Typography>
-                        <Typography variant="h6" sx={{ color: '#9CA3AF', fontWeight: 400, maxWidth: '600px', mx: 'auto' }}>
-                            We drastically cut down the noise. Discovering your digital neighborhood is now as simple as a few taps.
-                        </Typography>
+                        <Typography sx={{ color: PRIMARY_PURPLE, fontWeight: 800, mb: 1.5, textTransform: 'uppercase', letterSpacing: 2.5, fontSize: '0.85rem' }}>Core Advantage</Typography>
+                        <Typography variant="h2" sx={{ fontWeight: 900, color: DARK_NAVY, mb: 3 }}>Simple. Reliable. Local.</Typography>
                     </Box>
-                    <Grid container spacing={4}>
+                    <Grid container spacing={4} justifyContent="center">
                         {[
-                            { icon: search, title: "Discover", desc: "Filter freely by category, vibe, or detailed location mapping." },
-                            { icon: profile, title: "Explore", desc: "Read highly authentic, strictly vetted local user reviews." },
-                            { icon: clock, title: "Visit", desc: "Check live operating hours and book tables instantly." },
-                            { icon: support, title: "Connect", desc: "Message business owners directly for immediate support." }
-                        ].map((step, i) => (
-                            <Grid item xs={12} sm={6} md={3} key={i}>
-                                <Paper elevation={0} sx={{
-                                    p: 5, height: '100%', textAlign: 'center', bgcolor: 'rgba(255,255,255,0.03)',
-                                    border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', transition: 'all 0.3s ease',
-                                    backdropFilter: 'blur(10px)', '&:hover': { bgcolor: 'rgba(255,255,255,0.08)' }
+                            { icon: <StorefrontIcon sx={{ fontSize: 32 }} />, title: "Discover Shops", desc: "Find curated boutiques, cafes, and essential services instantly.", color: PRIMARY_PURPLE },
+                            { icon: <LocalOfferIcon sx={{ fontSize: 32 }} />, title: "Daily Deals", desc: "Unlock exclusive discounts and massive community savings.", color: '#10B981' },
+                            { icon: <VerifiedIcon sx={{ fontSize: 32 }} />, title: "Verified Hub", desc: "Shop with peace of mind knowing every partner is vetted.", color: '#3B82F6' }
+                        ].map((item, i) => (
+                            <Grid item xs={12} sm={6} md={4} key={i} sx={{ display: 'flex' }}>
+                                <Paper elevation={0} sx={{ 
+                                    p: 5, borderRadius: '32px', width: '100%',
+                                    bgcolor: '#F9FAFB', border: '1px solid #F1F5F9',
+                                    display: 'flex', flexDirection: 'column',
+                                    transition: 'all 0.4s ease', 
+                                    '&:hover': { transform: 'translateY(-10px)', bgcolor: '#FFF', boxShadow: '0 30px 60px -15px rgba(0,0,0,0.08)', borderColor: 'rgba(111, 50, 191, 0.2)' }
                                 }}>
-                                    <Box sx={{ width: 80, height: 80, mx: 'auto', mb: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'rgba(111, 50, 191, 0.2)', borderRadius: '50%' }}>
-                                        <Box component="img" src={step.icon} sx={{ width: 40, height: 'auto', filter: 'brightness(0) invert(1)' }} />
-                                    </Box>
-                                    <Typography variant="h6" sx={{ fontWeight: 800, mb: 2 }}>{step.title}</Typography>
-                                    <Typography variant="body2" sx={{ color: '#9CA3AF', lineHeight: 1.6 }}>{step.desc}</Typography>
+                                    <Avatar sx={{ 
+                                        bgcolor: 'rgba(255,255,255,1)', mb: 4, width: 72, height: 72, 
+                                        color: item.color, border: `1px solid ${item.color}20`,
+                                        boxShadow: `0 8px 20px ${item.color}15`
+                                    }}>
+                                        {item.icon}
+                                    </Avatar>
+                                    <Typography variant="h5" sx={{ fontWeight: 900, mb: 2, color: DARK_NAVY }}>{item.title}</Typography>
+                                    <Typography sx={{ color: '#64748B', lineHeight: 1.8, fontSize: '1.05rem', flexGrow: 1 }}>{item.desc}</Typography>
                                 </Paper>
                             </Grid>
                         ))}
@@ -150,44 +159,70 @@ const Home = () => {
                 </Container>
             </Box>
 
-            {/* Massive CTA */}
-            <Box sx={{ py: { xs: 12, md: 20 }, bgcolor: '#FFFFFF' }}>
-                <Container maxWidth="md">
-                    <Paper elevation={0} sx={{
-                        p: { xs: 6, md: 10 }, borderRadius: '32px', textAlign: 'center',
-                        background: 'linear-gradient(135deg, #6F32BF 0%, #4c1d95 100%)', color: '#FFFFFF',
-                        boxShadow: '0 25px 50px -12px rgba(111, 50, 191, 0.4)'
-                    }}>
-                        <Typography variant="h2" sx={{ fontWeight: 900, mb: 3, letterSpacing: '-0.02em', fontSize: { xs: '2.5rem', md: '4rem' } }}>Join the revolution.</Typography>
-                        <Typography variant="h5" sx={{ fontWeight: 400, mb: 6, opacity: 0.9, color: '#E9D5FF' }}>Thousands of neighbors are exploring hidden local gems.</Typography>
-                        <Button
+            {/* --- CTA SECTION --- */}
+            <Container maxWidth="lg" sx={{ mb: { xs: 12, md: 20 } }}>
+                <Box sx={{ 
+                    position: 'relative', overflow: 'hidden',
+                    background: `linear-gradient(135deg, ${DARK_NAVY} 0%, #1E293B 100%)`, 
+                    borderRadius: '48px', p: { xs: 8, md: 15 }, 
+                    textAlign: 'center', color: '#FFF' 
+                }}>
+                    <Box sx={{ position: 'absolute', top: '-20%', left: '-10%', width: '400px', height: '400px', bgcolor: PRIMARY_PURPLE, filter: 'blur(200px)', opacity: 0.15 }} />
+                    
+                    <Stack spacing={4} alignItems="center" sx={{ position: 'relative', zIndex: 1 }}>
+                        <Typography variant="h2" sx={{ fontWeight: 900, mb: 0, fontSize: { xs: '2.5rem', md: '4rem' }, letterSpacing: '-0.02em' }}>
+                            Join the revolution <br /> of local commerce.
+                        </Typography>
+                        <Typography sx={{ color: '#94A3B8', fontSize: '1.2rem', maxWidth: '650px', mx: 'auto' }}>
+                            Thousands of locals are discovering hidden gems every day. Your next favorite neighborhood spot is just a click away.
+                        </Typography>
+                        <Button 
                             component={Link} to="/customer/registration"
-                            variant="contained" size="large" disableElevation
-                            sx={{
-                                bgcolor: '#FFFFFF', color: '#111827', fontWeight: 800, px: 8, py: 2, borderRadius: '50px', fontSize: '1.2rem',
-                                '&:hover': { bgcolor: '#F3F4F6', transform: 'scale(1.02)' }, transition: 'all 0.2s ease'
+                            variant="contained" disableElevation
+                            sx={{ 
+                                bgcolor: '#FFF', color: DARK_NAVY, fontWeight: 900, px: 8, py: 2.5, borderRadius: '20px', 
+                                fontSize: '1.2rem', textTransform: 'none',
+                                transition: 'all 0.3s ease', '&:hover': { bgcolor: '#F1F5F9', transform: 'scale(1.05)' }
                             }}
                         >
-                            Create Free Account
+                            Register Free Now
                         </Button>
-                    </Paper>
-                </Container>
-            </Box>
+                    </Stack>
+                </Box>
+            </Container>
 
             <Footer />
 
-            {/* Chatbot */}
+            {/* --- REFINED CHAT SYSTEM --- */}
             <Slide direction="up" in={showChatBot} mountOnEnter unmountOnExit>
-                <Box sx={{ position: 'fixed', bottom: 100, right: 30, width: { xs: 320, md: 400 }, height: 600, bgcolor: '#FFFFFF', borderRadius: '24px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', zIndex: 2000, overflow: 'hidden', display: 'flex', flexDirection: 'column', border: '1px solid #E5E7EB' }}>
-                    <Box sx={{ p: 2.5, bgcolor: '#111827', color: '#FFFFFF', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Typography sx={{ fontWeight: 800, fontSize: '15px' }}>Support Chat</Typography>
-                        <IconButton onClick={() => setShowChatBot(false)} size="small" sx={{ color: '#9CA3AF', '&:hover': { color: '#FFF' } }}><CloseIcon fontSize="small" /></IconButton>
+                <Box sx={{ 
+                    position: 'fixed', bottom: { xs: 20, sm: 100 }, right: { xs: 20, sm: 40 }, 
+                    width: { xs: 'calc(100% - 40px)', sm: 400 }, height: 600, 
+                    bgcolor: '#FFF', borderRadius: '32px', zIndex: 3000,
+                    boxShadow: '0 25px 60px -12px rgba(0,0,0,0.25)', overflow: 'hidden',
+                    display: 'flex', flexDirection: 'column', border: '1px solid rgba(0,0,0,0.05)'
+                }}>
+                    <Box sx={{ p: 3, bgcolor: DARK_NAVY, color: '#FFF', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Stack direction="row" spacing={1.5} alignItems="center">
+                            <Box sx={{ width: 10, height: 10, bgcolor: '#10B981', borderRadius: '50%' }} />
+                            <Typography sx={{ fontWeight: 800 }}>LocalBiz Support</Typography>
+                        </Stack>
+                        <IconButton size="small" onClick={() => setShowChatBot(false)} sx={{ color: 'rgba(255,255,255,0.6)', '&:hover': { color: '#FFF' } }}><CloseIcon /></IconButton>
                     </Box>
                     <Box sx={{ flexGrow: 1 }}><ChatBot /></Box>
                 </Box>
             </Slide>
-            <Fab onClick={() => setShowChatBot(!showChatBot)} disableRipple sx={{ position: 'fixed', bottom: 30, right: 30, zIndex: 1000, bgcolor: '#111827', color: '#FFFFFF', '&:hover': { bgcolor: '#374151', transform: 'scale(1.05)' }, transition: 'all 0.2s ease', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.2)' }}>
-                {showChatBot ? <CloseIcon /> : <ChatIcon />}
+            <Fab 
+                onClick={() => setShowChatBot(!showChatBot)}
+                sx={{ 
+                    position: 'fixed', bottom: 30, right: 30, 
+                    bgcolor: PRIMARY_PURPLE, color: '#FFF',
+                    width: 68, height: 68,
+                    '&:hover': { bgcolor: '#5A289D' },
+                    boxShadow: `0 15px 30px ${PRIMARY_PURPLE}40`
+                }}
+            >
+                {showChatBot ? <CloseIcon /> : <ChatBubbleIcon />}
             </Fab>
         </Box>
     );

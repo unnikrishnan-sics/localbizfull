@@ -1,6 +1,6 @@
 // src/components/Footer.js
 
-import { Container, Stack, Box, Typography } from '@mui/material';
+import { Container, Stack, Box, Typography, Grid } from '@mui/material';
 import React from 'react';
 import { Link } from 'react-router-dom'; // Make sure you have react-router-dom
 import logo from "../../assets/logo.png";
@@ -8,137 +8,96 @@ import logo from "../../assets/logo.png";
 // Reusable style for links to remove underlines and set color
 const linkStyle = {
     textDecoration: 'none',
-    color: 'white'
+    color: '#9CA3AF',
+    transition: 'color 0.2s ease',
 };
 
-const Footer = ({ userRole = 'customer' }) => { // Default to 'customer'
-
-    // Dynamically build the base path (e.g., '/customer', '/bussiness')
+const Footer = ({ userRole = 'customer' }) => {
     const basePath = `/${userRole}`;
-
-    // Construct the full paths for each link, respecting capitalization
     const homePath = `${basePath}/home`;
     const aboutPath = `${basePath}/AboutUs`;
     const contactPath = `${basePath}/Contact`;
 
     return (
-        <Container 
-            maxWidth={false} 
-            disableGutters  
+        <Box 
+            component="footer"
             sx={{ 
-                backgroundColor: "#333333",
-                width: "100%",
-                height: "auto", // Use 'auto' height for responsiveness
-                marginTop: "auto",
-                paddingBottom: '20px' // Add padding at the bottom
+                backgroundColor: "#111827",
+                color: '#FFFFFF',
+                pt: { xs: 8, md: 10 },
+                pb: 4,
+                borderTop: '1px solid rgba(255,255,255,0.05)'
             }}
         >
-            <Stack sx={{ 
-                display: "flex", 
-                justifyContent: "space-between", 
-                alignItems: "center", 
-                flexDirection: "row", 
-                marginTop: '40px',
-                width: "100%"
-            }}>
-                {/* Left side with logo and text (no changes) */}
-                <Box sx={{ 
-                    display: "flex", 
-                    flexDirection: "column", 
-                    justifyContent: 'start', 
-                    alignItems: "flex-start", 
-                    marginTop: '10px', 
-                    marginLeft: "50px" 
-                }}>
-                    <Box sx={{ 
-                        width: "372px", 
-                        height: "115px", 
-                        display: "flex", 
-                        justifyContent: "flex-start", 
-                        alignItems: 'center' 
-                    }}>
-                        <Box component="img" src={logo} alt='logo'></Box>
-                    </Box>
-                    <Typography sx={{ fontSize: "14px", fontWeight: "500", color: "white" }}>
-                        Your own brand—Local Biz Connect empowers every step  
-                    </Typography>
-                    <Typography sx={{ fontSize: "14px", fontWeight: "500", color: "white" }}>
-                        of the local experience.
-                    </Typography>
-                </Box>
-                
-                {/* Right side with DYNAMIC and CONDITIONAL links */}
-                <Box sx={{ 
-                    display: "flex", 
-                    flexDirection: "column", 
-                    alignItems: "flex-end", 
-                    marginRight: '50px', 
-                    marginTop: "50px" 
-                }}>
-                    {/* Home link is always displayed */}
-                    <Link to={homePath} style={linkStyle}>
-                        <Typography variant='p' sx={{ color: "white", marginTop: "20px", '&:hover': { textDecoration: 'underline' } }}>
-                            Home
-                        </Typography>
-                    </Link>
+            <Container maxWidth="lg">
+                <Grid container spacing={6} justifyContent="space-between">
+                    {/* Brand Section */}
+                    <Grid item xs={12} md={4}>
+                        <Stack spacing={3}>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <Box component="img" src={logo} alt='LocalBiz' sx={{ height: 40, width: 'auto' }} />
+                            </Box>
+                            <Typography sx={{ color: "#9CA3AF", lineHeight: 1.7, maxWidth: '300px', fontSize: '0.95rem' }}>
+                                Empowering local experiences through seamless digital networking. Connect, discover, and grow with LocalBiz.
+                            </Typography>
+                        </Stack>
+                    </Grid>
 
-                    {/* --- CONDITIONAL RENDERING --- */}
-                    {/* Only show About and Contact if the role is NOT 'bussiness' */}
-                    {userRole !== 'bussiness' && (
-                        <>
-                            <Link to={aboutPath} style={linkStyle}>
-                                <Typography variant='p' sx={{ color: "white", marginTop: "20px", '&:hover': { textDecoration: 'underline' } }}>
-                                    About
-                                </Typography>
-                            </Link>
-                            <Link to={contactPath} style={linkStyle}>
-                                <Typography variant='p' sx={{ color: "white", marginTop: "20px", '&:hover': { textDecoration: 'underline' } }}>
-                                    Contact
-                                </Typography>
-                            </Link>
-                        </>
-                    )}
-                </Box>
-            </Stack>
-            <Box sx={{ 
-                borderBottom: "1px solid white",
-                marginLeft: "auto",
-                marginRight: "auto",
-                width: "95%", 
-                marginTop: "20px" 
-            }}></Box>
-            {/* Bottom section (no changes) */}
-            <Stack sx={{
-                display: "flex", 
-                flexDirection: "row",
-                justifyContent: "space-between",
-                paddingTop: "20px",
-                paddingLeft: "50px"
-            }}>
-                <Box>
-                    <Typography sx={{ color: 'white', fontSize: "14px", fontWeight: "500" }}>
-                        Copy right @2024. All rights reserved
-                    </Typography>
-                </Box>
-                <Box sx={{
-                    display: "flex", 
-                    flexDirection: "row",
-                    marginLeft: "50px",
-                    paddingRight: "50px",
-                    gap: "20px"
+                    {/* Navigation Section */}
+                    <Grid item xs={6} md={2}>
+                        <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, fontSize: '1rem' }}>Platform</Typography>
+                        <Stack spacing={2}>
+                            <Link to={homePath} style={linkStyle}><Typography variant="body2" sx={{ '&:hover': { color: '#6F32BF' } }}>Home</Typography></Link>
+                            {userRole !== 'bussiness' && (
+                                <>
+                                    <Link to={aboutPath} style={linkStyle}><Typography variant="body2" sx={{ '&:hover': { color: '#6F32BF' } }}>About Us</Typography></Link>
+                                    <Link to={contactPath} style={linkStyle}><Typography variant="body2" sx={{ '&:hover': { color: '#6F32BF' } }}>Contact</Typography></Link>
+                                </>
+                            )}
+                        </Stack>
+                    </Grid>
+
+                    {/* Legal Section */}
+                    <Grid item xs={6} md={2}>
+                        <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, fontSize: '1rem' }}>Legal</Typography>
+                        <Stack spacing={2}>
+                            <Typography variant="body2" sx={{ color: '#9CA3AF', cursor: 'pointer', '&:hover': { color: '#6F32BF' } }}>Privacy Policy</Typography>
+                            <Typography variant="body2" sx={{ color: '#9CA3AF', cursor: 'pointer', '&:hover': { color: '#6F32BF' } }}>Terms of Service</Typography>
+                            <Typography variant="body2" sx={{ color: '#9CA3AF', cursor: 'pointer', '&:hover': { color: '#6F32BF' } }}>Cookie Policy</Typography>
+                        </Stack>
+                    </Grid>
+
+                    {/* Newsletter / Contact (Social Placeholder) */}
+                    <Grid item xs={12} md={3}>
+                        <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, fontSize: '1rem' }}>Support</Typography>
+                        <Typography variant="body2" sx={{ color: '#9CA3AF', mb: 2 }}>
+                            Questions? Reach out to us anytime at 
+                            <span style={{ color: '#6F32BF', fontWeight: 600, display: 'block', marginTop: '4px' }}>support@localbiz.com</span>
+                        </Typography>
+                    </Grid>
+                </Grid>
+
+                <Box sx={{ 
+                    borderTop: "1px solid rgba(255,255,255,0.05)",
+                    mt: 8,
+                    pt: 4,
+                    display: 'flex',
+                    flexDirection: { xs: 'column', md: 'row' },
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 2
                 }}>
-                    <Typography sx={{ color: 'white', fontSize: "14px", fontWeight: "500" }}>
-                        Terms of conditions
+                    <Typography sx={{ color: '#6B7280', fontSize: "0.85rem", fontWeight: "500" }}>
+                        © 2024 LocalBiz Connect. All rights reserved.
                     </Typography>
-                    <Typography sx={{ color: "white", fontSize: "14px", fontWeight: "500" }}>
-                        F & Q
-                    </Typography>
-                    <Typography sx={{ color: "white", fontSize: "14px", fontWeight: "500" }}>
-                        Privacy policy
-                    </Typography>
+                    <Stack direction="row" spacing={3}>
+                        <Typography variant="caption" sx={{ color: '#6B7280', cursor: 'pointer', '&:hover': { color: '#FFFFFF' } }}>Status</Typography>
+                        <Typography variant="caption" sx={{ color: '#6B7280', cursor: 'pointer', '&:hover': { color: '#FFFFFF' } }}>Twitter</Typography>
+                        <Typography variant="caption" sx={{ color: '#6B7280', cursor: 'pointer', '&:hover': { color: '#FFFFFF' } }}>LinkedIn</Typography>
+                    </Stack>
                 </Box>
-            </Stack>
-        </Container>
+            </Container>
+        </Box>
     );
 }
 

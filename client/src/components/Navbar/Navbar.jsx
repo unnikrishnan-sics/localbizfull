@@ -46,145 +46,161 @@ const Navbar = ({ contactbg = {}, aboutbg = {}, homebg = {} }) => {
     const location = useLocation();
     return (
         <>
-            <AppBar position="static" sx={{ backgroundColor: 'transparent', boxShadow: "none", backgroundImage: `url(${contactbg})`, ...aboutbg, ...homebg }}>
-                <Container maxWidth="xl">
-                    <Toolbar disableGutters
-                        sx={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center'
-                        }}
-                    >
+            <AppBar 
+                position="sticky" 
+                sx={{ 
+                    top: 0,
+                    zIndex: 1100,
+                    backgroundColor: 'rgba(255, 255, 255, 0.7)', 
+                    backdropFilter: 'blur(20px)',
+                    borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
+                    boxShadow: "none",
+                    transition: 'all 0.3s ease-in-out'
+                }}
+            >
+                <Container maxWidth="lg">
+                    <Toolbar disableGutters sx={{ py: 1 }}>
+                        <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+                            <Box 
+                                component="img" 
+                                src={Logo} 
+                                alt='LocalBiz'
+                                sx={{ 
+                                    height: { xs: 32, md: 40 }, 
+                                    width: 'auto',
+                                    transition: 'transform 0.2s ease',
+                                    '&:hover': { transform: 'scale(1.02)' }
+                                }}
+                            />
+                        </Link>
 
-                        <Box sx={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center'
-                        }}>
-                            <Link to="/">
-                                <Box component="img" src={Logo} alt='logo'
-                                    sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }}>
-
-                                </Box>
-                            </Link>
-
-                        </Box>
-
-
-                        <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+                        <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' }, justifyContent: 'flex-end' }}>
                             <IconButton
                                 size="large"
-                                aria-label="account of current user"
-                                aria-controls="menu-appbar"
-                                aria-haspopup="true"
                                 onClick={handleOpenNavMenu}
-                                color="inherit"
+                                sx={{ color: "#111827" }}
                             >
-                                <MenuIcon sx={{ color: "#384371" }} />
+                                <MenuIcon />
                             </IconButton>
                             <Menu
                                 id="menu-appbar"
                                 anchorEl={anchorElNav}
-                                anchorOrigin={{
-                                    vertical: 'bottom',
-                                    horizontal: 'left',
-                                }}
+                                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                                 keepMounted
-                                transformOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'left',
-                                }}
+                                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                                 open={Boolean(anchorElNav)}
                                 onClose={handleCloseNavMenu}
-                                sx={{ display: { xs: 'block', md: 'none' } }}
+                                sx={{ display: { xs: 'block', md: 'none' }, mt: 1 }}
+                                PaperProps={{
+                                    sx: { borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', minWidth: '180px' }
+                                }}
                             >
                                 {pages.map((page) => (
-                                    <MenuItem key={page.label}
+                                    <MenuItem 
+                                        key={page.label} 
                                         onClick={handleCloseNavMenu}
-
+                                        component={Link} 
+                                        to={page.path}
+                                        sx={{ py: 1.5 }}
                                     >
-                                        <Typography color='primary'
-                                            sx={{ textAlign: 'center', color: '#1967D2' }}>
+                                        <Typography sx={{ fontWeight: 600, color: location.pathname === page.path ? "#6F32BF" : "#4B5563" }}>
                                             {page.label}
                                         </Typography>
                                     </MenuItem>
                                 ))}
+                                <Box sx={{ p: 1, borderTop: '1px solid #F3F4F6', mt: 1 }}>
+                                    <Button fullWidth variant="contained" onClick={handleOpenUserMenu} sx={{ bgcolor: '#6F32BF', textTransform: 'none', borderRadius: '8px' }}>
+                                        Login
+                                    </Button>
+                                </Box>
                             </Menu>
                         </Box>
-                        <Box sx={{
-                            display: { xs: 'flex', md: 'none' },
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexGrow: 1,
-                        }}>
-                            <Link to="/" >
-                                <Box component="img" src={Logo} sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} ></Box>
-                            </Link>
 
-                        </Box>
-
-                        <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, justifyContent: 'center', gap: "50px" }}>
+                        <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, justifyContent: 'center', gap: 6 }}>
                             {pages.map((page) => (
                                 <Link
                                     to={page.path}
                                     key={page.label}
                                     style={{ textDecoration: "none" }}
-                                    onClick={handleCloseNavMenu}
                                 >
-                                    <Typography color='primary' sx={{
-                                        my: 2, fontSize: "14px", fontWeight: "500", color: location.pathname === page.path ? "#6F32BF" : "none", display: 'block', textTransform: "inherit", '&:hover': {
-                                            // borderBottom: "1px solid #1967D2",
-                                            color: '#1967D2'
-                                        }
-                                    }}> {page.label}</Typography>
-
+                                    <Typography sx={{
+                                        fontSize: "0.95rem", 
+                                        fontWeight: 600, 
+                                        color: location.pathname === page.path ? "#6F32BF" : "#4B5563",
+                                        transition: 'all 0.2s ease',
+                                        '&:hover': { color: '#6F32BF' },
+                                        position: 'relative',
+                                        '&::after': location.pathname === page.path ? {
+                                            content: '""',
+                                            position: 'absolute',
+                                            bottom: -4,
+                                            left: '10%',
+                                            width: '80%',
+                                            height: '2px',
+                                            bgcolor: '#6F32BF',
+                                            borderRadius: '2px'
+                                        } : {}
+                                    }}>
+                                        {page.label}
+                                    </Typography>
                                 </Link>
                             ))}
                         </Box>
-                        <Box sx={{ flexGrow: 0 }}>
-                            <Tooltip title="Open login menu">
-                                <Button
-                                    variant="contained"
-                                    color="secondary"
-                                    onClick={handleOpenUserMenu}
-                                    endIcon={<ArrowRightAltIcon />}
-                                    sx={{ borderRadius: "25px", textTransform: "none" }}
-                                >
-                                    Login
-                                </Button>
-                            </Tooltip>
+
+                        <Box sx={{ flexGrow: 0, display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 2 }}>
+                            <Button
+                                variant="outlined"
+                                component={Link} to="/customer/registration"
+                                sx={{ 
+                                    borderRadius: "12px", 
+                                    textTransform: "none", 
+                                    fontWeight: 700,
+                                    borderColor: '#E5E7EB',
+                                    color: '#374151',
+                                    px: 3,
+                                    '&:hover': { borderColor: '#6F32BF', color: '#6F32BF', bgcolor: 'transparent' }
+                                }}
+                            >
+                                Get Started
+                            </Button>
+                            <Button
+                                variant="contained"
+                                disableElevation
+                                onClick={handleOpenUserMenu}
+                                endIcon={<ArrowRightAltIcon />}
+                                sx={{ 
+                                    borderRadius: "12px", 
+                                    textTransform: "none", 
+                                    fontWeight: 700,
+                                    bgcolor: '#6F32BF',
+                                    px: 3,
+                                    '&:hover': { bgcolor: '#5b299e' }
+                                }}
+                            >
+                                Login
+                            </Button>
                             <Menu
-                                sx={{ mt: '45px' }}
+                                sx={{ mt: '15px' }}
                                 id="menu-appbar"
                                 anchorEl={anchorElUser}
-                                anchorOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
-                                }}
+                                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                                 keepMounted
-                                transformOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
-                                }}
+                                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                                 open={Boolean(anchorElUser)}
                                 onClose={handleCloseUserMenu}
+                                PaperProps={{
+                                    sx: { borderRadius: '16px', boxShadow: '0 20px 40px rgba(0,0,0,0.12)', border: '1px solid #F3F4F6', p: 1 }
+                                }}
                             >
-                                <MenuItem onClick={handleCloseUserMenu}>
-                                    <Link to="/customer/login" style={{ textDecoration: "none", color: "#000" }}>
-                                        Customer Login
-                                    </Link>
+                                <MenuItem onClick={handleCloseUserMenu} component={Link} to="/customer/login" sx={{ borderRadius: '8px', py: 1.5 }}>
+                                    <Typography sx={{ fontWeight: 500, fontSize: '0.9rem' }}>Customer Portal</Typography>
                                 </MenuItem>
-                                <MenuItem onClick={handleCloseUserMenu}>
-                                    <Link to="/organiser/login" style={{ textDecoration: "none", color: "#000" }}>
-                                        Organiser Login
-                                    </Link>
+                                <MenuItem onClick={handleCloseUserMenu} component={Link} to="/organiser/login" sx={{ borderRadius: '8px', py: 1.5 }}>
+                                    <Typography sx={{ fontWeight: 500, fontSize: '0.9rem' }}>Organiser Dashboard</Typography>
                                 </MenuItem>
-                                <MenuItem onClick={handleCloseUserMenu}>
-                                    <Link to="/bussiness/login" style={{ textDecoration: "none", color: "#000" }}>
-                                        Bussiness Login
-                                    </Link>
+                                <MenuItem onClick={handleCloseUserMenu} component={Link} to="/bussiness/login" sx={{ borderRadius: '8px', py: 1.5 }}>
+                                    <Typography sx={{ fontWeight: 500, fontSize: '0.9rem' }}>Business Hub</Typography>
                                 </MenuItem>
-                                {/* Add more roles if needed */}
                             </Menu>
                         </Box>
                     </Toolbar>
