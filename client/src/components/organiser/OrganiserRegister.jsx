@@ -97,7 +97,7 @@ const OrganiserRegister = () => {
             const response = await axios.post(`${baseUrl}organisation/registration`, formData);
             if (response.data.message === "Organization created successfully") {
                 toast.success("Organization registered! Awaiting verification.");
-                navigate("/organiser/login");
+                window.location.href = "/organiser/login";
             } else {
                 toast.error(response.data.message || "Registration failed");
             }
@@ -113,7 +113,7 @@ const OrganiserRegister = () => {
             <NavbarSigin siginupStyle={{ background: "transparent", boxShadow: "none" }} />
 
             <Container maxWidth="lg" sx={{ py: 8 }}>
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+                <motion.div initial={{ opacity: 1, y: 0 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
                     <Paper elevation={0} sx={{ p: { xs: 3, md: 6 }, borderRadius: '32px', boxShadow: '0 20px 40px rgba(111, 50, 191, 0.08)', position: 'relative', overflow: 'hidden' }}>
                         <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, height: '8px', background: 'linear-gradient(90deg, #6F32BF, #3498db)' }} />
 

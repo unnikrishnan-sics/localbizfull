@@ -91,6 +91,9 @@ const bussinessLogin = async (req, res) => {
         if (!isMatch) {
             return res.status(400).json({ message: "Invalid Password." })
         }
+        if (!bussiness.isAdminApproved) {
+            return res.status(403).json({ message: "Your account is pending Admin approval. Please wait." })
+        }
         const token = await jwt.sign({ id: bussiness._id }, process.env.SECRET_KEY, { expiresIn: "1hr" });
         res.status(200).json({ message: "bussiness logged in successfully", token: token });
 

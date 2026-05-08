@@ -131,7 +131,7 @@ const CustomerRegistration = () => {
             const response = await axios.post(`${baseUrl}customer/registration`, formData);
             if (response.status === 201 || response.data.message === "Customer created successfully") {
                 toast.success("Registration successful! Welcome aboard.");
-                navigate("/customer/login");
+                window.location.href = "/customer/login";
             } else {
                 toast.error(response.data.message || "Registration failed");
             }
@@ -148,7 +148,7 @@ const CustomerRegistration = () => {
 
             <Container maxWidth="md" sx={{ py: 8 }}>
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 1, y: 0 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
                 >

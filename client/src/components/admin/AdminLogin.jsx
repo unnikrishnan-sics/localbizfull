@@ -37,7 +37,7 @@ const AdminLogin = () => {
             if (token && message === "Admin logged in successfully") {
                 localStorage.setItem("token", token);
                 toast.success("Welcome, Administrator!");
-                navigate("/admin/dashboard");
+                window.location.href = "/admin/dashboard";
             } else {
                 toast.error(message || "Login failed");
             }
@@ -54,7 +54,7 @@ const AdminLogin = () => {
 
             <Container maxWidth="sm" sx={{ py: { xs: 8, md: 12 } }}>
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
+                    initial={{ opacity: 1, scale: 1 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.5 }}
                 >

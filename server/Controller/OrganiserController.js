@@ -76,6 +76,9 @@ const organisationLogin = async (req, res) => {
         if (!isMatch) {
             return res.status(400).json({ message: "Invalid Password." })
         }
+        if (!organisation.isAdminApproved) {
+            return res.status(403).json({ message: "Your account is pending Admin approval. Please wait." })
+        }
         const token = await jwt.sign({ id: organisation._id }, process.env.SECRET_KEY, { expiresIn: "1hr" });
         res.status(200).json({ message: "organisation logged in successfully", token: token });
 

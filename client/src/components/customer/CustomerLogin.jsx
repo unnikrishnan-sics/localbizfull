@@ -37,7 +37,7 @@ const CustomerLogin = () => {
       if (token && message === "customer logged in successfully") {
         localStorage.setItem("token", token);
         toast.success("Welcome back! Logged in successfully.");
-        navigate("/customer/home");
+        window.location.href = "/customer/home";
       } else {
         toast.error(message || "Login failed. Please try again.");
       }
@@ -54,7 +54,7 @@ const CustomerLogin = () => {
 
       <Container maxWidth="sm" sx={{ py: { xs: 8, md: 12 } }}>
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={{ opacity: 1, scale: 1 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
         >

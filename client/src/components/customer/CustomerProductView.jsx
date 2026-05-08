@@ -461,7 +461,7 @@ const CustomerProductView = () => {
                                         borderRadius: '8px'
                                     }}>
                                         <img
-                                            src={product.photo?.filename ? `${baseUrl}uploads/${product.photo.filename}` : 'https://via.placeholder.com/400x300?text=No+Image'}
+                                            src={product.photo ? (typeof product.photo === 'object' ? `${baseUrl}uploads/${product.photo.filename}` : `${baseUrl}uploads/${product.photo}`) : 'https://via.placeholder.com/400x300?text=No+Image'}
                                             alt={product.productName}
                                             style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                                         />

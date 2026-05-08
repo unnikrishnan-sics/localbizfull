@@ -38,7 +38,7 @@ const BusinessLogin = () => {
       if (token && message === "bussiness logged in successfully") {
         localStorage.setItem("token", token);
         toast.success("Welcome, Business Owner! Logged in successfully.");
-        navigate("/bussiness/home");
+        window.location.href = "/bussiness/home";
       } else {
         toast.error(message || "Login failed. Please check your credentials.");
       }
@@ -55,7 +55,7 @@ const BusinessLogin = () => {
 
       <Container maxWidth="sm" sx={{ py: { xs: 8, md: 12 } }}>
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={{ opacity: 1, scale: 1 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
         >

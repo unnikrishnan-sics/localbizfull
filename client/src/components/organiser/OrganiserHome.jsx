@@ -162,7 +162,7 @@ function OrganiserHome() {
                   <Box sx={{ height: 100, background: 'linear-gradient(45deg, #6F32BF, #3498db)' }} />
                   <Box sx={{ mt: -6, px: 3, pb: 4, textAlign: 'center' }}>
                     <Avatar
-                      src={organisation?.profilePic?.filename ? `${baseUrl}uploads/${organisation.profilePic.filename}` : ""}
+                      src={organisation?.profilePic ? (typeof organisation.profilePic === 'object' ? `${baseUrl}uploads/${organisation.profilePic.filename}` : `${baseUrl}uploads/${organisation.profilePic}`) : ""}
                       sx={{ width: 100, height: 100, border: '4px solid white', mx: 'auto', mb: 2, bgcolor: '#6F32BF' }}
                     />
                     <Typography variant="h6" fontWeight={800}>{organisation.name}</Typography>
@@ -264,7 +264,7 @@ function OrganiserHome() {
                   <BusinessCard initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: idx * 0.05 }}>
                     <Box sx={{ height: 180, position: 'relative', bgcolor: '#eee' }}>
                       <img
-                        src={b.bussinessLogo?.filename ? `${baseUrl}uploads/${b.bussinessLogo.filename}` : coin}
+                        src={b.bussinessLogo ? (typeof b.bussinessLogo === 'object' ? `${baseUrl}uploads/${b.bussinessLogo.filename}` : `${baseUrl}uploads/${b.bussinessLogo}`) : coin}
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         alt={b.bussinessName}
                       />

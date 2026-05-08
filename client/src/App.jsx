@@ -102,7 +102,7 @@ function App() {
           <Route path='/customer/forgotpassword' element={<CustomerForgotPassword />} />
           <Route path='/customer/resetpassword' element={<CustomerResetPassword />} />
           <Route path='/customer/home' element={<CustomerHome />} />
-          {/* <Route path='/customer/viewproduct/:id' element={<CustomerProductView />} /> */}
+          <Route path='/customer/viewproduct/:id' element={<CustomerProductView />} />
           <Route path='/customer/productview/:id' element={<CustomerProductView />} />
           <Route path='/customer/profile' element={<CustomerProfile />} />
           <Route path='/customer/msg/compaint' element={<MsgComplaint />} />
@@ -122,10 +122,10 @@ function App() {
           <Route path='/bussiness/addproduct' element={<BussinessAddProduct />} />
           <Route path='/bussiness/editproduct/:id' element={<BussinessEditProducts />} />
           <Route path='/bussiness/ViewProduct/:productId' element={<BusinessViewProduct />} />
-          {/* <Route path='/bussiness/Community' element={<CommunityJoinForm />} />
+          <Route path='/bussiness/Community' element={<CommunityJoinForm />} />
           <Route path='/bussiness/ViewEvents' element={<BusinessEvents />} />
           <Route path='/bussiness/ViewTrainning' element={<ViewTrainning />} />
-          <Route path='/bussiness/ViewWorkShops' element={<ViewWorkShop />} /> */}
+          <Route path='/bussiness/ViewWorkShops' element={<ViewWorkShop />} />
 
 
           {/* organiser */}
@@ -137,7 +137,7 @@ function App() {
           <Route path='/organiser/bussinessrequest' element={<OrganizerBussinessRequest />} />
           <Route path='/organiser/AboutUs' element={<OrganiserAboutUs />} />
           <Route path='/organiser/Contact' element={<OrganiserContact />} />
-          {/* <Route path='/organiser/addevents' element={<OrganiserAddEvents />} />
+          <Route path='/organiser/addevents' element={<OrganiserAddEvents />} />
           <Route path='/organiser/Viewevents' element={<OrganiserViewEvents />} />
           <Route path='/organiser/AddTrainning' element={<AddTrainning />} />
           <Route path='/organiser/ViewTrainning' element={<ViewTrainingsTable />} />
@@ -145,7 +145,7 @@ function App() {
           <Route path='/organiser/ViewWorkShop' element={<ViewWorkshopsTable />} />
           <Route path='/organiser/EditEvents/:id' element={<EditEvents />} />
           <Route path='/organiser/EditTrainning/:id' element={<EditTrainning />} />
-          <Route path='/organiser/EditWorkShop/:id' element={<EditWorkShop />} /> */}
+          <Route path='/organiser/EditWorkShop/:id' element={<EditWorkShop />} />
           <Route path='/organiser/ViewProductList/:bussinessId' element={<OrganaiserViewProductList />} />
           <Route path='/organiser/joined-members' element={<JointMembers />} />
 

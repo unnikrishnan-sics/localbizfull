@@ -4,7 +4,7 @@ import axios from 'axios';
 
 // 1. Define baseUrl FIRST from environment variables.
 // It's good practice to add a fallback for local development if the .env variable is not found.
-export const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+export const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4056/';
 
 // 2. Create the Axios instance using the baseUrl defined ABOVE.
 const axiosInstance = axios.create({

@@ -380,7 +380,7 @@ const CustomerBusinessProductList = () => {
                                         borderBottom: '1px solid #ddd',
                                     }}>
                                         <img
-                                            src={product.photo?.filename ? `${baseUrl}uploads/${product.photo.filename}` : coin}
+                                            src={product.photo ? (typeof product.photo === 'object' ? `${baseUrl}uploads/${product.photo.filename}` : `${baseUrl}uploads/${product.photo}`) : coin}
                                             alt={product.productName}
                                             style={{
                                                 height: '100%',

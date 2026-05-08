@@ -254,7 +254,7 @@ const CustomerHome = () => {
                                     >
                                         <Box sx={{ position: 'relative', height: 240 }}>
                                             <img
-                                                src={b.bussinessLogo?.filename ? `${baseUrl}uploads/${b.bussinessLogo.filename}` : coin}
+                                                src={b.bussinessLogo ? (typeof b.bussinessLogo === 'object' ? `${baseUrl}uploads/${b.bussinessLogo.filename}` : `${baseUrl}uploads/${b.bussinessLogo}`) : coin}
                                                 alt={b.bussinessName}
                                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                             />

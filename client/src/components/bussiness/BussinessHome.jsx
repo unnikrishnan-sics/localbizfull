@@ -144,7 +144,7 @@ const BussinessHome = () => {
                                     <Box sx={{ height: 100, background: 'linear-gradient(45deg, #0f3460, #e94560)' }} />
                                     <Box sx={{ mt: -6, px: 3, pb: 4, textAlign: 'center' }}>
                                         <Avatar
-                                            src={bussiness?.profilePic?.filename ? `${baseUrl}uploads/${bussiness.profilePic.filename}` : ""}
+                                            src={bussiness?.profilePic ? (typeof bussiness.profilePic === 'object' ? `${baseUrl}uploads/${bussiness.profilePic.filename}` : `${baseUrl}uploads/${bussiness.profilePic}`) : ""}
                                             sx={{ width: 100, height: 100, border: '4px solid white', mx: 'auto', mb: 2, bgcolor: '#0f3460' }}
                                         />
                                         <Typography variant="h6" fontWeight={800}>{bussiness.name}</Typography>
@@ -244,7 +244,7 @@ const BussinessHome = () => {
                                             }}>
                                                 <Box sx={{ height: 200, position: 'relative' }}>
                                                     <img
-                                                        src={product.photo?.filename ? `${baseUrl}uploads/${product.photo.filename}` : "https://via.placeholder.com/300"}
+                                                        src={product.photo ? (typeof product.photo === 'object' ? `${baseUrl}uploads/${product.photo.filename}` : `${baseUrl}uploads/${product.photo}`) : "https://via.placeholder.com/300"}
                                                         alt={product.productName}
                                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                                     />
@@ -340,7 +340,7 @@ const BussinessHome = () => {
                                     }} />
                                     <label htmlFor="p-edit-upload" style={{ cursor: 'pointer' }}>
                                         <Avatar
-                                            src={imagePreview || (bussiness?.profilePic?.filename ? `${baseUrl}uploads/${bussiness.profilePic.filename}` : "")}
+                                            src={imagePreview || (bussiness?.profilePic ? (typeof bussiness.profilePic === 'object' ? `${baseUrl}uploads/${bussiness.profilePic.filename}` : `${baseUrl}uploads/${bussiness.profilePic}`) : "")}
                                             sx={{ width: 120, height: 120, mx: 'auto', mb: 2, border: '4px solid #0f3460' }}
                                         />
                                         <Typography color="primary" fontWeight={700}>Change Brand Identity</Typography>
