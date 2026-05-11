@@ -19,7 +19,7 @@ function ChatBot() {
   const chatHistoryRef = useRef(null);
 
   const genAI = new GoogleGenerativeAI(secret_key);
-  const model = genAI.getGenerativeModel({ model: "gemini-3-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
   const handleUserInput = (e) => {
     setUserInput(e.target.value);
