@@ -21,6 +21,7 @@ import SearchIcon from '@mui/icons-material/Search';
 
 const pages = [
     { label: 'Home', path: '/customer/home' },
+    { label: 'Events', path: '/customer/events' },
     { label: 'About', path: '/customer/AboutUs' },
     { label: 'Contact', path: '/customer/Contact' },
     // { label: 'Businesses', path: '/customer/bussinessview' }

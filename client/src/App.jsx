@@ -59,6 +59,7 @@ import CustomerBusinessProductList from './components/customer/CustomerBusinessP
 import ViewWorkShop from './components/bussiness/ViewWorkShop';
 import OrganaiserViewProductList from './components/organiser/OrganaiserViewProductList';
 import JointMembers from './components/organiser/JointMembers';
+import CustomerEventsView from './components/customer/CustomerEventsView';
 
 
 function App() {
@@ -111,6 +112,7 @@ function App() {
           <Route path='/customer/Contact' element={<CustomerContact />} />
           <Route path='/customer/bussinessview' element={<CustomerBusinessView />} />
           <Route path="/customer/business/products/:bussinessId" element={<CustomerBusinessProductList />} />
+          <Route path='/customer/events' element={<CustomerEventsView />} />
 
 
           {/* bussiness */}

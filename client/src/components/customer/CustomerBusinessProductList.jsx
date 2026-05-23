@@ -65,6 +65,10 @@ const CustomerBusinessProductList = () => {
     const [isLoadingProducts, setIsLoadingProducts] = useState(true);
     const [noProductsFound, setNoProductsFound] = useState(false);
 
+    // Events state management
+    const [businessEvents, setBusinessEvents] = useState([]);
+    const [isLoadingEvents, setIsLoadingEvents] = useState(true);
+
     // Modal styles (consistent with CustomerHome)
     const styleLogout = {
         position: 'absolute',
@@ -134,9 +138,23 @@ const CustomerBusinessProductList = () => {
         }
     };
 
+    // Fetch joined events for business
+    const fetchBusinessEvents = async () => {
+        setIsLoadingEvents(true);
+        try {
+            const response = await axiosInstance.get(`/api/joinedEvents/business/${bussinessId}`);
+            setBusinessEvents(response.data?.data || []);
+        } catch (error) {
+            console.error("Error fetching business events:", error);
+        } finally {
+            setIsLoadingEvents(false);
+        }
+    };
+
     useEffect(() => {
         fetchUser();
         fetchBusinessProducts();
+        fetchBusinessEvents();
     }, [bussinessId]);
 
     // Modal handlers
@@ -447,6 +465,112 @@ const CustomerBusinessProductList = () => {
                                 </StyledProductCard>
                             </Grid>
                         ))}
+                    </Grid>
+                )}
+            </Box>
+
+            {/* Participating Events & Workshops Section */}
+            <Box sx={{
+                padding: { xs: '30px 20px', md: '50px 75px' },
+                backgroundColor: '#ffffff',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '30px',
+                width: '100%',
+                boxSizing: 'border-box'
+            }}>
+                <Typography variant='h4' sx={{
+                    fontSize: { xs: "24px", sm: "28px", md: "32px" },
+                    fontWeight: "800",
+                    color: "text.primary",
+                    textAlign: 'center',
+                    width: '100%',
+                    mb: 0
+                }}>
+                    Participating Events & Workshops
+                </Typography>
+                <Typography variant="body1" sx={{ color: 'text.secondary', textAlign: 'center', maxWidth: '600px', mb: '10px' }}>
+                    See the community gatherings, trainings, and workshops this business has joined and is actively participating in.
+                </Typography>
+
+                {isLoadingEvents ? (
+                    <Typography variant='body1' sx={{ color: 'text.secondary' }}>
+                        Loading events...
+                    </Typography>
+                ) : businessEvents.length === 0 ? (
+                    <Paper variant="outlined" sx={{ p: 4, textAlign: 'center', borderRadius: '16px', borderStyle: 'dashed', maxWidth: '500px', width: '100%' }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                            This business has not joined any community events yet.
+                        </Typography>
+                    </Paper>
+                ) : (
+                    <Grid container spacing={3} justifyContent="center" sx={{ maxWidth: '1200px', width: '100%', mx: 'auto' }}>
+                        {businessEvents.map((item) => {
+                            const event = item.event;
+                            if (!event) return null;
+                            return (
+                                <Grid item xs={12} sm={6} md={4} key={item._id}>
+                                    <Card sx={{
+                                        borderRadius: '16px',
+                                        border: '1px solid rgba(0,0,0,0.08)',
+                                        boxShadow: 'none',
+                                        p: 3,
+                                        height: '100%',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        justifyContent: 'space-between',
+                                        '&:hover': {
+                                            boxShadow: '0 8px 24px rgba(0,0,0,0.05)',
+                                            borderColor: '#6F32BF'
+                                        }
+                                    }}>
+                                        <Box>
+                                            <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+                                                <Chip
+                                                    label={event.type}
+                                                    size="small"
+                                                    sx={{
+                                                        bgcolor: event.type?.toLowerCase() === 'workshop' ? '#e8f5e9' : event.type?.toLowerCase() === 'training' ? '#efebe9' : '#e8eaf6',
+                                                        color: event.type?.toLowerCase() === 'workshop' ? '#2e7d32' : event.type?.toLowerCase() === 'training' ? '#4e342e' : '#1a237e',
+                                                        fontWeight: 800,
+                                                        textTransform: 'uppercase',
+                                                        fontSize: '0.7rem'
+                                                    }}
+                                                />
+                                                <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                                                    {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                </Typography>
+                                            </Stack>
+                                            <Typography variant="h6" fontWeight={800} color="text.primary" gutterBottom>
+                                                {event.name}
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary" sx={{
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                display: '-webkit-box',
+                                                WebkitLineClamp: 3,
+                                                WebkitBoxOrient: 'vertical',
+                                                mb: 2
+                                            }}>
+                                                {event.description}
+                                            </Typography>
+                                        </Box>
+                                        <Stack spacing={1} sx={{ mt: 2, pt: 2, borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+                                            <Stack direction="row" spacing={1} alignItems="center">
+                                                <LocationOnOutlinedIcon sx={{ fontSize: 16, color: '#3498db' }} />
+                                                <Typography variant="caption" color="text.secondary" noWrap>
+                                                    {event.venue || "No Venue"}
+                                                </Typography>
+                                            </Stack>
+                                            <Typography variant="caption" color="text.secondary">
+                                                Organized by: <strong>{event.organizer}</strong>
+                                            </Typography>
+                                        </Stack>
+                                    </Card>
+                                </Grid>
+                            );
+                        })}
                     </Grid>
                 )}
             </Box>
