@@ -23,16 +23,16 @@ Server/coverage/
 
 # -------------------------
 # Environment files
-Client/.env
-Client/.env.local
-Client/.env.development.local
-Client/.env.test.local
-Client/.env.production.local
+# Client/.env
+# Client/.env.local
+# Client/.env.development.local
+# Client/.env.test.local
+# Client/.env.production.local
 
-Server/.env
-.env
-.env.local
-.env.*.local
+# Server/.env
+# .env
+# .env.local
+# .env.*.local
 
 # -------------------------
 # Testing
